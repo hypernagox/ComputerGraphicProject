@@ -1,0 +1,53 @@
+#pragma once
+#include "EventHandler.h"
+
+class CoRoutine;
+class GameObj;
+
+class EventMgr
+	:public Singleton<EventMgr>
+{
+	friend class Singleton;
+	EventMgr();
+	~EventMgr();
+private:
+	vector<function<void(void)>> m_vecEvent;
+	vector<GameEvent> m_vecGameEvent;
+	unordered_map<string, CoRoutine> m_mapCoTask;
+	list<CoRoutine> m_listCoTask;
+	EventHandler m_eveHandler = {};
+	vector<shared_ptr<GameObj>> m_vecDeadObj;
+public:
+	void Init();
+	void Update();
+	template<typename Func, typename... Args>
+		requires std::invocable<Func, Args...>
+	void AddEvent(Func&& fp, Args&&... args) { m_vecEvent.emplace_back([fp = std::forward<Func>(fp), ...args = std::forward<Args>(args)]()mutable {std::invoke(std::forward<Func>(fp), std::forward<Args>(args)...); }); }
+	void AddEvent(GameEvent _eveStruct) { m_vecGameEvent.emplace_back(std::move(_eveStruct)); }
+	void AddCoRoutine(string_view _strName, CoRoutine&& _coTask);
+	void AddCoRoutine(CoRoutine&& _coTask);
+
+	bool FindCoRoutine(string_view _strKey)const
+	{
+		return m_mapCoTask.contains(_strKey.data());
+	}
+
+	bool DestroyCoRoutine(string_view _strKey)
+	{
+		const bool bRes = FindCoRoutine(_strKey);
+		m_mapCoTask.erase(_strKey.data());
+		return bRes;
+	}
+
+	void AddDeadObj(shared_ptr<GameObj>&& pDeadObj_);
+
+	void Reset()
+	{
+		m_vecEvent.clear();
+		m_vecGameEvent.clear();
+		m_mapCoTask.clear();
+		m_listCoTask.clear();
+		m_vecDeadObj.clear();
+	}
+};
+
