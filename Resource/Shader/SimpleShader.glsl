@@ -72,6 +72,7 @@ layout (std140, binding = 0) uniform UBOData
     uint lightCount;
     vec3 pad6; 
 };
+
 void main()
 {
    // vec4 textureColor = texture(uTexture2D,TexCoord);
