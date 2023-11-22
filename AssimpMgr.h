@@ -22,10 +22,10 @@ private:
 	vector<std::future<void>> m_fpSetBuf;
 	//SpinLock m_spinLock = {};
 private:
-	shared_ptr<Model> ProcessNode(aiNode* pNode, const aiScene* pAiScene);
-	shared_ptr<Mesh> ProcessMesh(aiMesh* pAiMesh);
+	shared_ptr<Model> ProcessNode(aiNode* pNode, const aiScene* pAiScene)noexcept;
+	shared_ptr<Mesh> ProcessMesh(aiMesh* pAiMesh)noexcept;
 	//void ProcessBone(vector<Vertex>& vertices, aiNode* pNode, const aiScene* pAiScene);
-	shared_ptr<Material> ProcessMaterial(aiMesh* pAiMesh,const aiScene* pAiScene);
+	shared_ptr<Material> ProcessMaterial(aiMesh* pAiMesh,const aiScene* pAiScene)noexcept;
 private:
 	shared_ptr<Animation> ProcessAnimation(aiAnimation* pAiAnim,const aiScene* pAiScene);
 	shared_ptr<asAnimationNode> ParseAnimNode(shared_ptr<Animation> pAnim, aiNodeAnim* pAnimNode);
@@ -33,10 +33,13 @@ private:
 private:
 	shared_ptr<MyPolygon> ProcessNodePoly(aiNode* pNode, const aiScene* pAiScene);
 	std::pair<vector<SimpleVertex>, vector<GLuint>> ProcessMeshPoly(aiMesh* pAiMesh);
+private:
+	shared_ptr<GameObj> ProcessNodeGameObj(string_view strShaderName_, aiNode* pNode, const aiScene* pAiScene)noexcept;
 public:
 	void Init();
-	shared_ptr<GameObj> Load(string_view _strShaderName ,string_view _strModelFileName);
-	shared_ptr<Model> LoadModel(string_view _strModelFileName);
+	shared_ptr<GameObj> Load(string_view _strShaderName ,string_view _strModelFileName)noexcept;
+	shared_ptr<Model> LoadModel(string_view _strModelFileName)noexcept;
 	shared_ptr<MyPolygon> LoadPoly(string_view _strPolyFileName);
+	shared_ptr<GameObj> LoadAllPartsAsGameObj(string_view _strShaderName, string_view _strModelFileName)noexcept;
 };
 

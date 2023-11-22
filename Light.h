@@ -3,26 +3,50 @@
 
 class Light
 	:public Component
+	,public enable_shared_from_this<Light>
 {
 	friend class Scene;
 	COMP_CLONE(Light)
 private:
+	shared_ptr<Light> m_curLight;
+protected:
 	glm::vec3 m_position = glm::vec3{};
-	glm::vec3 m_ambient = glm::vec3{ .3f,.3f,.3f } *.5f;
+	glm::vec3 m_ambient = glm::vec3{ .3f,.3f,.3f };
 	glm::vec3 m_diffuse = glm::vec3{ .5f,.5f,.5f };
-	glm::vec3 m_specular = glm::vec3{1.f,1.f,0.f};
-private:
+	glm::vec3 m_specular = glm::vec3{.5f,.5f,.5f};
+	glm::vec3 m_direction = glm::vec3{ 1.f };
+	float m_fConstant = 1.f;
+	float m_fLinear =.1f;
+	float m_fQuadratic =.1f;
+protected:
 	void PushLightData(const GLint _curShaderID,const int _idx)const;
+	virtual void PushLightData()const noexcept;
+	void LightUpdate()noexcept;
 public:
 	Light();
 	~Light();
 	void FinalUpdate() override;
-
 public:
 	void SetLightPos(const glm::vec3& _position);
 	void SetAmbient(const glm::vec3& _ambient) { m_ambient = _ambient; }
 	void SetDiffuse(const glm::vec3& _diffuse) { m_diffuse = _diffuse; }
 	void SetSpecular(const glm::vec3& _specular) { m_specular = _specular; }
+	shared_ptr<Light> GetCurLight() noexcept {
+		return m_curLight ? m_curLight : shared_from_this();
+	}
+
+	shared_ptr<Light> SetCurLightType(const LIGHT_TYPE _eType);
+	shared_ptr<Light> SetCurLightType(shared_ptr<Light> pLight) {
+		m_curLight = pLight;
+		return pLight;
+	}
+
+	void SetConstantLinearQuad(const glm::vec3 floats)noexcept
+	{
+		m_fConstant = floats.x;
+		m_fLinear = floats.y;
+		m_fQuadratic = floats.z;
+	}
 
 	const glm::vec3& GetLightPos()const { return m_position; }
 	const glm::vec3& GetLightAmbient()const { return m_ambient; }

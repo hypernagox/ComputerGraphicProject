@@ -46,7 +46,7 @@ shared_ptr<Mesh> MCTilemapMeshGenerator::CreateMesh(MCTilemap* tilemap)
             vertices.push_back(glm::vec3(xmin, y, ymin));
             vertices.push_back(glm::vec3(xmax, y, ymax));
             vertices.push_back(glm::vec3(xmin, y, ymax));
-        }, glm::vec3(0.0f, -1.0f, 0.0f), vertices, triangles, normals, uvs);
+        },glm::vec3(0.0f, -1.0f, 0.0f), vertices, triangles, normals, uvs);
     }
 
     for (int x = 0; x < MCTilemap::MAP_WIDTH; x++)
@@ -120,13 +120,17 @@ shared_ptr<Mesh> MCTilemapMeshGenerator::CreateMesh(MCTilemap* tilemap)
     vector<Vertex> sVertices;
     for (int index = 0; index < vertices.size(); ++index)
     {
-        Vertex v(vertices[index] * 0.1f);
+        Vertex v( vertices[index] );
+       // v.position.y = -v.position.y;
         v.normal = normals[index];
+        v.color = glm::vec4{ glm::abs(v.normal),1.f };
+      
         v.uv = uvs[index];
         sVertices.push_back(v);
     }
 
     shared_ptr<Mesh> mesh = make_shared<Mesh>();
+    
     mesh->Init(sVertices, triangles);
     return mesh;
 }

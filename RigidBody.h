@@ -10,7 +10,7 @@ private:
 	glm::vec3 m_vAccel = {};
 	glm::vec3 m_vVelocity = {};
 	glm::vec3 m_vDir = {};
-	glm::vec3 m_vMaxVelocity = glm::vec3{ 1.5f,1.5f,1.5f };
+	glm::vec3 m_vMaxVelocity = glm::vec3{ 1.5f,30.5f,1.5f };
 	glm::ivec3 m_ivLimit = glm::ivec3{};
 	glm::vec3 m_vGravityOffset = {};
 	float m_fMass = 1.f;

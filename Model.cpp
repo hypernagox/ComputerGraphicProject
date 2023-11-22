@@ -69,7 +69,7 @@ void Model::UpdateModelTransform() noexcept
 	m_pModelTransform->UpdateTransfromHierarchy();
 }
 
-void Model::Render(const shared_ptr<Shader>& pShader_)
+void Model::Render(const shared_ptr<Shader>& pShader_, const bool bIsMeshRendererMaterialEmpty_)noexcept
 {
 	if (m_bIsActivate)
 	{
@@ -77,7 +77,10 @@ void Model::Render(const shared_ptr<Shader>& pShader_)
 
 		for (auto& material : m_vecMaterial)
 		{
-			material->PushMaterialData();
+			if (bIsMeshRendererMaterialEmpty_)
+			{
+				material->PushMaterialData();
+			}
 			for (const auto& tex : material->GetTex())
 			{
 				tex->BindTexture();
@@ -100,7 +103,7 @@ void Model::Render(const shared_ptr<Shader>& pShader_)
 
 	for (auto& child : m_vecChildModel)
 	{
-		child->Render(pShader_);
+		child->Render(pShader_, bIsMeshRendererMaterialEmpty_);
 	}
 }
 

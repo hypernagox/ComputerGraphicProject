@@ -31,9 +31,11 @@ public:
 		Node* const newNode = static_cast<Node* const>(HeapAlloc(m_handle, NULL, sizeof(Node)));
 		std::construct_at(&newNode->data, key_, Value{ std::forward<Args>(args)... });
 		newNode->next = nullptr;
-		std::unique_lock<std::shared_mutex> s_lock{ m_sharedMutex };
-		newNode->next = head.next;
-		head.next = newNode;
+		{
+			std::unique_lock<std::shared_mutex> s_lock{ m_sharedMutex };
+			newNode->next = head.next;
+			head.next = newNode;
+		}
 		return &newNode->data;
 	}
 	std::pair<Key, Value>* find(const Key& key_) noexcept
@@ -77,19 +79,21 @@ public:
 	void erase(const Key& key_)noexcept
 	{
 		Node* prevNode = &head;
-		std::unique_lock<std::shared_mutex> s_lock{ m_sharedMutex };
-		Node* curNode = prevNode->next;
-		while (curNode)
 		{
-			if (key_ == curNode->data.first)
+			std::unique_lock<std::shared_mutex> s_lock{ m_sharedMutex };
+			Node* curNode = prevNode->next;
+			while (curNode)
 			{
-				prevNode->next = curNode->next;
-				std::destroy_at(curNode);
-				HeapFree(m_handle, NULL, curNode);
-				return;
+				if (key_ == curNode->data.first)
+				{
+					prevNode->next = curNode->next;
+					std::destroy_at(curNode);
+					HeapFree(m_handle, NULL, curNode);
+					break;
+				}
+				prevNode = curNode;
+				curNode = curNode->next;
 			}
-			prevNode = curNode;
-			curNode = curNode->next;
 		}
 	}
 	void clear()noexcept

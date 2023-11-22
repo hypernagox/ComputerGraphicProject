@@ -16,11 +16,14 @@ enum class SCENE_ADDED_UPDATE
 	END
 };
 
+class SkyBox;
+
 class Scene
 {
 private:
 	vector<shared_ptr<GameObj>> m_vecObj[etoi(GROUP_TYPE::END)];
 	vector<weak_ptr<Light>> m_vecLights;
+	shared_ptr<SkyBox> m_skyBox;
 	array<Delegate, etoi(SCENE_ADDED_UPDATE::END)> m_arrAddedUpdateFp;
 	//int m_iNumOfJob = 0;
 public:
@@ -54,5 +57,6 @@ public:
 	void SaveForPractice(string_view _strPracticeName);
 	void LoadForPractice(string_view _strPracticeName);
 	//void WaitUpdate();
+	void SetSkyBox(SKYBOX_TYPE _eSkyBoxType,string_view _strSkyBoxName, string_view _strTextureName);
 };
 

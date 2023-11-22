@@ -26,14 +26,18 @@
     <ClCompile Include="Collider.cpp" />
     <ClCompile Include="CollisionHandler.cpp" />
     <ClCompile Include="CollisionMgr.cpp" />
+    <ClCompile Include="DirectionalLight.cpp" />
     <ClCompile Include="EventHandler.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="PannelUI.cpp" />
     <ClCompile Include="Particle.cpp" />
     <ClCompile Include="ParticleMgr.cpp" />
+    <ClCompile Include="PointLight.cpp" />
     <ClCompile Include="RayCaster.cpp" />
     <ClCompile Include="RigidBody.cpp" />
+    <ClCompile Include="SkyBox.cpp" />
     <ClCompile Include="SoundMgr.cpp" />
+    <ClCompile Include="SpotLight.cpp" />
     <ClCompile Include="UI.cpp" />
     <ClCompile Include="UIMgr.cpp" />
     <ClInclude Include="Animator.h" />
@@ -52,6 +56,7 @@
     <ClInclude Include="Core.h" />
     <ClInclude Include="CoRoutineHandler.h" />
     <ClInclude Include="CubeMapTex.h" />
+    <ClInclude Include="DirectionalLight.h" />
     <ClInclude Include="DoubleLockQueue.hpp" />
     <ClInclude Include="EventHandler.h" />
     <ClInclude Include="EventMgr.h" />
@@ -82,6 +87,7 @@
     <ClInclude Include="ParticleMgr.h" />
     <ClInclude Include="PathMgr.h" />
     <ClInclude Include="MyPolygon.h" />
+    <ClInclude Include="PointLight.h" />
     <ClInclude Include="RayCaster.h" />
     <ClInclude Include="ResMgr.h" />
     <ClInclude Include="Resource.h" />
@@ -93,7 +99,9 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="Singleton.hpp" />
     <ClInclude Include="define.h" />
+    <ClInclude Include="SkyBox.h" />
     <ClInclude Include="SoundMgr.h" />
+    <ClInclude Include="SpotLight.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Texture2D.h" />
     <ClInclude Include="ThreadMgr.h" />
@@ -126,6 +134,7 @@
     <ClInclude Include="Animation.h" />
     <ClInclude Include="OBBBox.hpp" />
     <ClInclude Include="ConcurrentHash.hpp" />
+    <ClInclude Include="AtomicMemoryPool.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
@@ -172,6 +181,8 @@
     <None Include="Resource\Shader\SimpleShader.glsl" />
     <None Include="Resource\Shader\SimpleShaderHasColor.glsl" />
     <None Include="Resource\Shader\SimpleShaderHasColorLight.glsl" />
+    <None Include="Resource\Shader\SkyBoxShaderCube.glsl" />
+    <None Include="Resource\Shader\SkyBoxShaderSphere.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Resource\Shader\AnimShader.glsl" />
@@ -293,6 +304,9 @@
       </SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <Lib>
+      <AdditionalDependencies>DbgHelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -317,6 +331,9 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <Lib>
+      <AdditionalDependencies>DbgHelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

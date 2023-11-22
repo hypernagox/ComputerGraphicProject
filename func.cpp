@@ -126,3 +126,25 @@ glm::vec3 GetMaxXYZ(const glm::vec3 v)noexcept
 	result[(const ushort)maxIndex] = 1;
 	return result;
 }
+
+void LogStackTrace() noexcept
+{
+	const int MaxFrames = 64;
+	void* stack[MaxFrames];
+	USHORT frames = CaptureStackBackTrace(0, MaxFrames, stack, NULL);
+
+	SymInitialize(GetCurrentProcess(), NULL, TRUE);
+
+	SYMBOL_INFO* symbol = (SYMBOL_INFO*)calloc(sizeof(SYMBOL_INFO) + 256 * sizeof(char), 1);
+	symbol->MaxNameLen = 255;
+	symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
+
+	for (USHORT i = 0; i < frames; i++)
+	{
+		::SymFromAddr(GetCurrentProcess(), (DWORD64)(stack[i]), 0, symbol);
+		std::cout << i << ": " << symbol->Name << " - 0x" << std::hex << symbol->Address << std::dec << std::endl;
+	}
+
+	free(symbol);
+	SymCleanup(GetCurrentProcess());
+}

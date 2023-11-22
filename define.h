@@ -103,6 +103,22 @@ enum class PROJECTION_TYPE
 	ORTHOGRAPHIC, // 직교 투영
 };
 
+enum class LIGHT_TYPE
+{
+	POINT,
+	SPOT,
+	DIRECTIONAL,
+
+	END
+};
+
+enum class SKYBOX_TYPE
+{
+	SPHERE,
+	CUBE,
+
+};
+
 static constexpr float PI = 3.14159265358979323846f;
 
 #define CAPTURE_COPY(Arg) \
@@ -111,3 +127,23 @@ static constexpr float PI = 3.14159265358979323846f;
         std::decay_t<decltype(Arg)>, \
         decltype(Arg)> \
     (std::forward<decltype(Arg)>(Arg))
+
+
+#define USE_NAGOX_ASSERT
+
+#ifdef USE_NAGOX_ASSERT
+
+#define NAGOX_ASSERT(condition, message) \
+    do { \
+        if (!(condition)) { \
+            std::cerr << "Activate NagOx Assertion: " << (message) << '\n'; \
+			LogStackTrace(); \
+            *(int*)nullptr = 0; \
+        } \
+    } while (0)
+
+#else
+
+#define NAGOX_ASSERT(condition, message)
+
+#endif

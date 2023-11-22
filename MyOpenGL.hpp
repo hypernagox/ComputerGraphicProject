@@ -42,3 +42,7 @@
 #include "RayCaster.h"
 #include "RigidBody.h"
 #include "SoundMgr.h"
+#include "PointLight.h"
+#include "DirectionalLight.h"
+#include "SpotLight.h"
+#include "SkyBox.h"

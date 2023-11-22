@@ -75,8 +75,8 @@ void KeyMgr::Update()
 		}
 	}
 
-	if (KEY_TAP(GLFW_MOUSE_BUTTON_LEFT))
-	{
-		Mgr(RayCaster)->MakeColliderList();
-	}
+	//if (KEY_TAP(GLFW_MOUSE_BUTTON_LEFT))
+	//{
+	//	Mgr(RayCaster)->MakeColliderList();
+	//}
 }

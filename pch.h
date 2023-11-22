@@ -1,6 +1,7 @@
 #pragma once
 #define _CRT_SECURE_NO_WARNINGS
 #include <Windows.h>
+#include <DbgHelp.h>
 
 #pragma comment(lib, "OpenGL32.Lib")
 #pragma comment(lib, "glew32.lib")
@@ -118,6 +119,9 @@ namespace fs = std::filesystem;
 #include <variant>
 #include <unordered_set>
 #include <shared_mutex>
+#include <new>
+#include <cstddef>
+#include <cstdlib>
 using std::span;
 using std::make_shared;
 using std::enable_shared_from_this;

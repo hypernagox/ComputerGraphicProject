@@ -190,6 +190,18 @@
     <Filter Include="Engine\02. Manager\SoundMgr">
       <UniqueIdentifier>{2c49e032-5743-462d-9972-804e1e42cecf}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Engine\06. Component\Component\Light\SpotLight">
+      <UniqueIdentifier>{1b86bd98-12d8-4573-88d6-f45db87a390b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\06. Component\Component\Light\DirectionalLight">
+      <UniqueIdentifier>{dab65a34-75be-466d-af39-92f6ad41804c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\06. Component\Component\Light\PointLight">
+      <UniqueIdentifier>{6cd932f5-8e5b-474a-b4d2-ebdb26a31e28}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\04. Object\SkyBox">
+      <UniqueIdentifier>{03f5631f-e45d-42e5-b0cd-229e0aa72f47}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -365,6 +377,18 @@
     </ClCompile>
     <ClCompile Include="MyPolygon.cpp">
       <Filter>ForHomeWork\MyPolygon</Filter>
+    </ClCompile>
+    <ClCompile Include="SpotLight.cpp">
+      <Filter>Engine\06. Component\Component\Light\SpotLight</Filter>
+    </ClCompile>
+    <ClCompile Include="PointLight.cpp">
+      <Filter>Engine\06. Component\Component\Light\PointLight</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectionalLight.cpp">
+      <Filter>Engine\06. Component\Component\Light\DirectionalLight</Filter>
+    </ClCompile>
+    <ClCompile Include="SkyBox.cpp">
+      <Filter>Engine\04. Object\SkyBox</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -582,6 +606,21 @@
     <ClInclude Include="ConcurrentHash.hpp">
       <Filter>Utility\struct</Filter>
     </ClInclude>
+    <ClInclude Include="AtomicMemoryPool.hpp">
+      <Filter>Utility\struct</Filter>
+    </ClInclude>
+    <ClInclude Include="SpotLight.h">
+      <Filter>Engine\06. Component\Component\Light\SpotLight</Filter>
+    </ClInclude>
+    <ClInclude Include="PointLight.h">
+      <Filter>Engine\06. Component\Component\Light\PointLight</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectionalLight.h">
+      <Filter>Engine\06. Component\Component\Light\DirectionalLight</Filter>
+    </ClInclude>
+    <ClInclude Include="SkyBox.h">
+      <Filter>Engine\04. Object\SkyBox</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resource\Shader\CubeShader.glsl">
@@ -605,6 +644,12 @@
     </None>
     <None Include="Resource\Shader\ObserverShader.glsl">
       <Filter>Engine\03. Element\Shader\ShaderCodes</Filter>
+    </None>
+    <None Include="Resource\Shader\SkyBoxShaderSphere.glsl">
+      <Filter>Engine\04. Object\SkyBox</Filter>
+    </None>
+    <None Include="Resource\Shader\SkyBoxShaderCube.glsl">
+      <Filter>Engine\04. Object\SkyBox</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

@@ -12,16 +12,41 @@ out vec3 FragPos;
 out vec3 Normal;
 out vec2 TexCoords;
 
-struct Light
+struct LightData
 {
-    vec3 position;
-    float pad1;
-    vec3 ambient;
-    float pad2;
-    vec3 diffuse;
-    float pad3;
-    vec3 specular;
-    float pad4;
+	vec3 position;
+	float pad1; 
+	vec3 ambient;
+	float pad2;
+	vec3 diffuse;
+	float pad3;
+	vec3 specular;
+	float pad4;
+	vec3 lightDir;
+	float pad5;
+};
+
+struct PointLightData
+{
+	LightData lData;
+	float constant;
+	float linear;
+	float quadratic;
+};
+
+struct SpotLightData
+{
+	LightData lData;
+	float constant;
+	float linear;
+	float quadratic;
+	float cutOff;
+	float outerCutoff;
+};
+
+struct DirectionalLightData
+{
+	LightData lData;
 };
 
 layout (std140, binding = 0) uniform UBOData
@@ -29,10 +54,14 @@ layout (std140, binding = 0) uniform UBOData
     mat4 uProj;
     mat4 uView;
     vec3 uViewPos;
-    float pad5;  
-    Light lights[50];
-    uint lightCount;
-    vec3 pad6; 
+	float pad5;
+	PointLightData pointLights[20];
+	SpotLightData spotLights[20];
+	DirectionalLightData dirLight;
+	mat4 uObserverView;
+    vec3 uObserverPos;
+	float pad6;
+	ivec4 lightCounts;
 };
 uniform mat4 uModel;
 uniform mat4 uBoneTransforms[100];
@@ -67,16 +96,41 @@ struct Material {
     float shininess;
 };
 
-struct Light
+struct LightData
 {
-    vec3 position;
-    float pad1;
-    vec3 ambient;
-    float pad2;
-    vec3 diffuse;
-    float pad3;
-    vec3 specular;
-    float pad4;
+	vec3 position;
+	float pad1; 
+	vec3 ambient;
+	float pad2;
+	vec3 diffuse;
+	float pad3;
+	vec3 specular;
+	float pad4;
+	vec3 lightDir;
+	float pad5;
+};
+
+struct PointLightData
+{
+	LightData lData;
+	float constant;
+	float linear;
+	float quadratic;
+};
+
+struct SpotLightData
+{
+	LightData lData;
+	float constant;
+	float linear;
+	float quadratic;
+	float cutOff;
+	float outerCutoff;
+};
+
+struct DirectionalLightData
+{
+	LightData lData;
 };
 
 layout (std140, binding = 0) uniform UBOData
@@ -84,10 +138,14 @@ layout (std140, binding = 0) uniform UBOData
     mat4 uProj;
     mat4 uView;
     vec3 uViewPos;
-    float pad5;  
-    Light lights[50];
-    uint lightCount;
-    vec3 pad6; 
+	float pad5;
+	PointLightData pointLights[20];
+	SpotLightData spotLights[20];
+	DirectionalLightData dirLight;
+	mat4 uObserverView;
+    vec3 uObserverPos;
+	float pad6;
+	ivec4 lightCounts;
 };
 
 uniform Material material;
@@ -116,19 +174,19 @@ void main()
     vec3 specular = vec3(0.0, 0.0, 0.0);
     vec3 V = vec3(0.f,0.f,1.f);
 
-    for(int i = 0; i < lightCount; ++i)
-    {
-        vec3 L = normalize(lights[i].position - FragPos);
-        vec3 R = reflect(-L, Normal);
-
-        ambient += lights[i].ambient * material.ambient;
-       
-        diffuse += max(dot(L, Normal), 0.0) * lights[i].diffuse  * material.diffuse;
-            
-        specular += pow(max(dot(R, V), 0.0), material.shininess) * lights[i].specular * material.specular;
-    }
-
-    vec4 color = vec4((ambient + diffuse + specular),1.f);
-
-    FragColor = min(1.5 * color * texture( uTexture2D, TexCoords ), vec4(1.f, 1.f, 1.f, 1.f));
+   //for(int i = 0; i < lightCounts.x; ++i)
+   //{
+   //    vec3 L = normalize(lights[i].position - FragPos);
+   //    vec3 R = reflect(-L, Normal);
+   //
+   //    ambient += lights[i].ambient * material.ambient;
+   //   
+   //    diffuse += max(dot(L, Normal), 0.0) * lights[i].diffuse  * material.diffuse;
+   //        
+   //    specular += pow(max(dot(R, V), 0.0), material.shininess) * lights[i].specular * material.specular;
+   //}
+   //
+   //vec4 color = vec4((ambient + diffuse + specular),1.f);
+   //
+   //FragColor = min(1.5 * color * texture( uTexture2D, TexCoords ), vec4(1.f, 1.f, 1.f, 1.f));
 }

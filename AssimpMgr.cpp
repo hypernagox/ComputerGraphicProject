@@ -63,7 +63,7 @@ AssimpMgr::~AssimpMgr()
 {
 }
 
-shared_ptr<Model> AssimpMgr::ProcessNode(aiNode* pNode, const aiScene* pAiScene)
+shared_ptr<Model> AssimpMgr::ProcessNode(aiNode* pNode, const aiScene* pAiScene)noexcept
 {
     auto pModel = make_shared<Model>();
    // auto pMeshRenderer = pObj->AddComponent<MeshRenderer>();
@@ -107,7 +107,7 @@ shared_ptr<Model> AssimpMgr::ProcessNode(aiNode* pNode, const aiScene* pAiScene)
     return pModel;
 }
 
-shared_ptr<Mesh> AssimpMgr::ProcessMesh(aiMesh* pAiMesh)
+shared_ptr<Mesh> AssimpMgr::ProcessMesh(aiMesh* pAiMesh)noexcept
 {
     vector<Vertex> vertices;
     vector<GLuint> indices;
@@ -215,7 +215,7 @@ shared_ptr<Mesh> AssimpMgr::ProcessMesh(aiMesh* pAiMesh)
 //    }
 //}
 
-shared_ptr<Material> AssimpMgr::ProcessMaterial(aiMesh* pAiMesh,const aiScene* pAiScene)
+shared_ptr<Material> AssimpMgr::ProcessMaterial(aiMesh* pAiMesh,const aiScene* pAiScene)noexcept
 {
     auto pAiMaterial = pAiScene->mMaterials[pAiMesh->mMaterialIndex];
 
@@ -467,13 +467,56 @@ std::pair<vector<SimpleVertex>,vector<GLuint>> AssimpMgr::ProcessMeshPoly(aiMesh
     return std::make_pair(std::move(vertices), std::move(indices));
 }
 
+shared_ptr<GameObj> AssimpMgr::ProcessNodeGameObj(string_view strShaderName_, aiNode* pNode, const aiScene* pAiScene)noexcept
+{
+    auto pObj = GameObj::make_obj();
+    auto pMeshRenderer = pObj->AddComponent<MeshRenderer>();
+    pMeshRenderer->SetShader(strShaderName_);
+    pObj->SetObjName(pNode->mName.C_Str());
+    
+    auto res_future = make_shared<vector<std::future<shared_ptr<Mesh>>>>();
+    res_future->reserve(pNode->mNumMeshes);
+
+    for (GLuint i = 0; i < pNode->mNumMeshes; ++i)
+    {
+        auto pAiMesh = pAiScene->mMeshes[pNode->mMeshes[i]];
+
+        res_future->emplace_back(Mgr(ThreadMgr)->EnqueueTaskFuture(&AssimpMgr::ProcessMesh, this, pAiMesh));
+
+        auto pMaterial = ProcessMaterial(pAiMesh, pAiScene);
+
+        pMeshRenderer->AddMaterial(std::move(pMaterial));
+    }
+
+    SetTransformation(pObj->GetTransform(), pNode);
+
+    m_fpSetBuf.emplace_back(std::async(std::launch::deferred, [this, pNode, pAiScene, pMeshRenderer, res_future = std::move(res_future)]()mutable noexcept {
+        for (auto& f : *res_future)
+        {
+            auto pMesh = f.get();
+            ///*if (pAiScene->HasAnimations())
+            //{
+            //    ProcessBone(pMesh->GetVertices(), pNode, pAiScene);
+            //}*/
+            pMesh->SetBuffers();
+            pMeshRenderer->AddMesh(std::move(pMesh));
+        }}));
+
+    for (GLuint i = 0; i < pNode->mNumChildren; ++i)
+    {
+        pObj->AddChild(ProcessNodeGameObj(strShaderName_,pNode->mChildren[i], pAiScene));
+    }
+
+    return pObj;
+}
+
 void AssimpMgr::Init()
 {
     m_wait.reserve(100);
     m_fpSetBuf.reserve(1000);
 }
 
-shared_ptr<GameObj> AssimpMgr::Load(string_view _strShaderName, string_view _strModelFileName)
+shared_ptr<GameObj> AssimpMgr::Load(string_view _strShaderName, string_view _strModelFileName)noexcept
 {
     unsigned int flag;
 
@@ -532,8 +575,13 @@ shared_ptr<GameObj> AssimpMgr::Load(string_view _strShaderName, string_view _str
     return pObj;
 }
 
-shared_ptr<Model> AssimpMgr::LoadModel(string_view _strModelFileName)
+shared_ptr<Model> AssimpMgr::LoadModel(string_view _strModelFileName)noexcept
 {
+    if (auto modelData = Mgr(ResMgr)->GetRes<Model>(_strModelFileName))
+    {
+        return modelData;
+    }
+
     unsigned int flag;
 
     flag = aiProcess_Triangulate |
@@ -578,6 +626,31 @@ shared_ptr<MyPolygon> AssimpMgr::LoadPoly(string_view _strPolyFileName)
     auto pPoly = ProcessNodePoly(scene->mRootNode, scene);
     //Mgr(ThreadMgr)->SetJobCount(0);
     return pPoly;
+}
+
+shared_ptr<GameObj> AssimpMgr::LoadAllPartsAsGameObj(string_view _strShaderName, string_view _strModelFileName)noexcept
+{
+    unsigned int flag;
+
+    flag = aiProcess_Triangulate |
+        aiProcess_JoinIdenticalVertices |
+        aiProcess_CalcTangentSpace |
+        aiProcess_GenNormals |
+        aiProcess_MakeLeftHanded |
+        aiProcess_FlipWindingOrder;
+
+    const aiScene* scene = m_importer.ReadFile((Mgr(PathMgr)->GetObjPath() / _strModelFileName).string().data(),
+        flag);
+
+    auto pObj = ProcessNodeGameObj(_strShaderName,scene->mRootNode, scene);
+
+
+    for (auto& f : m_wait)f.get();
+    m_wait.clear();
+    for (auto& fp : m_fpSetBuf) fp.get();
+    m_fpSetBuf.clear();
+
+    return pObj;
 }
 
 
