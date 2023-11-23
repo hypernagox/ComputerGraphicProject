@@ -34,8 +34,8 @@ inline bool IsSameVector(const glm::vec2& _a, const glm::vec2& _b)noexcept
 	return IsZeroVector(_a - _b);
 }
 
-inline constexpr float Deg2Rad(const float _degree)noexcept { return glm::radians(_degree); }
+inline constexpr const float Deg2Rad(const float _degree)noexcept { return glm::radians(_degree); }
 
-constexpr glm::vec3 GetRightByQuat(const glm::quat& _quat) { return (glm::mat4_cast(glm::normalize(_quat)))[0]; }
-constexpr glm::vec3 GetUpByQuat(const glm::quat& _quat) { return (glm::mat4_cast(glm::normalize(_quat)))[1]; }
-constexpr glm::vec3 GetLookByQuat(const glm::quat& _quat) { return (glm::mat4_cast(glm::normalize(_quat)))[2]; }
+constexpr const glm::vec3 GetRightByQuat(const glm::quat& _quat) noexcept { return (glm::mat4_cast(glm::normalize(_quat)))[0]; }
+constexpr const glm::vec3 GetUpByQuat(const glm::quat& _quat) noexcept { return (glm::mat4_cast(glm::normalize(_quat)))[1]; }
+constexpr const glm::vec3 GetLookByQuat(const glm::quat& _quat) noexcept { return (glm::mat4_cast(glm::normalize(_quat)))[2]; }

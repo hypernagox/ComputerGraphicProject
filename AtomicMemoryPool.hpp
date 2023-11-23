@@ -20,7 +20,7 @@ private:
 
 	void initialize() noexcept 
 	{
-		memoryBlock = static_cast<std::byte* const>(_aligned_malloc(aligned_block_size * maxBlockCount, max_align * 2));
+		memoryBlock = static_cast<std::byte* const>(_aligned_malloc(aligned_block_size * maxBlockCount, max_align));
 		head.store(reinterpret_cast<Block* const>(memoryBlock));
 		for (size_t i = 0; i < maxBlockCount - 1; ++i) 
 		{

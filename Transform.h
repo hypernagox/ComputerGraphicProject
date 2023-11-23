@@ -113,42 +113,42 @@ public:
 	const glm::quat& GetLocalRotation()const { return m_localRotation; }
 	const glm::vec3& GetLocalScale() const { return m_localScale; }
 
-	glm::vec3 GetLocalPositionAcc()const { return m_localPosition + m_posOffset + m_revOffset; }
-	glm::quat GetLocalRotationAcc()const { return m_rotOffsetWorld * m_localRotation * m_rotOffsetLocal; }
+	glm::vec3 GetLocalPositionAcc()const noexcept { return m_localPosition + m_posOffset + m_revOffset; }
+	glm::quat GetLocalRotationAcc()const noexcept { return m_rotOffsetWorld * m_localRotation * m_rotOffsetLocal; }
 
 
-	const glm::mat4& GetLocalToWorldMatrix()const { return m_matWorld; }
+	const glm::mat4& GetLocalToWorldMatrix()const noexcept { return m_matWorld; }
 	const glm::mat4& GetLocalMatrix()const noexcept { return m_matLocal; }
 
-	glm::vec3 GetWorldPosition() const { return glm::vec3(m_matWorld[3]); }
+	glm::vec3 GetWorldPosition() const noexcept { return glm::vec3(m_matWorld[3]); }
 
-	inline const glm::quat GetLocalRotationRecursion()const {
+	inline const glm::quat GetLocalRotationRecursion()const noexcept{
 		return GetWorldRotationRecursion() * glm::inverse(m_localRotation);
 	}
 
-	inline glm::quat GetWorldRotationRecursion(const glm::quat _accRotate = Transform::defaultQuat)const {
+	inline glm::quat GetWorldRotationRecursion(const glm::quat _accRotate = Transform::defaultQuat)const noexcept {
 		return m_pParent.expired() ? m_localRotation * _accRotate : m_pParent.lock()->GetWorldRotationRecursion(m_localRotation * _accRotate);
 	}
 
-	inline glm::vec3 GetWorldPositionRecursion(const glm::vec3 _accPos = Transform::ZERO_VEC)const {
+	inline glm::vec3 GetWorldPositionRecursion(const glm::vec3 _accPos = Transform::ZERO_VEC)const noexcept {
 		return m_pParent.expired() ? m_localPosition + m_posOffset + m_revOffset + _accPos : m_pParent.lock()->GetWorldPositionRecursion(m_localPosition + m_posOffset + m_revOffset + _accPos);
 	}
 
-	inline glm::quat GetWorldRotationAccRecursion(const glm::quat _accRotate = Transform::defaultQuat)const {
+	inline glm::quat GetWorldRotationAccRecursion(const glm::quat _accRotate = Transform::defaultQuat)const noexcept {
 		return m_pParent.expired() ? GetLocalRotationAcc() * _accRotate : m_pParent.lock()->GetWorldRotationAccRecursion(GetLocalRotationAcc() * _accRotate);
 	}
 
-	inline glm::vec3 GetWorldPositionAccRecursion(const glm::vec3 _accPos = Transform::ZERO_VEC)const {
+	inline glm::vec3 GetWorldPositionAccRecursion(const glm::vec3 _accPos = Transform::ZERO_VEC)const noexcept {
 		return m_pParent.expired() ? GetLocalPositionAcc() + _accPos : m_pParent.lock()->GetWorldPositionAccRecursion(GetLocalPositionAcc() + _accPos);
 	}
 
-	glm::vec3 GetRight()const { return glm::vec3(m_matWorld[0]); }
-	glm::vec3 GetUp() const { return glm::vec3(m_matWorld[1]); }
-	glm::vec3 GetLook() const { return glm::vec3(m_matWorld[2]); }
+	glm::vec3 GetRight()const noexcept { return glm::vec3(m_matWorld[0]); }
+	glm::vec3 GetUp() const noexcept { return glm::vec3(m_matWorld[1]); }
+	glm::vec3 GetLook() const noexcept { return glm::vec3(m_matWorld[2]); }
 
-	glm::vec3 GetRightRecursion()const { return GetRightByQuat(GetWorldRotationRecursion()); }
-	glm::vec3 GetUpRecursion() const { return GetUpByQuat(GetWorldRotationRecursion()); }
-	glm::vec3 GetLookRecursion() const { return GetLookByQuat(GetWorldRotationRecursion()); }
+	glm::vec3 GetRightRecursion()const noexcept { return GetRightByQuat(GetWorldRotationRecursion()); }
+	glm::vec3 GetUpRecursion() const noexcept { return GetUpByQuat(GetWorldRotationRecursion()); }
+	glm::vec3 GetLookRecursion() const noexcept { return GetLookByQuat(GetWorldRotationRecursion()); }
 
 	void SetPivot(const glm::vec3& _pivot)noexcept { m_rotatePivot = _pivot; }
 
