@@ -20,8 +20,7 @@ void Player::UpdatePlayerCamFpsMode() noexcept
 
 	glm::vec2 offset = Mgr(KeyMgr)->GetMouseDelta() * m_fCamSensivity;
 
-	m_fPitchOffsetAcc += offset.y * sign;
-	m_fPitchOffsetAcc = glm::clamp(m_fPitchOffsetAcc, -90.0f, 90.0f);
+	m_fPitchOffsetAcc = glm::clamp(m_fPitchOffsetAcc + (offset.y * sign), -90.0f, 90.0f);
 	offset.y = m_fPitchOffsetAcc - (m_fPitchOffsetAcc - offset.y * sign);
 
 	const glm::quat camQuat = camTrans->GetWorldRotationRecursion();
@@ -107,7 +106,7 @@ void Player::Update()
 	if (KEY_TAP(GLFW_KEY_F5))
 	{
 		m_fpChangeCamMode[m_curCamMode]();
-		m_curCamMode = (m_curCamMode + 1) % 3;
+		m_curCamMode = wrapAround(m_curCamMode + 1, 0, 3);
 		m_fPitchOffsetAcc = 0.f;
 	}
 	UpdatePlayerCamFpsMode();

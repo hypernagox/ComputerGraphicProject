@@ -156,3 +156,9 @@ const glm::vec3 NDC2World(const glm::vec3 ndc) noexcept
 	const glm::vec4 worldCoords = invVP * glm::vec4(ndc, 1.0f); 
 	return glm::vec3(worldCoords) / worldCoords.w; 
 }
+
+const short wrapAround(const short x, const short low, const short high)noexcept
+{
+	const short n = (x - low) % (high - low);
+	return (n >= 0) ? (n + low) : (n + high);
+}

@@ -81,7 +81,7 @@ public:
 	
 	//void SetJobCount(const int n_) { m_iCurJobCount.store(n_); }
 
-	void WaitAllJob() 
+	void WaitAllJob() noexcept
 	{
 		//while (m_iCurJobCount.load() != numOfJob_) {
 		//}
@@ -89,7 +89,7 @@ public:
 		std::unique_lock<SpinLock> lock{ m_spinLockForNotify };
 		//m_cvForWakeUp.wait(lock, [this]()noexcept {return 0 == m_iCurJobCount.load(); });
 
-		if (!m_cvForWakeUp.wait_for(lock, std::chrono::seconds(5), [this]() noexcept { return 0 == m_iCurJobCount.load(); }))
+		if (!m_cvForWakeUp.wait_for(lock, std::chrono::seconds(2), [this]() noexcept { return 0 == m_iCurJobCount.load(); }))
 		{
 			m_jobQ.clear();
 			m_futureQ.clear();

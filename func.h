@@ -87,3 +87,5 @@ glm::vec3 GetMaxXYZ(const glm::vec3 v)noexcept;
 void LogStackTrace()noexcept;
 
 const glm::vec3 NDC2World(const glm::vec3 ndc)noexcept;
+
+const short wrapAround(const short x, const short low, const short high)noexcept;

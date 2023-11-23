@@ -7,6 +7,7 @@
 template <typename T>
 class DoubleLockQueue
 {
+	static const inline HANDLE g_handle = GetProcessHeap();
 private:
 	struct Node;
 	static inline AtomicMemoryPool<Node> g_memPool{ 1024 * 2 };
@@ -14,7 +15,7 @@ private:
 		T data;
 		Node* next;
 #ifdef USE_ATOMIC_ALLOCATER
-		void* operator new(const size_t size) noexcept {
+		void* const operator new(const size_t size) noexcept {
 			return g_memPool.allocate();
 		}
 
@@ -22,12 +23,12 @@ private:
 			g_memPool.deallocate(ptr);
 		}
 #else
-		void* operator new(const size_t size) noexcept {
-			return ::HeapAlloc(GetProcessHeap(), NULL, sizeof(Node));
+		void* const operator new(const size_t size) noexcept {
+			return ::HeapAlloc(g_handle, NULL, sizeof(Node));
 	}
 
 		void operator delete(void* const ptr) noexcept {
-			HeapFree(GetProcessHeap(), NULL, ptr);
+			HeapFree(g_handle, NULL, ptr);
 		}
 #endif
 	};
