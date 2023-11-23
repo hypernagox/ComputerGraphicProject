@@ -15,10 +15,10 @@ TimeMgr::~TimeMgr()
 void TimeMgr::Init()
 {
 	m_DeltaTime = std::chrono::duration<float>(0.f);
-	m_PrevTime = std::chrono::steady_clock::now();
+	m_InitTime = m_PrevTime = std::chrono::steady_clock::now();
 }
 
-void TimeMgr::Update()
+void TimeMgr::Update()noexcept
 {
 	auto CurTime = std::chrono::steady_clock::now();
 	m_DeltaTime = CurTime - m_PrevTime;

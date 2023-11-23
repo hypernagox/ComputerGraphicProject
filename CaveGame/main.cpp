@@ -5,6 +5,9 @@
 #include "MCTerrainGenerator.h"
 #include "MCTilemapMeshGenerator.h"
 
+#include "Player.h"
+#include "PlayerCam.h"
+
 shared_ptr<GameObj> pObserver;
 shared_ptr<Camera>  observerCam;
 
@@ -15,7 +18,7 @@ int main()
     Mgr(Core)->Init();
     Mgr(Core)->SetClearColor(RGBA_WHITE);
 
-    Camera::GetCurCam()->GetTransform()->SetLocalPosition({ 0.0f, 0.0f, -1.0f });
+    //Camera::GetCurCam()->GetTransform()->SetLocalPosition({ 0.0f, 0.0f, -1.0f });
     //Camera::GetCurCam()->GetTransform()->SetLocalRotation(glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)));
 
     //pObserver = Mgr(AssimpMgr)->Load("SimpleShader.glsl", "yup.obj");
@@ -49,12 +52,21 @@ int main()
         auto l = pLight->AddComponent<Light>();
         l->SetCurLightType(LIGHT_TYPE::DIRECTIONAL);
         l->SetLightPos({ -100,100,0 });
-       // pLight->GetTransform()->SetLocalRotation(90.f, X_AXIS);
+        pLight->GetTransform()->SetLocalRotation(90.f, X_AXIS);
         pLight->GetTransform()->SetLookAt({ -3.5f,-1.2f,-1.2f });
         l->SetSpecular({ .5f,.5f,.5f });
         l->SetDiffuse({ .5f,.5f,.5f });
         curScene->AddObject(pLight, GROUP_TYPE::DEFAULT);
     }
+
+    {
+        auto player = make_shared <Player>();
+       
+        curScene->AddObject(player, GROUP_TYPE::PLAYER);
+
+        player->AddChild(make_shared<PlayerCam>());
+    }
+
     curScene->SetSkyBox(SKYBOX_TYPE::SPHERE, "basic_skybox_3d_flip.fbx", "magical_forest_fantasy_6k.jpg");
     Mgr(Core)->GameLoop();
 }

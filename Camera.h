@@ -38,7 +38,7 @@ public:
 	static glm::mat4 GetMainCamViewMat()noexcept { return g_mat4MainView; }
 	static void SetMainCam(shared_ptr<Camera> _pTargetCam);
 	static shared_ptr<Camera> GetObserverCam()noexcept { return g_observer; }
-
+	static const std::pair<glm::mat4, glm::mat4> GetMainCamProjViewMat()noexcept { return g_curMainCam->GetCamMat(); }
 	Camera();
 	~Camera();
 
@@ -70,7 +70,7 @@ public:
 	const glm::mat4& GetCamMatView()const { return m_matView; }
 	const glm::mat4& GetCamMatProj()const { return m_matProjection; }
 
-	std::pair<glm::mat4,glm::mat4> GetCamMat()const { return std::make_pair(m_matView, m_matProjection); }
+	const std::pair<glm::mat4,glm::mat4> GetCamMat()const noexcept{ return std::make_pair(m_matView, m_matProjection); }
 
 	virtual void Save(string_view _resName, rapidjson::PrettyWriter<rapidjson::StringBuffer>& writer, const fs::path& _savePath) override
 	{

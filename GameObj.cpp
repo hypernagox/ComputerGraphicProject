@@ -28,7 +28,7 @@ GameObj::GameObj()
     :Resource{RESOURCE_TYPE::GAMEOBJECT}
 {
     m_arrComp[etoi(COMPONENT_TYPE::TRANSFORM)] = std::make_shared<Transform>();
-    m_arrComp[etoi(COMPONENT_TYPE::CAMERA)] = std::make_shared<Camera>();
+    //m_arrComp[etoi(COMPONENT_TYPE::CAMERA)] = std::make_shared<Camera>();
 }
 
 GameObj::~GameObj()

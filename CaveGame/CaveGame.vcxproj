@@ -153,6 +153,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Player.cpp" />
+    <ClCompile Include="PlayerCam.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MyOpenGL.vcxproj">
@@ -166,6 +168,8 @@
     <ClInclude Include="MCTilemapMeshGenerator.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="PerlinNoise.hpp" />
+    <ClInclude Include="Player.h" />
+    <ClInclude Include="PlayerCam.h" />
     <ClInclude Include="Vector2D.hpp" />
     <ClInclude Include="Vector3D.hpp" />
   </ItemGroup>

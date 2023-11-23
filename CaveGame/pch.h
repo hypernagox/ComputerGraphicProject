@@ -127,3 +127,15 @@ using std::list;
 #include <initializer_list>
 using std::initializer_list;
 using std::pair;
+#include "Singleton.hpp"
+#include "define.h"
+#include "Vertex.hpp"
+#include "func.h"
+#include "MyStb.h"
+#include "CustomMath.hpp"
+#include "SpinLock.hpp"
+#include "CoRoutine.hpp"
+#include "Delegate.hpp"
+#include "CircleQueue.hpp"
+#include "Animation.h"
+#include "BoneInfo.h"

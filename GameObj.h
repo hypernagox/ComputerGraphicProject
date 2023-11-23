@@ -33,7 +33,7 @@ class GameObj
 		InitGameObj();
 		return *this;
 	}
-private:
+protected:
 	weak_ptr<GameObj> m_pParentGameObj;
 	array<shared_ptr<Component>, COMPONENT_COUNT> m_arrComp;
 	vector<shared_ptr<GameObj>> m_vecChildObj;
@@ -54,13 +54,13 @@ public:
 	GameObj(const GameObj& _other);
 	GameObj& operator = (GameObj _other);
 
-	void InitGameObj();
-	void Awake();
-	void Start();
+	virtual void InitGameObj();
+	virtual void Awake();
+	virtual void Start();
 
-	void Update();
-	void LateUpdate();
-	void LastUpdate();
+	virtual void Update();
+	virtual void LateUpdate();
+	virtual void LastUpdate();
 	void MarkTransformDirty()const noexcept;
 	void ColliderUpdate()noexcept;
 	void FinalUpdate();

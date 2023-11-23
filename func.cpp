@@ -81,9 +81,9 @@ std::tuple<glm::vec3, glm::quat, glm::vec3> Decompose(const glm::mat4& transform
 const glm::vec3 ScreenToOpenGL2D(const glm::vec2& mpos)noexcept
 {
 	const auto [width, height] = Mgr(Core)->GetWidthHeight();
-	const auto pCam = Camera::GetCurCam();
+	const auto [proj, view] = Camera::GetMainCamProjViewMat();
 	const auto pos = glm::vec3{ (2.0f * mpos.x) / width - 1.0f ,1.0f - (2.0f * mpos.y) / height ,0.f };
-	return glm::inverse(pCam->GetCamMatProj() * pCam->GetCamMatView()) * glm::vec4{ pos,1.f };
+	return glm::inverse(proj * view) * glm::vec4{ pos,1.f };
 }
 
 const glm::vec2 OpenGL2D2Screen(const glm::vec3& glpos) noexcept
@@ -147,4 +147,12 @@ void LogStackTrace() noexcept
 
 	free(symbol);
 	SymCleanup(GetCurrentProcess());
+}
+
+const glm::vec3 NDC2World(const glm::vec3 ndc) noexcept
+{
+	const auto [proj, view] = Camera::GetMainCamProjViewMat();
+	const glm::mat4 invVP = glm::inverse(proj * view); 
+	const glm::vec4 worldCoords = invVP * glm::vec4(ndc, 1.0f); 
+	return glm::vec3(worldCoords) / worldCoords.w; 
 }

@@ -16,6 +16,15 @@
     <Filter Include="Precompiled Headers">
       <UniqueIdentifier>{2bb1e746-4b1a-4196-877d-10906418eb3f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="CaveObject">
+      <UniqueIdentifier>{0dc73bce-c286-4628-ac03-2f6d4cfb4e4e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CaveObject\Player">
+      <UniqueIdentifier>{fb7cc27c-8e81-470c-b9b4-936d943d3bd5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CaveObject\PlayerCam">
+      <UniqueIdentifier>{1889f580-1079-45b2-84e0-f95f9af44a08}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -32,6 +41,12 @@
     </ClCompile>
     <ClCompile Include="MCTerrainGenerator.cpp">
       <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>CaveObject\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayerCam.cpp">
+      <Filter>CaveObject\PlayerCam</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -58,6 +73,12 @@
     </ClInclude>
     <ClInclude Include="MCTerrainGenerator.h">
       <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>CaveObject\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerCam.h">
+      <Filter>CaveObject\PlayerCam</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

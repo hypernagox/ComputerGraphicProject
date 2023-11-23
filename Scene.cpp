@@ -20,21 +20,21 @@
 
 Scene::Scene()
 {
-	auto pCam = GameObj::make_obj();
-	pCam->GetTransform()->SetLocalPosition({ 0.f,0.f,-1.5f });
-	pCam->AddScript(make_shared<CamMoveScript>());
-	//static_pointer_cast<CamMoveScript>(pCam->GetMonoBehavior("CamMoveScript"))->SetMoveSpeed(0.f);
-	//auto pHandle = pCam->AddComponent<InputHandler>();
-	pCam->GetComp<Camera>()->SetMainCam();
-	//pHandle->SetCommand(GLFW_KEY_W, make_shared<MoveFront>());
-	//pHandle->SetCommand(GLFW_KEY_S, make_shared<MoveBack>());
-	//pHandle->SetCommand(GLFW_KEY_A, make_shared<MoveLeft>());
-	//pHandle->SetCommand(GLFW_KEY_D, make_shared<MoveRight>());
-	//pHandle->SetCommand(GLFW_KEY_Q, make_shared<MoveLeftRotate>());
-	//pHandle->SetCommand(GLFW_KEY_E, make_shared<MoveRightRotate>());
-	//pHandle->SetCommand(GLFW_KEY_UP, make_shared<MoveUp>());
-	//pHandle->SetCommand(GLFW_KEY_DOWN, make_shared<MoveDown>());
-	AddObject(std::move(pCam), GROUP_TYPE::DEFAULT);
+	//auto pCam = GameObj::make_obj();
+	//pCam->GetTransform()->SetLocalPosition({ 0.f,0.f,-1.5f });
+	//pCam->AddScript(make_shared<CamMoveScript>());
+	////static_pointer_cast<CamMoveScript>(pCam->GetMonoBehavior("CamMoveScript"))->SetMoveSpeed(0.f);
+	////auto pHandle = pCam->AddComponent<InputHandler>();
+	//pCam->GetComp<Camera>()->SetMainCam();
+	////pHandle->SetCommand(GLFW_KEY_W, make_shared<MoveFront>());
+	////pHandle->SetCommand(GLFW_KEY_S, make_shared<MoveBack>());
+	////pHandle->SetCommand(GLFW_KEY_A, make_shared<MoveLeft>());
+	////pHandle->SetCommand(GLFW_KEY_D, make_shared<MoveRight>());
+	////pHandle->SetCommand(GLFW_KEY_Q, make_shared<MoveLeftRotate>());
+	////pHandle->SetCommand(GLFW_KEY_E, make_shared<MoveRightRotate>());
+	////pHandle->SetCommand(GLFW_KEY_UP, make_shared<MoveUp>());
+	////pHandle->SetCommand(GLFW_KEY_DOWN, make_shared<MoveDown>());
+	//AddObject(std::move(pCam), GROUP_TYPE::DEFAULT);
 }
 
 Scene::~Scene()

@@ -22,11 +22,11 @@ private:
 	glm::vec2 m_vPrevMousePos=ZERO_VEC3;
 public:
 	void Init();
-	void Update();
+	void Update()noexcept;
 public:
-	glm::vec2 GetMousePos()const { return m_vMousePos; }
-	glm::vec2 GetMouseDelta()const { return m_vMousePos - m_vPrevMousePos; }
-	const tKeyInfo& GetKeyInfo(const int _VKval) { return m_mapKey.try_emplace(_VKval, tKeyInfo{ _VKval }).first->second; }
-	const KEY_STATE GetKeyState(const int _VKval) { return GetKeyInfo(_VKval).eState; }
+	glm::vec2 GetMousePos()const noexcept{ return m_vMousePos; }
+	glm::vec2 GetMouseDelta()const noexcept{ return m_vMousePos - m_vPrevMousePos; }
+	const tKeyInfo& GetKeyInfo(const int _VKval) noexcept{ return m_mapKey.try_emplace(_VKval, tKeyInfo{ _VKval }).first->second; }
+	const KEY_STATE GetKeyState(const int _VKval) noexcept{ return GetKeyInfo(_VKval).eState; }
 };
 
