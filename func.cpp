@@ -81,9 +81,9 @@ std::tuple<glm::vec3, glm::quat, glm::vec3> Decompose(const glm::mat4& transform
 const glm::vec3 ScreenToOpenGL2D(const glm::vec2& mpos)noexcept
 {
 	const auto [width, height] = Mgr(Core)->GetWidthHeight();
-	const auto pCam = Camera::GetCurCam();
+	const auto [proj, view] = Camera::GetMainCamProjViewMat();
 	const auto pos = glm::vec3{ (2.0f * mpos.x) / width - 1.0f ,1.0f - (2.0f * mpos.y) / height ,0.f };
-	return glm::inverse(pCam->GetCamMatProj() * pCam->GetCamMatView()) * glm::vec4{ pos,1.f };
+	return glm::inverse(proj * view) * glm::vec4{ pos,1.f };
 }
 
 const glm::vec2 OpenGL2D2Screen(const glm::vec3& glpos) noexcept
@@ -125,4 +125,34 @@ glm::vec3 GetMaxXYZ(const glm::vec3 v)noexcept
 	glm::vec3 result(0);
 	result[(const ushort)maxIndex] = 1;
 	return result;
+}
+
+void LogStackTrace() noexcept
+{
+	const int MaxFrames = 64;
+	void* stack[MaxFrames];
+	USHORT frames = CaptureStackBackTrace(0, MaxFrames, stack, NULL);
+
+	SymInitialize(GetCurrentProcess(), NULL, TRUE);
+
+	SYMBOL_INFO* symbol = (SYMBOL_INFO*)calloc(sizeof(SYMBOL_INFO) + 256 * sizeof(char), 1);
+	symbol->MaxNameLen = 255;
+	symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
+
+	for (USHORT i = 0; i < frames; i++)
+	{
+		::SymFromAddr(GetCurrentProcess(), (DWORD64)(stack[i]), 0, symbol);
+		std::cout << i << ": " << symbol->Name << " - 0x" << std::hex << symbol->Address << std::dec << std::endl;
+	}
+
+	free(symbol);
+	SymCleanup(GetCurrentProcess());
+}
+
+const glm::vec3 NDC2World(const glm::vec3 ndc) noexcept
+{
+	const auto [proj, view] = Camera::GetMainCamProjViewMat();
+	const glm::mat4 invVP = glm::inverse(proj * view); 
+	const glm::vec4 worldCoords = invVP * glm::vec4(ndc, 1.0f); 
+	return glm::vec3(worldCoords) / worldCoords.w; 
 }

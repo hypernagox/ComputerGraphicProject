@@ -1,0 +1,21 @@
+#include "pch.h"
+#include "MCTerrainGenerator.h"
+#include "MCTilemap.h"
+#include "PerlinNoise.hpp"
+
+void MCTerrainGenerator::Generate(MCTilemap* tilemap)
+{
+	for (int x = 0; x < MCTilemap::MAP_WIDTH; ++x)
+	{
+		for (int y = 0; y < MCTilemap::MAP_HEIGHT; ++y)
+		{
+			for (int z = 0; z < MCTilemap::MAP_WIDTH; ++z)
+			{
+				Vector3D perlinCoords = Vector3D(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z)) * 0.1f;
+				float perlinValue = Perlin::Fbm(perlinCoords, 2);
+				int tile = perlinValue * 16.0f + 8.0f - y > 0.0f;
+				tilemap->SetTile(x, y, z, tile);
+			}
+		}
+	}
+}

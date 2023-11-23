@@ -33,7 +33,7 @@ public:
 	void InitModel()noexcept;
 	void UpdateModelTransform()noexcept;
 
-	void Render(const shared_ptr<Shader>& pShader_);
+	void Render(const shared_ptr<Shader>& pShader_, const bool bIsMeshRendererMaterialEmpty_)noexcept;
 public:
 	bool IsActivate()const { return m_bIsActivate; }
 	void SetActivate(const bool b_) { m_bIsActivate = b_; }

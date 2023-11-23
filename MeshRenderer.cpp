@@ -115,13 +115,12 @@ void MeshRenderer::PreRender() const
 			}
 		}
 	}
-	for (const auto& material : m_vecMaterial)
+	else
 	{
-		material->PushMaterialData();
-	}
-	if (const auto observer = Camera::GetObserverCam())
-	{
-		m_pShader->SetUniformMat4(observer->GetCamMatView(), "uObserverView");
+		for (const auto& material : m_vecMaterial)
+		{
+			material->PushMaterialData();
+		}
 	}
 }
 
@@ -129,7 +128,7 @@ void MeshRenderer::Render() const
 {
 	if (m_pModelData)
 	{
-		m_pModelData->Render(m_pShader);
+		m_pModelData->Render(m_pShader,m_vecMaterial.empty());
 	}
 	else
 	{

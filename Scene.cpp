@@ -16,24 +16,25 @@
 #include "MeshRenderer.h"
 #include "Model.h"
 #include "Collider.h"
+#include "SkyBox.h"
 
 Scene::Scene()
 {
-	auto pCam = GameObj::make_obj();
-	pCam->GetTransform()->SetLocalPosition({ 0.f,0.f,-1.5f });
-	pCam->AddScript(make_shared<CamMoveScript>());
-	//static_pointer_cast<CamMoveScript>(pCam->GetMonoBehavior("CamMoveScript"))->SetMoveSpeed(0.f);
-	//auto pHandle = pCam->AddComponent<InputHandler>();
-	pCam->GetComp<Camera>()->SetMainCam();
-	//pHandle->SetCommand(GLFW_KEY_W, make_shared<MoveFront>());
-	//pHandle->SetCommand(GLFW_KEY_S, make_shared<MoveBack>());
-	//pHandle->SetCommand(GLFW_KEY_A, make_shared<MoveLeft>());
-	//pHandle->SetCommand(GLFW_KEY_D, make_shared<MoveRight>());
-	//pHandle->SetCommand(GLFW_KEY_Q, make_shared<MoveLeftRotate>());
-	//pHandle->SetCommand(GLFW_KEY_E, make_shared<MoveRightRotate>());
-	//pHandle->SetCommand(GLFW_KEY_UP, make_shared<MoveUp>());
-	//pHandle->SetCommand(GLFW_KEY_DOWN, make_shared<MoveDown>());
-	AddObject(std::move(pCam), GROUP_TYPE::DEFAULT);
+	//auto pCam = GameObj::make_obj();
+	//pCam->GetTransform()->SetLocalPosition({ 0.f,0.f,-1.5f });
+	//pCam->AddScript(make_shared<CamMoveScript>());
+	////static_pointer_cast<CamMoveScript>(pCam->GetMonoBehavior("CamMoveScript"))->SetMoveSpeed(0.f);
+	////auto pHandle = pCam->AddComponent<InputHandler>();
+	//pCam->GetComp<Camera>()->SetMainCam();
+	////pHandle->SetCommand(GLFW_KEY_W, make_shared<MoveFront>());
+	////pHandle->SetCommand(GLFW_KEY_S, make_shared<MoveBack>());
+	////pHandle->SetCommand(GLFW_KEY_A, make_shared<MoveLeft>());
+	////pHandle->SetCommand(GLFW_KEY_D, make_shared<MoveRight>());
+	////pHandle->SetCommand(GLFW_KEY_Q, make_shared<MoveLeftRotate>());
+	////pHandle->SetCommand(GLFW_KEY_E, make_shared<MoveRightRotate>());
+	////pHandle->SetCommand(GLFW_KEY_UP, make_shared<MoveUp>());
+	////pHandle->SetCommand(GLFW_KEY_DOWN, make_shared<MoveDown>());
+	//AddObject(std::move(pCam), GROUP_TYPE::DEFAULT);
 }
 
 Scene::~Scene()
@@ -217,9 +218,21 @@ void Scene::PreRender()
 	sceneData.viewMat = pCam->GetCamMatView();
 	sceneData.viewPos = pCam->GetTransform()->GetWorldPosition();
 
+	if (const auto observer = Camera::GetObserverCam())
+	{
+		sceneData.observerPos = observer->GetTransform()->GetWorldPosition();
+		sceneData.observerViewMat = observer->GetCamMatView();
+	}
+	else
+	{
+		sceneData.observerPos = sceneData.viewPos;
+		sceneData.observerViewMat = sceneData.viewMat;
+	}
+
+	sceneData.lightCounts = glm::ivec4{ 0 };
 	//static GLint curShaderID;
 	//glGetIntegerv(GL_CURRENT_PROGRAM, &curShaderID);
-	GLuint lightCount = 0;
+	//GLuint lightCount = 0;
 	const auto cache = m_vecLights.data();
 	for (ushort idx = 0; idx < (const ushort)m_vecLights.size();)
 	{
@@ -229,11 +242,12 @@ void Scene::PreRender()
 			/*Mgr(Core)->AddDrawCall([light = light.get(), lightCount]()noexcept {
 				light->PushLightData(curShaderID, lightCount);
 				});*/
-			sceneData.lights[idx].position = light->GetLightPos();
-			sceneData.lights[idx].ambient = light->GetLightAmbient();
-			sceneData.lights[idx].diffuse = light->GetLightDiffuse();
-			sceneData.lights[idx].specular = light->GetLightSpecular();
-			++lightCount;
+			//sceneData.lights[idx].position = light->GetLightPos();
+			//sceneData.lights[idx].ambient = light->GetLightAmbient();
+			//sceneData.lights[idx].diffuse = light->GetLightDiffuse();
+			//sceneData.lights[idx].specular = light->GetLightSpecular();
+			//++lightCount;
+			light->GetCurLight()->PushLightData();
 			++idx;
 		}
 		else
@@ -241,13 +255,7 @@ void Scene::PreRender()
 			idx = RemoveElement(m_vecLights, idx);
 		}
 	}
-	sceneData.lightCount = lightCount;
-
-	if (const auto observer = Camera::GetObserverCam())
-	{
-		sceneData.viewPos = observer->GetTransform()->GetWorldPosition();
-	}
-
+	//sceneData.lightCount = lightCount;
 	Mgr(Core)->BindUBOData();
 
 	//glUniform1i(glGetUniformLocation(curShaderID, "lightCount"), lightCount);
@@ -292,6 +300,10 @@ void Scene::Render()
 		m_arrAddedUpdateFp[etoi(SCENE_ADDED_UPDATE::RENDER)]();
 	}
 
+	if (m_skyBox)
+	{
+		m_skyBox->Render();
+	}
 	//Mgr(ThreadMgr)->Join();
 }
 
@@ -350,6 +362,11 @@ void Scene::LoadForPractice(string_view _strPracticeName)
 		auto [pObj, groupNum] = f.get();
 		m_vecObj[groupNum].emplace_back(std::move(pObj));
 	}
+}
+
+void Scene::SetSkyBox(SKYBOX_TYPE _eSkyBoxType,string_view _strSkyBoxName,string_view _strTextureName)
+{
+	m_skyBox = make_shared<SkyBox>(_eSkyBoxType,_strSkyBoxName, _strTextureName);
 }
 
 //void Scene::WaitUpdate() 

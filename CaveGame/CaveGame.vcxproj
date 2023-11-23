@@ -115,6 +115,8 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -131,6 +133,8 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -141,12 +145,33 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="CaveMain.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="MCTerrainGenerator.cpp" />
+    <ClCompile Include="MCTilemap.cpp" />
+    <ClCompile Include="MCTilemapMeshGenerator.cpp" />
+    <ClCompile Include="pch.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Player.cpp" />
+    <ClCompile Include="PlayerCam.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MyOpenGL.vcxproj">
       <Project>{941ece50-f212-49ee-8838-b731abff56a8}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="CustomMath.hpp" />
+    <ClInclude Include="MCTerrainGenerator.h" />
+    <ClInclude Include="MCTilemap.h" />
+    <ClInclude Include="MCTilemapMeshGenerator.h" />
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="PerlinNoise.hpp" />
+    <ClInclude Include="Player.h" />
+    <ClInclude Include="PlayerCam.h" />
+    <ClInclude Include="Vector2D.hpp" />
+    <ClInclude Include="Vector3D.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

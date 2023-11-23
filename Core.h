@@ -1,6 +1,6 @@
 #pragma once
 
-struct LightData
+struct alignas(16) LightData
 {
 	glm::vec3 position;
 	float pad1; 
@@ -10,17 +10,48 @@ struct LightData
 	float pad3;
 	glm::vec3 specular;
 	float pad4;
+	glm::vec3 direction;
+	float pad5;
 };
 
-struct UBOData
+struct alignas(16) PointLightData
+{
+	LightData lData;
+	float constant;
+	float linear;
+	float quadratic;
+	float pad;	
+};
+
+struct alignas(16) SpotLightData
+{
+	LightData lData;
+	float constant;
+	float linear;
+	float quadratic;
+	float cutOff;
+	float outerCutoff;
+	float pad[3];
+};
+
+struct alignas(16) DirectionalLightData
+{
+	LightData lData;
+};
+
+struct alignas(16) UBOData
 {
 	glm::mat4 projMat;
 	glm::mat4 viewMat;
 	glm::vec3 viewPos;
-	float pad5;  
-	LightData lights[50];
-	GLuint lightCount;
-	glm::vec3 pad6; 
+	float pad1;
+	PointLightData pointLights[20];
+	SpotLightData spotLights[20];
+	DirectionalLightData dirLight;
+	glm::mat4 observerViewMat = glm::mat4{ 1.f };
+	glm::vec3 observerPos = glm::vec3{ 0.f,0.f,0.f };
+	float pad2;
+	glm::ivec4 lightCounts = glm::ivec4{ 0 };
 };
 
 class Core
@@ -46,6 +77,7 @@ private:
 	void SetUBO();
 	std::tuple<int, int, int, int> AdjustWinSize(GLuint width_, GLuint height_, HWND hwnd)const noexcept;
 	std::tuple<int, int, int, int> AdjustWinSize(HWND hwnd)const noexcept;
+	void PrepareStart()const noexcept;
 public:
 	void BindUBOData()const noexcept {
 		glBindBuffer(GL_UNIFORM_BUFFER, m_ubo);

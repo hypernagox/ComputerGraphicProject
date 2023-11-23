@@ -13,7 +13,7 @@ private:
 	glm::vec3 m_ambient = glm::vec3{ 1.f,1.f,1.f };
 	glm::vec3 m_diffuse = glm::vec3{ 1.f,1.f,1.f };
 	glm::vec3 m_specular = glm::vec3{ .5f,.5f,.5f };
-	float	  m_shininess = 1.f;
+	float	  m_shininess = 10.f;
 	vector<shared_ptr<Texture>> m_vecTex;
 private:
 	void PushMaterialData();

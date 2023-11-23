@@ -13,10 +13,72 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Precompiled Headers">
+      <UniqueIdentifier>{2bb1e746-4b1a-4196-877d-10906418eb3f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CaveObject">
+      <UniqueIdentifier>{0dc73bce-c286-4628-ac03-2f6d4cfb4e4e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CaveObject\Player">
+      <UniqueIdentifier>{fb7cc27c-8e81-470c-b9b4-936d943d3bd5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CaveObject\PlayerCam">
+      <UniqueIdentifier>{1889f580-1079-45b2-84e0-f95f9af44a08}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="CaveMain.cpp">
+    <ClCompile Include="main.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>Precompiled Headers</Filter>
+    </ClCompile>
+    <ClCompile Include="MCTilemap.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="MCTilemapMeshGenerator.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="MCTerrainGenerator.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>CaveObject\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayerCam.cpp">
+      <Filter>CaveObject\PlayerCam</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Vector3D.hpp">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="CustomMath.hpp">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="PerlinNoise.hpp">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector2D.hpp">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>Precompiled Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="MCTilemap.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="MCTilemapMeshGenerator.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="MCTerrainGenerator.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>CaveObject\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerCam.h">
+      <Filter>CaveObject\PlayerCam</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

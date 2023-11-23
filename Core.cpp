@@ -91,6 +91,14 @@ std::tuple<int, int, int, int> Core::AdjustWinSize(HWND hwnd) const noexcept
 	return std::make_tuple(adjustedWidth, adjustedHeight, posX, posY);
 }
 
+void Core::PrepareStart() const noexcept
+{
+	Mgr(SceneMgr)->Update();
+	Mgr(SceneMgr)->PreFinalUpdate();
+	Mgr(SceneMgr)->FinalUpdate();
+	Mgr(SceneMgr)->Render();
+}
+
 void Core::Init(const GLuint _winWidth, const GLuint _winHeight)
 {
 	glfwInit();
@@ -144,7 +152,11 @@ void Core::Init(const GLuint _winWidth, const GLuint _winHeight)
 		Mgr(Core)->SetWinHeight(height);
 		glViewport(0, 0, width, height);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 		Mgr(SceneMgr)->Update();
+		Mgr(SceneMgr)->PreFinalUpdate();
+		Mgr(SceneMgr)->FinalUpdate();
+
 		Mgr(SceneMgr)->Render();
 
 		ImGui_ImplGlfw_NewFrame();
@@ -205,6 +217,8 @@ void Core::GameLoop()
 	Mgr(UIMgr)->Start();
 	Mgr(ThreadMgr)->ExecuteMainThreadTask();
 	
+	PrepareStart();
+
 	while (!glfwWindowShouldClose(m_pWinInfo))
 	{
 		glfwPollEvents();

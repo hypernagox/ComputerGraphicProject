@@ -17,7 +17,7 @@ void KeyMgr::Init()
 	m_mapKey.reserve(1000);
 }
 
-void KeyMgr::Update()
+void KeyMgr::Update()noexcept
 {
 	if (glfwGetWindowAttrib(m_pWinInfo, GLFW_FOCUSED))
 	{
@@ -75,8 +75,8 @@ void KeyMgr::Update()
 		}
 	}
 
-	if (KEY_TAP(GLFW_MOUSE_BUTTON_LEFT))
-	{
-		Mgr(RayCaster)->MakeColliderList();
-	}
+	//if (KEY_TAP(GLFW_MOUSE_BUTTON_LEFT))
+	//{
+	//	Mgr(RayCaster)->MakeColliderList();
+	//}
 }

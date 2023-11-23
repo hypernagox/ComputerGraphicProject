@@ -83,3 +83,7 @@ std::wstring string2wstring(std::string_view input)noexcept;
 std::string wstring2string(std::wstring_view input)noexcept;
 
 glm::vec3 GetMaxXYZ(const glm::vec3 v)noexcept;
+
+void LogStackTrace()noexcept;
+
+const glm::vec3 NDC2World(const glm::vec3 ndc)noexcept;

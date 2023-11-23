@@ -11,6 +11,7 @@ enum class RESOURCE_TYPE
 	TEXTURE_2D,
 	TEXTURE_CUBE,
 	MODEL,
+	SKYBOX,
 
 	END
 };
