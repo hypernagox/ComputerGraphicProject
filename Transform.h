@@ -8,6 +8,10 @@ class Transform :
 	public Component
 	, public enable_shared_from_this<Transform>
 {
+	
+	static constexpr glm::vec3 ZERO_VEC = glm::vec3{ 0.f,0.f,0.f };
+	static const glm::quat defaultQuat;
+public:
 	shared_ptr<Component> Comp_Clone()const override
 	{
 		auto newTrans = std::make_shared<Transform>(*this);
@@ -16,8 +20,6 @@ class Transform :
 		newTrans->m_pParent.reset();
 		return newTrans;
 	}
-	static constexpr glm::vec3 ZERO_VEC = glm::vec3{ 0.f,0.f,0.f };
-	static const glm::quat defaultQuat;
 private:
 	weak_ptr<Transform> m_pParent;
 	vector<weak_ptr<Transform>> m_vecChild;
@@ -290,6 +292,32 @@ public:
 		m_rotOffsetWorld = glm::quat{ glm::radians(glm::vec3{_xDeg,_yDeg,_zDeg}) } *m_rotOffsetWorld;
 	}
 	
+	inline void MakeFinalMat()noexcept
+	{
+		m_localPosition = m_localPosition + m_revOffset + m_posOffset;
+		m_localRotation = glm::normalize(m_rotOffsetWorld * m_localRotation * m_rotOffsetLocal);
+
+		const glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), m_localPosition);
+		const glm::mat4 rotationMatrix = glm::mat4_cast(m_localRotation);
+		const glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), m_localScale);
+
+		const glm::mat4 pivotMatrix = glm::translate(glm::mat4(1.0f), m_rotatePivot);
+
+		m_matLocal = glm::inverse(pivotMatrix) * translationMatrix * rotationMatrix * scaleMatrix * pivotMatrix;
+
+		if (const auto parent = m_pParent.lock())
+		{
+			m_matWorld = parent->GetLocalToWorldMatrix() * m_matLocal;
+		}
+		else
+		{
+			m_matWorld = m_matLocal;
+		}
+
+		m_posOffset = m_revOffset = Transform::ZERO_VEC;
+		m_rotOffsetLocal = m_rotOffsetWorld = Transform::defaultQuat;
+	}
+
 	void UpdateTransfromHierarchy()noexcept
 	{
 		if (!m_bDirty)
@@ -300,34 +328,12 @@ public:
 			}
 			return;
 		}
-
-		m_localPosition = m_localPosition + m_revOffset + m_posOffset;
-		m_localRotation = glm::normalize(m_rotOffsetWorld * m_localRotation * m_rotOffsetLocal);
-
-		const glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), m_localPosition);
-		const glm::mat4 rotationMatrix = glm::mat4_cast(m_localRotation);
-		const glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), m_localScale);
-
-		const glm::mat4 pivotMatrix = glm::translate(glm::mat4(1.0f), m_rotatePivot);
-
-		m_matLocal = glm::inverse(pivotMatrix) * translationMatrix * rotationMatrix * scaleMatrix * pivotMatrix;
-
-		if (const auto parent = m_pParent.lock())
-		{
-			m_matWorld = parent->GetLocalToWorldMatrix() * m_matLocal;
-		}
-		else
-		{
-			m_matWorld = m_matLocal;
-		}
-
+		MakeFinalMat();
 		for (const auto& child : m_vecChild)
 		{
 			Mgr(ThreadMgr)->Enqueue(&Transform::UpdateTransfromHierarchy, child.lock().get());
 		}
 		m_bDirty = false;
-		m_posOffset = m_revOffset = Transform::ZERO_VEC;
-		m_rotOffsetLocal = m_rotOffsetWorld = Transform::defaultQuat;
 	}
 
 	void FinalUpdate()override
@@ -336,31 +342,9 @@ public:
 		{
 			return;
 		}
-
-		m_localPosition = m_localPosition + m_revOffset + m_posOffset;
-		m_localRotation = glm::normalize(m_rotOffsetWorld * m_localRotation * m_rotOffsetLocal);
-
-		const glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), m_localPosition);
-		const glm::mat4 rotationMatrix = glm::mat4_cast(m_localRotation);
-		const glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), m_localScale);
-
-		const glm::mat4 pivotMatrix = glm::translate(glm::mat4(1.0f), m_rotatePivot);
-
-		m_matLocal = glm::inverse(pivotMatrix) * translationMatrix * rotationMatrix * scaleMatrix * pivotMatrix;
-
-		if (const auto parent = m_pParent.lock())
-		{
-			m_matWorld = parent->GetLocalToWorldMatrix() * m_matLocal;
-		}
-		else
-		{
-			m_matWorld = m_matLocal;
-		}
-
-		m_bDirty = false;
-		m_posOffset = m_revOffset = Transform::ZERO_VEC;
-		m_rotOffsetLocal = m_rotOffsetWorld = Transform::defaultQuat;
+		MakeFinalMat();
 	}
+	void ClearTransformFlag()noexcept { m_bDirty = false; }
 
 	virtual void Save(string_view _resName, rapidjson::PrettyWriter<rapidjson::StringBuffer>& writer, const fs::path& _savePath) override
 	{

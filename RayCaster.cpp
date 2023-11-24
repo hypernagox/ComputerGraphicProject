@@ -16,77 +16,51 @@ RayCaster::RayCaster()
 
 RayCaster::~RayCaster()
 {
-    m_bStopRequest = true;
-    m_bWait.store(false,std::memory_order_seq_cst);
-    m_bWait.notify_one();
-    m_pickingThread.join();
 }
 
 void RayCaster::Init()
 {
-    m_pickingThread = std::jthread{ [this]()noexcept {
-        while (true)
-        {
-            m_bWait.wait(true);
-
-            if (m_bStopRequest)
-            {
-                return;
-            }
-           
-            const auto curScene = Mgr(SceneMgr)->GetCurScene();
-            m_vecCollider.clear();
-
-            for (int i = 0; i < etoi(GROUP_TYPE::END); ++i)
-            {
-                for (auto& objs : curScene->GetGroupObj((GROUP_TYPE)i))
-                {
-                    for (auto& obj : *objs)
-                    {
-                        if (const auto pCollider = obj->GetComp<Collider>())
-                        {
-                           m_vecCollider.emplace_back(pCollider.get());
-                        }
-                    }
-                }
-            }
-
-            m_bWait.store(true, std::memory_order_seq_cst);
-        }
-    } };
 }
 
-void RayCaster::Update()
+void RayCaster::Update()noexcept
 {
 	if (KEY_TAP(GLFW_MOUSE_BUTTON_LEFT))
 	{
-        if (!m_bDirty)
-        {
-            return;
-        }
-
-        while (!m_bWait.load(std::memory_order_seq_cst))
-        {
-
-        }
-
         const auto viewMat = Camera::GetMainCamViewMat();
-        std::ranges::sort(m_vecCollider, [viewMat](const Collider* const a, const Collider* const b)noexcept {
+        static const auto cmp = [viewMat](const Collider* const a, const Collider* const b)noexcept {
             return (viewMat * glm::vec4{ a->GetColliderTransform()->GetWorldPosition(),1.f }).z < (viewMat * glm::vec4{ b->GetColliderTransform()->GetWorldPosition(),1.f }).z;
-            });
+            };
         const auto cache = m_vecCollider.data();
-        const ushort num = (const ushort)m_vecCollider.size();
         const Ray curRay = castRay();
-        for (ushort i = 0; i < num; ++i)
+        shared_ptr<Collider> target = nullptr;
+        for (ushort i = 0; i < (const ushort)m_vecCollider.size();)
         {
-            if (rayIntersectsOBB(curRay.rayDir, curRay.rayStart, cache[i]->GetOBB()))
+            shared_ptr<Collider> pCol = cache[i].lock();
+            if (pCol)
             {
-                m_pCurPickedObj = cache[i]->GetGameObj();
-                break;
+                if (rayIntersectsOBB(curRay.rayDir, curRay.rayStart, pCol->GetOBB()))
+                {
+                    if (!target)
+                    {
+                        target = pCol;
+                    }
+                    else
+                    {
+                        target = cmp(target.get(), pCol.get()) ? target : pCol;
+                    }
+                }
+                ++i;
+            }
+            else
+            {
+                cache[i] = std::move(m_vecCollider.back());
+                m_vecCollider.pop_back();
             }
         }
-
-        m_bDirty = false;
+        if (target)
+        {
+            m_pCurPickedObj = target->GetGameObj();
+        }
 	}
 }
 
@@ -102,27 +76,28 @@ glm::vec2 RayCaster::normalizeDeviceCoordinates(const glm::vec2& vPos_) const no
 Ray RayCaster::castRay() const noexcept
 {
     const auto ndc = normalizeDeviceCoordinates(Mgr(KeyMgr)->GetMousePos());
-    const auto pCam = Camera::GetCurCam();
+    const auto [proj, view] = Camera::GetMainCamProjViewMat();
 
     const glm::vec4 rayStartClip(ndc.x, ndc.y, -1.f, 1.f);
     
     const glm::vec4 rayEndClip(ndc.x, ndc.y, 1.f, 1.f);   
 
     
-    glm::mat4 invProjMatrix = glm::inverse(pCam->GetCamMatProj());
+    const glm::mat4 invProjMatrix = glm::inverse(proj);
     glm::vec4 rayStartView = invProjMatrix * rayStartClip;
     rayStartView /= rayStartView.w;
     glm::vec4 rayEndView = invProjMatrix * rayEndClip;
     rayEndView /= rayEndView.w;
 
-    const glm::mat4 invViewMatrix = glm::inverse(pCam->GetCamMatView());
+    glm::mat4 invViewMatrix = glm::inverse(view);
+
     const glm::vec3 rayStartWorld = glm::vec3(invViewMatrix * rayStartView);
     const glm::vec3 rayEndWorld = glm::vec3(invViewMatrix * rayEndView);
 
     
     const glm::vec3 rayDirWorld = glm::normalize(rayEndWorld - rayStartWorld);
 
-    return Ray{ rayDirWorld,rayStartWorld };
+    return Ray{ rayDirWorld,rayStartWorld ,rayEndWorld};
 }
 
 const bool RayCaster::rayIntersectsOBB(const glm::vec3& rayDir, const glm::vec3& rayStart, const OBBBox& obb) const noexcept
@@ -159,10 +134,4 @@ const bool RayCaster::rayIntersectsOBB(const glm::vec3& rayDir, const glm::vec3&
     return true;
 }
 
-void RayCaster::MakeColliderList() noexcept
-{
-    m_bDirty = true;
-    m_bWait.store(false, std::memory_order_seq_cst);
-    m_bWait.notify_one();
-}
 

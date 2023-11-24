@@ -73,6 +73,11 @@ void Light::LightUpdate() noexcept
 	//lightTrans->GetWaitLock().Wait();
 	m_position = lightTrans->GetWorldPosition();
 	m_direction = glm::normalize(lightTrans->GetLook());
+	if (m_curLight)
+	{
+		m_curLight->m_position = m_position;
+		m_curLight->m_direction = m_direction;
+	}
 	if (IsZeroVector(m_position))
 	{
 		m_position = glm::vec3{ 0.f,1.f,0.f };

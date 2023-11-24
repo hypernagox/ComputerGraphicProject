@@ -2,7 +2,7 @@
 #include "pch.h"
 #include "AtomicMemoryPool.hpp"
 
-#define USE_ATOMIC_ALLOCATER
+//#define USE_ATOMIC_ALLOCATER
 
 template <typename T>
 class DoubleLockQueue

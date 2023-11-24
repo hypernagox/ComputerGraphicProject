@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "KeyMgr.h"
 #include "Core.h"
-#include "RayCaster.h"
 
 KeyMgr::KeyMgr()
 {
@@ -74,9 +73,4 @@ void KeyMgr::Update()noexcept
 			}
 		}
 	}
-
-	//if (KEY_TAP(GLFW_MOUSE_BUTTON_LEFT))
-	//{
-	//	Mgr(RayCaster)->MakeColliderList();
-	//}
 }

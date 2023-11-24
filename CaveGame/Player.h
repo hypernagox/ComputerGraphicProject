@@ -22,5 +22,8 @@ public:
 
 	void Update()override;
 	
+	const glm::vec3 GetPlayerLook()const noexcept;
+
+	void Fire()noexcept;
 };
 

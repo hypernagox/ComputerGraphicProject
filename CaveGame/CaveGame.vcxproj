@@ -145,6 +145,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Bullet.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MCTerrainGenerator.cpp" />
     <ClCompile Include="MCTilemap.cpp" />
@@ -162,6 +163,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Bullet.h" />
     <ClInclude Include="CustomMath.hpp" />
     <ClInclude Include="MCTerrainGenerator.h" />
     <ClInclude Include="MCTilemap.h" />

@@ -15,7 +15,7 @@ private:
 	PROJECTION_TYPE m_eProjType = PROJECTION_TYPE::PERSPECTIVE;
 
 	float m_near = 0.1f;
-	float m_far = 1000.f;
+	float m_far = 10000.f;
 	float m_fov = glm::pi<float>() / 4.f;
 	float m_scale = 1.f;
 
@@ -38,7 +38,7 @@ public:
 	static glm::mat4 GetMainCamViewMat()noexcept { return g_mat4MainView; }
 	static void SetMainCam(shared_ptr<Camera> _pTargetCam);
 	static shared_ptr<Camera> GetObserverCam()noexcept { return g_observer; }
-	static const std::pair<glm::mat4, glm::mat4> GetMainCamProjViewMat()noexcept { return g_curMainCam->GetCamMat(); }
+	static const std::pair<glm::mat4, glm::mat4> GetMainCamProjViewMat()noexcept { return g_curMainCam->GetCamMatProjView(); }
 	Camera();
 	~Camera();
 
@@ -70,7 +70,7 @@ public:
 	const glm::mat4& GetCamMatView()const { return m_matView; }
 	const glm::mat4& GetCamMatProj()const { return m_matProjection; }
 
-	const std::pair<glm::mat4,glm::mat4> GetCamMat()const noexcept{ return std::make_pair(m_matView, m_matProjection); }
+	const std::pair<glm::mat4,glm::mat4> GetCamMatProjView()const noexcept{ return std::make_pair(m_matProjection, m_matView); }
 
 	virtual void Save(string_view _resName, rapidjson::PrettyWriter<rapidjson::StringBuffer>& writer, const fs::path& _savePath) override
 	{

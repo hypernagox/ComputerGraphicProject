@@ -28,9 +28,27 @@ public:
 	void FinalUpdate() override;
 public:
 	void SetLightPos(const glm::vec3& _position);
-	void SetAmbient(const glm::vec3& _ambient) { m_ambient = _ambient; }
-	void SetDiffuse(const glm::vec3& _diffuse) { m_diffuse = _diffuse; }
-	void SetSpecular(const glm::vec3& _specular) { m_specular = _specular; }
+	void SetAmbient(const glm::vec3& _ambient) noexcept {
+		m_ambient = _ambient; 
+		if (m_curLight)
+		{
+			m_curLight->m_ambient = _ambient;
+		}
+	}
+	void SetDiffuse(const glm::vec3& _diffuse)  noexcept {
+		m_diffuse = _diffuse;
+		if (m_curLight)
+		{
+			m_curLight->m_diffuse = _diffuse;
+		}
+	}
+	void SetSpecular(const glm::vec3& _specular)  noexcept {
+		m_specular = _specular; 
+		if (m_curLight)
+		{
+			m_curLight->m_specular = _specular;
+		}
+	}
 	shared_ptr<Light> GetCurLight() noexcept {
 		return m_curLight ? m_curLight : shared_from_this();
 	}

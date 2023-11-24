@@ -25,6 +25,9 @@
     <Filter Include="CaveObject\PlayerCam">
       <UniqueIdentifier>{1889f580-1079-45b2-84e0-f95f9af44a08}</UniqueIdentifier>
     </Filter>
+    <Filter Include="CaveObject\Bullet">
+      <UniqueIdentifier>{255ff973-96de-47f8-915a-4b14e32d44bc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -47,6 +50,9 @@
     </ClCompile>
     <ClCompile Include="PlayerCam.cpp">
       <Filter>CaveObject\PlayerCam</Filter>
+    </ClCompile>
+    <ClCompile Include="Bullet.cpp">
+      <Filter>CaveObject\Bullet</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -79,6 +85,9 @@
     </ClInclude>
     <ClInclude Include="PlayerCam.h">
       <Filter>CaveObject\PlayerCam</Filter>
+    </ClInclude>
+    <ClInclude Include="Bullet.h">
+      <Filter>CaveObject\Bullet</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
