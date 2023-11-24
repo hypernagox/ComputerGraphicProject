@@ -18,7 +18,9 @@ EventHandler::~EventHandler()
 
 void EventHandler::operator()(const CreateObjEvent& _eve)
 {
-	Mgr(SceneMgr)->GetCurScene()->AddObject(_eve.TargetAddObj, _eve.eObjGroupType);
+	_eve.TargetAddObj->Start();
+	_eve.TargetAddObj->Awake();
+	Mgr(SceneMgr)->GetCurScene()->AddObject(std::move(_eve.TargetAddObj), _eve.eObjGroupType);
 }
 
 void EventHandler::operator()(const CreateUIEvent& _eve)

@@ -7,7 +7,11 @@
 #include "Transform.h"
 #include "Camera.h"
 #include "AssimpMgr.h"
+#include "Bullet.h"
+#include "EventMgr.h"
+#include "RayCaster.h"
 
+glm::vec3 temp;
 void Player::ChangeCamType() noexcept
 {
 
@@ -33,17 +37,14 @@ void Player::UpdatePlayerCamFpsMode() noexcept
 
 void Player::InitCamDirection() noexcept
 {
-	const glm::vec3 worldCoords = NDC2World(ScreenToOpenGL2D(glm::vec3{ Mgr(KeyMgr)->GetMousePos(), 0.0f }));
-	const auto pTrans = GetTransform();
-	const glm::vec3 curPos = pTrans->GetWorldPositionAccRecursion();
-	pTrans->SetLookAt(glm::normalize(worldCoords - curPos));
+	GetTransform()->SetLookAt(GetPlayerLook());
 }
 
 Player::Player()
 {
 	*static_cast<GameObj*>(this) = *Mgr(AssimpMgr)->Load("SimpleShaderHasColorLight.glsl", "MyCube.fbx");
 	auto pCam = make_shared<Camera>();
-	pCam->SetNear(10.f);
+	pCam->SetNear(6.f);
 	m_arrComp[etoi(COMPONENT_TYPE::CAMERA)] = pCam;
 	GetTransform()->SetLocalScale(0.01f);
 }
@@ -109,8 +110,26 @@ void Player::Update()
 		m_curCamMode = wrapAround(m_curCamMode + 1, 0, 3);
 		m_fPitchOffsetAcc = 0.f;
 	}
+	if (KEY_TAP(GLFW_MOUSE_BUTTON_LEFT))
+	{
+		Fire();
+	}
 	UpdatePlayerCamFpsMode();
 	GameObj::Update();
+}
+
+const glm::vec3 Player::GetPlayerLook() const noexcept
+{
+	const glm::vec3 worldCoords = NDC2World(ScreenToOpenGL2D(Mgr(KeyMgr)->GetMousePos()));
+	const auto pTrans = GetTransform();
+	const glm::vec3 curPos = pTrans->GetWorldPositionAccRecursion();
+	return glm::normalize(worldCoords - curPos);
+}
+
+void Player::Fire()  noexcept
+{
+	auto bullet = make_shared<Bullet>(GetTransform()->GetWorldPosition(),Mgr(RayCaster)->castRay().rayDir);
+	CreateObj(std::move(bullet), GROUP_TYPE::PROJ_PLAYER);
 }
 
 

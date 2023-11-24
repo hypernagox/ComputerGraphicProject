@@ -48,22 +48,42 @@ int main()
     curScene->AddUpdateFp(SCENE_ADDED_UPDATE::PRERENDER, &Update);
 
     {
-        auto pLight = GameObj::make_obj();
+        auto pLight = Mgr(AssimpMgr)->Load("SimpleShaderHasColorLight.glsl","MyCube.fbx");
         auto l = pLight->AddComponent<Light>();
         l->SetCurLightType(LIGHT_TYPE::DIRECTIONAL);
-        l->SetLightPos({ -100,100,0 });
+        l->SetLightPos({ -5,5,0 });
+        pLight->GetTransform()->SetLocalScale(0.1f);
         pLight->GetTransform()->SetLocalRotation(90.f, X_AXIS);
         pLight->GetTransform()->SetLookAt({ -3.5f,-1.2f,-1.2f });
-        l->SetSpecular({ .5f,.5f,.5f });
-        l->SetDiffuse({ .5f,.5f,.5f });
-        curScene->AddObject(pLight, GROUP_TYPE::DEFAULT);
+        l->SetSpecular(glm::vec3{ 1.5f,1.5f,1.5f }*10.f);
+        l->SetDiffuse(glm::vec3{ 1.5f,1.5f,1.5f }*10.f);
+        curScene->AddObject(pLight, GROUP_TYPE::MONSTER);
+        pLight->SetObjName("light");
+        auto pCol = pLight->AddComponent<Collider>();
+        pCol->SetColBoxScale({ 5,5,5 });
+        pCol->GetCollisionHandler()->SetCollisionHandlerFunc([l,pLight](auto& a, auto& b) {
+            static auto s = l->GetLightSpecular();
+            static auto d = l->GetLightDiffuse();
+            static bool flag = false;
+            flag = !flag;
+            if (flag)
+            {
+                l->SetSpecular({});
+                l->SetDiffuse({});
+            }
+            else
+            {
+                l->SetSpecular(s);
+                l->SetDiffuse(d);
+            }
+            },COLLISION_TYPE::COL_ENTER);
+        
     }
-
+    Mgr(CollisionMgr)->RegisterGroup(GROUP_TYPE::MONSTER, GROUP_TYPE::PROJ_PLAYER);
     {
         auto player = make_shared <Player>();
-       
+        player->SetObjName("player");
         curScene->AddObject(player, GROUP_TYPE::PLAYER);
-
         player->AddChild(make_shared<PlayerCam>());
     }
 

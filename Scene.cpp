@@ -246,7 +246,13 @@ void Scene::PreRender()
 			//sceneData.lights[idx].ambient = light->GetLightAmbient();
 			//sceneData.lights[idx].diffuse = light->GetLightDiffuse();
 			//sceneData.lights[idx].specular = light->GetLightSpecular();
-			//++lightCount;
+			//++lightCount;\
+
+			if(!light->GetGameObj()->IsAlive())
+			{
+				idx = RemoveElement(m_vecLights, idx);
+				continue;
+			}
 			light->GetCurLight()->PushLightData();
 			++idx;
 		}

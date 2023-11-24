@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "EventMgr.h"
 #include "CoRoutine.hpp"
+#include "RayCaster.h"
+#include "KeyMgr.h"
 
 EventMgr::EventMgr()
 {

@@ -32,7 +32,7 @@ Model::Model(const Model& other)
 	,m_vecMesh{other.m_vecMesh}
 	,m_vecMaterial{other.m_vecMaterial}
 	,m_bIsActivate{other.m_bIsActivate}
-	,m_pModelTransform{make_shared<Transform>(*other.m_pModelTransform)}
+	,m_pModelTransform{static_pointer_cast<Transform>(other.m_pModelTransform->Comp_Clone())}
 {
 	for (const auto& otherChild : other.m_vecChildModel)
 	{

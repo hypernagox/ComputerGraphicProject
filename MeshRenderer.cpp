@@ -90,9 +90,10 @@ void MeshRenderer::FinalUpdate()
 	{
 		return;
 	}
-	if (m_bTransformDirty)
+	const auto pTrans = GetTransform();
+	if (m_bTransformDirty || pTrans->IsDirty())
 	{
-		m_pModelData->GetModelTransform()->SetMatrix(GetTransform()->GetLocalToWorldMatrix());
+		m_pModelData->GetModelTransform()->SetMatrix(pTrans->GetLocalToWorldMatrix());
 	}
 	m_pModelData->UpdateModelTransform();
 }

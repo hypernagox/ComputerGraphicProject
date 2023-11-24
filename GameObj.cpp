@@ -16,6 +16,7 @@
 #include "Core.h"
 #include "Collider.h"
 #include "Model.h"
+#include "RayCaster.h"
 
 using namespace rapidjson;
 
@@ -207,16 +208,20 @@ void GameObj::ColliderUpdate()noexcept
 void GameObj::FinalUpdate()
 {
     const auto comp_cache = m_arrComp.data();
-    for (unsigned short i = 1; i < COMPONENT_COUNT ; ++i)
+    for (unsigned short i = 2; i < COMPONENT_COUNT ; ++i)
     {
         if (comp_cache[i])
         {
             comp_cache[i]->FinalUpdate();
         }
     }
-
-    static_cast<Transform*>(comp_cache[0].get())->FinalUpdate();
-
+    const auto pTrans = static_cast<Transform*>(comp_cache[0].get());
+    pTrans->FinalUpdate();
+    if (const auto m = static_cast<MeshRenderer*>(comp_cache[1].get()))
+    {
+        m->FinalUpdate();
+    }
+    pTrans->ClearTransformFlag();
     const auto cache = m_vecChildObj.data();
     const ushort num = (const ushort)m_vecChildObj.size();
     for (ushort i = 0; i < num; ++i)
@@ -315,7 +320,10 @@ void GameObj::AddComponent(shared_ptr<Component> _pComp)
     {
         Mgr(SceneMgr)->GetCurScene()->AddLights(static_pointer_cast<Light>(_pComp));
     }
-
+    else if (COMPONENT_TYPE::COLLIDER == static_cast<COMPONENT_TYPE>(idx))
+    {
+        Mgr(RayCaster)->AddCollider(static_pointer_cast<Collider>(_pComp));
+    }
     if (idx < COMPONENT_COUNT)
     {
         m_arrComp[idx] = std::move(_pComp);

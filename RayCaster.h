@@ -5,8 +5,9 @@ struct Ray
 {
 	glm::vec3 rayDir;
 	glm::vec3 rayStart;
-	Ray(const glm::vec3& dir_,const glm::vec3& point_)
-		:rayDir{dir_},rayStart{point_}{}
+	glm::vec3 rayEnd;
+	Ray(const glm::vec3& dir_,const glm::vec3& start_,const glm::vec3& end_)noexcept
+		:rayDir{dir_},rayStart{start_},rayEnd{end_}{}
 };
 
 class GameObj;
@@ -21,23 +22,15 @@ class RayCaster
 	~RayCaster();
 private:
 	shared_ptr<GameObj> m_pCurPickedObj;
-	vector<Collider*> m_vecCollider;
+	vector<weak_ptr<Collider>> m_vecCollider;
 	bool m_bDirty = false;
-	std::jthread m_pickingThread;
-	std::atomic<bool> m_bWait = true;
-	bool m_bStopRequest = false;
 public:
 	void Init();
-	void Update();
+	void Update()noexcept;
+	void AddCollider(weak_ptr<Collider> pCol_)noexcept { m_vecCollider.emplace_back(std::move(pCol_)); }
 	glm::vec2 normalizeDeviceCoordinates(const glm::vec2& vPos_)const noexcept;
 	Ray castRay()const noexcept;
 	const bool rayIntersectsOBB(const glm::vec3& rayDir, const glm::vec3& rayStart, const OBBBox& obb)const noexcept;
-	void MakeColliderList()noexcept;
 	const shared_ptr<GameObj>& GetCurPickedObj()const noexcept{ return m_pCurPickedObj; }
-	const shared_ptr<GameObj>& GetCurPickedObjNow()noexcept
-	{
-		Update();
-		return m_pCurPickedObj;
-	}
 };
 

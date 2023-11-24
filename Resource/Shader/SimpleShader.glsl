@@ -295,7 +295,7 @@ vec3 CalculateDirectionalLight(DirectionalLightData light, vec3 normal, vec3 fra
 
     
     float diff = max(dot(normal, lightDir), 0.01);
-    if(diff <= 0.02)
+    if(diff <= 0.01)
     {
     return ambient + defaultAmbient;
     }
