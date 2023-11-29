@@ -17,6 +17,7 @@ int main()
 {
     Mgr(Core)->Init();
     Mgr(Core)->SetClearColor(RGBA_WHITE);
+    glfwSetInputMode(Mgr(Core)->GetWinInfo(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     //Camera::GetCurCam()->GetTransform()->SetLocalPosition({ 0.0f, 0.0f, -1.0f });
     //Camera::GetCurCam()->GetTransform()->SetLocalRotation(glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)));
