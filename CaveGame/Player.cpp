@@ -56,7 +56,9 @@ Player::~Player()
 void Player::Start()
 {
 	GameObj::Start();
-	m_fpChangeCamMode[0] = [this]()noexcept {GetComp<Camera>()->SetMainCam(); };
+	m_fpChangeCamMode[0] = [this]()noexcept {
+		GetComp<Camera>()->SetMainCam();
+		};
 	m_fpChangeCamMode[1] = [this]()noexcept {
 		const auto pChild = static_pointer_cast<PlayerCam>(m_vecChildObj.front());
 		pChild->SetThisObjMainCam();
