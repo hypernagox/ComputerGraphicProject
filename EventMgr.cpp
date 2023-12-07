@@ -3,6 +3,9 @@
 #include "CoRoutine.hpp"
 #include "RayCaster.h"
 #include "KeyMgr.h"
+#include "DoubleLockQueue.hpp"
+
+std::future<void> g_resetMemPool;
 
 EventMgr::EventMgr()
 {
@@ -14,6 +17,15 @@ EventMgr::~EventMgr()
 
 void EventMgr::Update()
 {
+	m_vecInternalGameEventBuffer.swap(m_vecGameEvent);
+
+	for (auto& eve : m_vecInternalGameEventBuffer)
+	{
+		std::visit(m_eveHandler, std::move(eve));
+	}
+
+	m_vecInternalGameEventBuffer.clear();
+
 	for (auto& eve : m_vecGameEvent)
 	{
 		std::visit(m_eveHandler, std::move(eve));
@@ -45,6 +57,15 @@ void EventMgr::Update()
 		}
 	}
 
+	m_vecInternalEventBuffer.swap(m_vecEvent);
+
+	for (const auto& eve : m_vecInternalEventBuffer)
+	{
+		eve();
+	}
+
+	m_vecInternalEventBuffer.clear();
+
 	for (const auto& eve : m_vecEvent)
 	{
 		eve();
@@ -75,4 +96,12 @@ void EventMgr::AddCoRoutine(CoRoutine&& _coTask)
 void EventMgr::AddDeadObj(shared_ptr<GameObj>&& pDeadObj_)
 {
 	m_vecDeadObj.emplace_back(std::move(pDeadObj_));
+}
+
+void EventMgr::CheckMemPool() const noexcept
+{
+	if (DoubleLockQueue<std::function<void(void)>>::g_memPool.isNeedReset())
+	{
+		g_resetMemPool = Mgr(ThreadMgr)->EnqueueTaskFuture([]()noexcept {DoubleLockQueue<std::function<void(void)>>::g_memPool.checkAndResetIfNeeded(); });
+	}
 }

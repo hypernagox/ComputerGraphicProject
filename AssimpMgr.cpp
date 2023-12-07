@@ -16,6 +16,7 @@
 static unordered_map<string, int> g_tempBoneMap;
 static vector<BoneInfo> g_tempBoneVec;
 static int boneCounter = 0;
+static string tempName;
 
 void UpdateBoneParentIndices(aiNode* pNode);
 glm::mat4 GetBoneWorldTransform(const int idx);
@@ -63,7 +64,7 @@ AssimpMgr::~AssimpMgr()
 {
 }
 
-shared_ptr<Model> AssimpMgr::ProcessNode(aiNode* pNode, const aiScene* pAiScene)noexcept
+shared_ptr<Model> AssimpMgr::ProcessNode(aiNode* pNode, const aiScene* pAiScene, const glm::mat4 parentWorld)noexcept
 {
     auto pModel = make_shared<Model>();
    // auto pMeshRenderer = pObj->AddComponent<MeshRenderer>();
@@ -85,9 +86,19 @@ shared_ptr<Model> AssimpMgr::ProcessNode(aiNode* pNode, const aiScene* pAiScene)
         pModel->AddMaterial(std::move(pMaterial));
     }
     
-    pModel->SetModelMat(ConvertAiMatrixToGLM(pNode->mTransformation));
+    pModel->m_matLocal = ConvertAiMatrixToGLM(pNode->mTransformation);
+    glm::mat4 cacheMat = glm::mat4{ 1.f };
+    if (pNode->mParent)
+    {
+        cacheMat = pModel->m_matWorld = parentWorld * pModel->m_matLocal;
+    }
+    else
+    {
+        cacheMat = pModel->m_matWorld = pModel->m_matLocal;
+    }
+    pModel->SetModelMat(pModel->m_matLocal);
 
-    m_fpSetBuf.emplace_back(std::async(std::launch::deferred,[this,pNode,pAiScene,pModel, res_future = std::move(res_future)]()mutable noexcept {
+    m_fpSetBuf.emplace_back(std::async(std::launch::deferred,[cacheMat,this,pNode,pAiScene,pModel, res_future = std::move(res_future)]()mutable noexcept {
         for (auto& f : *res_future)
         {
             auto pMesh = f.get();
@@ -96,12 +107,13 @@ shared_ptr<Model> AssimpMgr::ProcessNode(aiNode* pNode, const aiScene* pAiScene)
             //    ProcessBone(pMesh->GetVertices(), pNode, pAiScene);
             //}*/
             pMesh->SetBuffers();
+            Mgr(ResMgr)->AddMeshList(tempName, pModel->GetResName(), cacheMat, pMesh->m_vecVertex, pMesh->m_vecIdx);
             pModel->AddMesh(std::move(pMesh));
         }}));
 
     for (GLuint i = 0; i < pNode->mNumChildren; ++i)
     {
-        pModel->AddChild(ProcessNode(pNode->mChildren[i], pAiScene));
+        pModel->AddChild(ProcessNode(pNode->mChildren[i], pAiScene,pModel->m_matWorld));
     }
 
     return pModel;
@@ -250,13 +262,17 @@ shared_ptr<Material> AssimpMgr::ProcessMaterial(aiMesh* pAiMesh,const aiScene* p
         aiString path;
         if (pAiMaterial->GetTexture((aiTextureType)(i), 0, &path) == AI_SUCCESS)
         {
+            std::cout << path.C_Str() << std::endl;
             if (!pMaterial->AddTexture2D(path.C_Str()))
             {
                 const string temp = path.C_Str();
+                std::cout << temp << std::endl;
                 if (!pMaterial->AddTexture2D(temp.substr(temp.rfind('\\') + 1)))
                 {
                     pMaterial->AddTexture2D(temp.substr(temp.rfind("/") + 1));
                 }
+                std::cout << temp.substr(temp.rfind('\\') + 1) << std::endl;
+                std::cout << temp.substr(temp.rfind("/") + 1) << std::endl;
                 break;
             }
         }
@@ -518,8 +534,18 @@ void AssimpMgr::Init()
 
 shared_ptr<GameObj> AssimpMgr::Load(string_view _strShaderName, string_view _strModelFileName)noexcept
 {
+    if (auto modelData = Mgr(ResMgr)->GetRes<Model>(_strModelFileName))
+    {
+        auto pObj = GameObj::make_obj();
+        auto m = pObj->AddComponent<MeshRenderer>();
+        pObj->SetResName(_strModelFileName);
+        m->SetModelData(modelData);
+        m->SetShader(_strShaderName);
+        return pObj;
+    }
+    tempName = _strModelFileName;
     unsigned int flag;
-
+    
     flag = aiProcess_Triangulate |
         aiProcess_JoinIdenticalVertices |
         aiProcess_CalcTangentSpace |
@@ -531,7 +557,7 @@ shared_ptr<GameObj> AssimpMgr::Load(string_view _strShaderName, string_view _str
         flag);
 
     auto pObj = GameObj::make_obj();
-    pObj->SetObjName(_strModelFileName);
+    pObj->SetResName(_strModelFileName);
 
     auto pMeshRenderer = pObj->AddComponent<MeshRenderer>();
 
@@ -571,7 +597,7 @@ shared_ptr<GameObj> AssimpMgr::Load(string_view _strShaderName, string_view _str
 
     //    boneCounter = 0;
     //}
-
+    tempName.clear();
     return pObj;
 }
 

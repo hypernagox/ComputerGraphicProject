@@ -39,7 +39,8 @@ void Camera::FinalUpdate()
 	{
 		camTrans->GetWaitLock().Wait();
 	}*/
-	m_matView = glm::inverse(camTrans->GetLocalToWorldMatrix());
+	m_matViewInv = camTrans->GetLocalToWorldMatrix();
+	m_matView = glm::inverse(m_matViewInv);
 
 	if (m_bIsMainCam)
 	{
@@ -61,6 +62,7 @@ void Camera::FinalUpdate()
 	{
 		g_mat4Ortho = m_matProjection = glm::orthoLH(-width / 2.0f * m_camOrthoFactor, width / 2.0f * m_camOrthoFactor, -height / 2.0f * m_camOrthoFactor, height / 2.0f * m_camOrthoFactor, -10000.f, 10000.f);
 	}
+	m_matProjInv = glm::inverse(m_matProjection);
 }
 
 void Camera::ShakeCam(const float fShakeIntensity_, const float fDuration_) noexcept

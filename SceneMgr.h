@@ -20,7 +20,8 @@ public:
 	void PreFinalUpdate();
 	void FinalUpdate();
 
-	void Render()const;
+	void PreRender()const noexcept;
+	void Render()const noexcept;
 	void Enter();
 
 	const shared_ptr<Scene>& GetCurScene()const { return m_pCurScene; }

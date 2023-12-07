@@ -35,6 +35,9 @@ void ThreadMgr::Init()
 					m_cvQ.wait(lock, [this,&task]() noexcept {
 						return m_jobQ.try_pop(task) || m_bStopRequest;
 						});
+					//m_cvQ.wait(lock, [this,&task]() noexcept {
+					//	return m_jobQ.try_pop(task) || m_bStopRequest;
+					//	});
 					if (m_bStopRequest)
 					{
 						return;
@@ -67,6 +70,9 @@ void ThreadMgr::Init()
 					m_cvQFuture.wait(lock, [this,&task]() noexcept {
 						return m_futureQ.try_pop(task) || m_bStopRequest;
 						});
+					//m_cvQFuture.wait(lock, [this,&task]() noexcept {
+					//	return m_futureQ.try_pop(task) || m_bStopRequest;
+					//	});
 					if (m_bStopRequest)
 					{
 						return;

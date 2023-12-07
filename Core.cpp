@@ -16,6 +16,9 @@
 #include "CollisionMgr.h"
 #include "RayCaster.h"
 #include "SoundMgr.h"
+#include "InstancingMgr.h"
+
+extern std::future<void> g_resetMemPool;
 
 Core::Core()
 {
@@ -131,13 +134,16 @@ void Core::Init(const GLuint _winWidth, const GLuint _winHeight)
 	glClearDepthf(1.0F);
 
 	//glEnable(GL_CULL_FACE);
-	//glFrontFace(GL_CCW);
+	//glFrontFace(GL_CW);
 	//glCullFace(GL_BACK);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glfwSetWindowRefreshCallback(m_pWinInfo, [](GLFWwindow* _winInfo) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		Mgr(SceneMgr)->PreRender();
+		Mgr(InstancingMgr)->Render();
 		Mgr(SceneMgr)->Render();
 
 		ImGui_ImplGlfw_NewFrame();
@@ -157,7 +163,10 @@ void Core::Init(const GLuint _winWidth, const GLuint _winHeight)
 		Mgr(SceneMgr)->PreFinalUpdate();
 		Mgr(SceneMgr)->FinalUpdate();
 
+		Mgr(SceneMgr)->PreRender();
+		Mgr(InstancingMgr)->Render();
 		Mgr(SceneMgr)->Render();
+		
 
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
@@ -189,7 +198,7 @@ void Core::Init(const GLuint _winWidth, const GLuint _winHeight)
 		});
 
 	glViewport(0, 0, m_winWidth, m_winHeight);
-	glfwSwapInterval(1);
+	//glfwSwapInterval(1);
 
 	SetUBO();
 
@@ -206,6 +215,7 @@ void Core::Init(const GLuint _winWidth, const GLuint _winHeight)
 	Mgr(CollisionMgr)->Init();
 	Mgr(RayCaster)->Init();
 	Mgr(SoundMgr)->Init();
+	Mgr(InstancingMgr)->Init();
 
 	Mgr(TimeMgr)->Init();
 }
@@ -239,16 +249,27 @@ void Core::GameLoop()
 
 		Mgr(RayCaster)->Update();
 
+		Mgr(InstancingMgr)->Update();
+
+		Mgr(SceneMgr)->PreRender();
+
+		Mgr(InstancingMgr)->Render();
 		Mgr(SceneMgr)->Render();
 		
+
+		if (g_resetMemPool.valid())
+		{
+			g_resetMemPool.get();
+		}
+
 		Mgr(ParticleMgr)->Update();
 
 		Mgr(CollisionMgr)->RenderCollisionBox();
 
 		//DrawCall();
 
-		Mgr(UIMgr)->Update();
-		Mgr(UIMgr)->Render();
+		//Mgr(UIMgr)->Update();
+		//Mgr(UIMgr)->Render();
 
 		//DrawCall();
 		Mgr(EventMgr)->Update();

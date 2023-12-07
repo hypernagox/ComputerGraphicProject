@@ -5,14 +5,14 @@ struct OBBBox
 {
 private:
     static constexpr const glm::vec3 offsets[8] = {
-            glm::vec3(1, 1, 1),
-            glm::vec3(-1, 1, 1),
-            glm::vec3(1, -1, 1),
-            glm::vec3(-1, -1, 1),
-            glm::vec3(1, 1, -1),
-            glm::vec3(-1, 1, -1),
-            glm::vec3(1, -1, -1),
-            glm::vec3(-1, -1, -1)
+        glm::vec3(0.5f, 0.0f, 0.5f),
+        glm::vec3(-0.5f, 0.0f, 0.5f),
+        glm::vec3(0.5f, 0.0f, -0.5f),
+        glm::vec3(-0.5f, 0.0f, -0.5f),
+        glm::vec3(0.5f, 1.0f, 0.5f),
+        glm::vec3(-0.5f, 1.0f, 0.5f),
+        glm::vec3(0.5f, 1.0f, -0.5f),
+        glm::vec3(-0.5f, 1.0f, -0.5f)
     };
 
     const glm::vec3 CalculateCenter() const noexcept {
@@ -48,13 +48,13 @@ public:
         cacheRotationMat = CalculateRotationMatrix();
 
         glm::mat4 reversedZRotation = cacheRotationMat;
-        reversedZRotation[2] = -reversedZRotation[2];
+        //reversedZRotation[2] = -reversedZRotation[2];
         const auto cornersCache = corners.data();
         for (ushort i = 0; i < 8; ++i)
         {
             cornersCache[i] = cacheCenter + glm::vec3(reversedZRotation * glm::vec4(cacheExtends * offsets[i], 0));
         }
-        transform[2] = -transform[2];
+        //transform[2] = -transform[2];
     }
 
     const glm::vec3 getAxis(unsigned short index) const noexcept{return glm::normalize(glm::vec3(transform[index]));}

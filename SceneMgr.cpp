@@ -37,9 +37,13 @@ void SceneMgr::FinalUpdate()
 	m_pCurScene->FinalUpdate();
 }
 
-void SceneMgr::Render() const
+void SceneMgr::PreRender() const noexcept
 {
 	m_pCurScene->PreRender();
+}
+
+void SceneMgr::Render() const noexcept
+{
 	m_pCurScene->Render();
 }
 

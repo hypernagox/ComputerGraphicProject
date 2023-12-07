@@ -2,15 +2,16 @@
 #include "pch.h"
 #include "AtomicMemoryPool.hpp"
 
-//#define USE_ATOMIC_ALLOCATER
+#define USE_ATOMIC_ALLOCATER
 
 template <typename T>
 class DoubleLockQueue
 {
 	static const inline HANDLE g_handle = GetProcessHeap();
-private:
+public:
 	struct Node;
-	static inline AtomicMemoryPool<Node> g_memPool{ 1024 * 2 };
+	static inline AtomicMemoryPool<Node> g_memPool{ 1024 * 1000 };
+private:
 	struct Node {
 		T data;
 		Node* next;
@@ -34,7 +35,8 @@ private:
 	};
 	Node* head;
 	Node* tail;
-	SpinLock headLock, tailLock;
+	SpinLock headLock;
+	SpinLock tailLock;
 public:
 	DoubleLockQueue()noexcept {
 		head = tail = new Node;
@@ -53,9 +55,11 @@ public:
 		Node* const value = new Node;
 		std::construct_at(&value->data, std::forward<Args>(args)...);
 		value->next = nullptr;
-		std::lock_guard<SpinLock> lock{ tailLock };
-		tail->next = value;
-		tail = value;
+		{
+			std::lock_guard<SpinLock> lock{ tailLock };
+			tail->next = value;
+			tail = value;
+		}
 	}
 	const bool try_pop(T& _target)noexcept {
 		//std::lock_guard<SpinLock> lock{ headLock };
@@ -81,8 +85,13 @@ public:
 		_lock.unlock();
 		delete oldHead;
 	}
-	const bool empty()const noexcept {
-		return !head->next;
+	const bool empty() noexcept {
+		bool bIsEmpty;
+		{
+			std::lock_guard<SpinLock> lock{ tailLock };
+			bIsEmpty = !head->next;
+		}
+		return bIsEmpty;
 	}
 	void clear() {
 		while (!empty()) {

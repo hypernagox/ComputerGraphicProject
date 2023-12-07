@@ -86,20 +86,24 @@ void MeshRenderer::SetModelData(shared_ptr<Model> pModelData_) noexcept
 
 void MeshRenderer::FinalUpdate()
 {
-	if (!m_pModelData)
+	if (!m_pModelData || m_bIsIntancing)
 	{
 		return;
 	}
 	const auto pTrans = GetTransform();
-	if (m_bTransformDirty || pTrans->IsDirty())
-	{
-		m_pModelData->GetModelTransform()->SetMatrix(pTrans->GetLocalToWorldMatrix());
-	}
+	//if (m_bTransformDirty || pTrans->IsDirty())
+	//{
+	//	m_pModelData->GetModelTransform()->SetMatrix(pTrans->GetLocalToWorldMatrix() * m_pModelData->m_matWorld);
+	//}
 	m_pModelData->UpdateModelTransform();
 }
 
 void MeshRenderer::PreRender() const
 {
+	if (m_bIsIntancing || !m_bIsActivate)
+	{
+		return;
+	}
 	m_pShader->Use();
 	//Mgr(SceneMgr)->GetCurScene()->PreRender(m_pShader);
 
@@ -121,15 +125,23 @@ void MeshRenderer::PreRender() const
 		for (const auto& material : m_vecMaterial)
 		{
 			material->PushMaterialData();
+			for (const auto& tex : material->GetTex())
+			{
+				tex->BindTexture();
+			}
 		}
 	}
 }
 
 void MeshRenderer::Render() const
 {
+	if (m_bIsIntancing || !m_bIsActivate)
+	{
+		return;
+	}
 	if (m_pModelData)
 	{
-		m_pModelData->Render(m_pShader,m_vecMaterial.empty());
+		m_pModelData->Render(m_pShader,m_vecMaterial.empty(),GetTransform()->GetLocalToWorldMatrix());
 	}
 	else
 	{

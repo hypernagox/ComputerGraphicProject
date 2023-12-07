@@ -21,6 +21,7 @@
 #include <glm/ext.hpp>
 #include <glm/gtx/string_cast.hpp> 
 #include <glm/gtc/type_ptr.hpp> 
+#include <glm/gtc/noise.hpp> 
 
 #define GLFW_INCLUDE_NONE
 #define GLFW_EXPOSE_NATIVE_WIN32
@@ -122,6 +123,7 @@ namespace fs = std::filesystem;
 #include <new>
 #include <cstddef>
 #include <cstdlib>
+#include <intrin.h>
 using std::span;
 using std::make_shared;
 using std::enable_shared_from_this;

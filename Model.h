@@ -13,12 +13,16 @@ class Model
 	,public enable_shared_from_this<Model>
 {
 	friend class AssimpMgr;
+	friend class InstancingMgr;
+	friend class MeshRenderer;
 private:
 	weak_ptr<Model> m_pParentModel;
 	vector<shared_ptr<Model>> m_vecChildModel;
 	vector<shared_ptr<Mesh>> m_vecMesh;
 	vector<shared_ptr<Material>> m_vecMaterial;
 	shared_ptr<Transform> m_pModelTransform;
+	glm::mat4 m_matLocal = glm::mat4{ 1.f };
+	glm::mat4 m_matWorld = glm::mat4{ 1.f };
 	bool m_bIsActivate = true;
 public:
 	Model();
@@ -33,7 +37,7 @@ public:
 	void InitModel()noexcept;
 	void UpdateModelTransform()noexcept;
 
-	void Render(const shared_ptr<Shader>& pShader_, const bool bIsMeshRendererMaterialEmpty_)noexcept;
+	void Render(const shared_ptr<Shader>& pShader_, const bool bIsMeshRendererMaterialEmpty_,const glm::mat4& ownerMatrix=glm::mat4{1.f})noexcept;
 public:
 	bool IsActivate()const { return m_bIsActivate; }
 	void SetActivate(const bool b_) { m_bIsActivate = b_; }

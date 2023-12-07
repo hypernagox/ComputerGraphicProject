@@ -19,7 +19,7 @@ private:
 	bool m_bIsFixed = true;
 	float m_fCamSensivity = 0.f;
 
-	float m_fMoveSpeed = 1.f;
+	float m_fMoveSpeed = 10.f;
 public:
 	CamMoveScript();
 	~CamMoveScript();

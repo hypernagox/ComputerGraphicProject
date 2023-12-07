@@ -8,7 +8,7 @@ template<>
 const ushort RemoveElement<shared_ptr<GameObj>>(vector<shared_ptr<GameObj>>& _delVec, const ushort _delIdx)noexcept
 {
 	Mgr(EventMgr)->AddDeadObj(std::move(_delVec[_delIdx]));
-	_delVec[_delIdx] = std::move(_delVec.back());
+	_delVec[_delIdx].swap(_delVec.back());
 	_delVec.pop_back();
 	return _delIdx;
 }

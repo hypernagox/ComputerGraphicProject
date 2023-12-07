@@ -41,6 +41,7 @@ protected:
 	unordered_map<string, shared_ptr<MonoBehavior>> m_mapScripts;
 	//unordered_map<std::type_index, shared_ptr<MonoBehavior>> m_mapScripts;
 	bool		m_bIsAlive = true;
+	string m_strObjectName;
 	//std::atomic<bool> m_bIsUpdateFinish = false;
 protected:
 	explicit GameObj();
@@ -137,7 +138,7 @@ public:
 	shared_ptr<T> GetMonoBehavior();
 	vector<shared_ptr<GameObj>>& GetChildObj() { return m_vecChildObj; }
 	const weak_ptr<GameObj>& GetParentGameObj()const { return m_pParentGameObj; }
-	constexpr const bool IsAlive()const { return m_bIsAlive; }
+	constexpr const bool IsAlive()const noexcept{ return m_bIsAlive; }
 	void SetThisObjMainCam()const;
 	/*void WaitForObjUpdate() {
 		while (!m_bIsUpdateFinish.load()) {
@@ -186,8 +187,12 @@ public:
 	iterator begin()const { return iterator{ const_cast<GameObj*>(this) }; }
 	iterator end()const { return iterator{ nullptr }; }
 
-	void SetObjName(string_view _strName) { SetResName(_strName); }
-	const string& GetObjName()const { return GetResName(); }
+	void SetResName(string_view _strName) { Resource::SetResName(_strName); }
+	const string& GetResName()const { return Resource::GetResName(); }
+
+	void SetObjName(string_view _strName) noexcept { m_strObjectName = _strName; }
+	const string& GetObjName()const noexcept { return m_strObjectName; }
+
 	GameObj* FindChildObj(string_view _strName)const {
 		const auto iter = std::find_if(this->begin(),this->end(), [_strName](const auto& nodes) {
 			return nodes->GetObjName() == _strName;
@@ -204,6 +209,7 @@ public:
 	auto GetAllObj()const noexcept{
 		return std::views::all(*this);
 	}
+	const glm::mat4& GetObjectWorldTransform()const noexcept;
 	void Save(string_view _resName,const fs::path& _loadPath = Mgr(PathMgr)->GetSavePath()) override;
 	void Load(string_view _dirName,const fs::path& _savePath = Mgr(PathMgr)->GetSavePath()) override;
 };
@@ -245,3 +251,5 @@ inline shared_ptr<T> GameObj::GetMonoBehavior()
 	return static_pointer_cast<T>((m_mapScripts.find(typeid(T).name())->second));
 }
 
+const bool IsAliveObj(const shared_ptr<GameObj>& obj)noexcept;
+const glm::mat4& GetMatrix(const shared_ptr<GameObj>& obj)noexcept;

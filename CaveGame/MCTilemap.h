@@ -3,7 +3,7 @@
 class MCTilemap
 {
 public:
-	static constexpr int MAP_WIDTH = 512;
+	static constexpr int MAP_WIDTH = 64;
 	static constexpr int MAP_HEIGHT = 16;
 
 private:

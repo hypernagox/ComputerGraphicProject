@@ -48,6 +48,12 @@ public:
 
 	void AddLights(weak_ptr<Light> _pLight) { m_vecLights.emplace_back(std::move(_pLight)); }
 
+	template<typename Fp>
+	void AddUpdateFp(SCENE_ADDED_UPDATE _eUpdateType, Fp&& fp)noexcept
+	{
+		m_arrAddedUpdateFp[etoi(_eUpdateType)] += [fp = std::move(fp)]()mutable { fp(); };
+	}
+
 	template<typename Func, typename... Args> requires std::invocable<Func, Args...>
 	void AddUpdateFp(SCENE_ADDED_UPDATE _eUpdateType,Func&& fp, Args&&... args)
 	{

@@ -318,6 +318,15 @@ public:
 		m_rotOffsetLocal = m_rotOffsetWorld = Transform::defaultQuat;
 	}
 
+	void UpdateTransfromHierarchyForPrepare()noexcept
+	{
+		MakeFinalMat();
+		for (const auto& child : m_vecChild)
+		{
+			child.lock()->MakeFinalMat();
+		}
+	}
+
 	void UpdateTransfromHierarchy()noexcept
 	{
 		if (!m_bDirty)

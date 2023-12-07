@@ -34,3 +34,13 @@ shared_ptr<Transform> Component::GetTransform() const noexcept
 {
 	return m_pOwner.lock()->GetTransform();
 }
+
+const bool Component::IsAlive() const noexcept
+{
+	return m_pOwner.lock()->IsAlive();
+}
+
+const glm::mat4& Component::GetOwnerWorldTransform() const noexcept
+{
+	return m_pOwner.lock()->GetObjectWorldTransform();
+}

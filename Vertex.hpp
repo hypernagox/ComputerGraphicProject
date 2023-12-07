@@ -12,7 +12,8 @@ struct Vertex
 	//glm::ivec4 boneIds = {};
 	//glm::vec4 boneWeights = {};
 
-	Vertex() = default;
-
-	Vertex(const glm::vec3& _v):position{_v}{}
+	//Vertex() = default;
+	//  Vertex(glm::vec3 pos, glm::vec3 norm, glm::vec2 uvs, glm::vec4 col = glm::vec4(0.f))
+    //    : position(pos), normal(norm), tangent(glm::vec3(0.f)), uv(uvs), color(col) {}
+	//Vertex(const glm::vec3& _v):position{_v}{}
 };

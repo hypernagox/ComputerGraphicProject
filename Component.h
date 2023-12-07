@@ -79,6 +79,8 @@ public:
 public:
 	COMPONENT_TYPE GetCompType()const { return m_eCompType; }
 	bool IsValid()const { return m_pOwner.expired() == false; }
+	const bool IsAlive()const noexcept;
+	const glm::mat4& GetOwnerWorldTransform()const noexcept;
 	//const WaitLock& GetWaitLock()const { return m_waitLock; }
 };
 

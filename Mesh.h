@@ -9,10 +9,13 @@ class Mesh
 	friend class MeshRenderer;
 	friend class AssimpMgr;
 	friend class Model;
+	friend class InstancingMgr;
 private:
 	vector<Vertex> m_vecVertex;
 	vector<GLuint> m_vecIdx;
 	GLuint vao, vbo, ebo;
+	GLuint m_numOfVertices = 0;
+	GLuint m_numOfIndices = 0;
 private:
 	void SetBuffers();
 	vector<Vertex>& GetVertices() { return m_vecVertex; }

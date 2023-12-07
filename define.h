@@ -147,3 +147,12 @@ static constexpr float PI = 3.14159265358979323846f;
 #define NAGOX_ASSERT(condition, message)
 
 #endif
+
+class GameObj;
+class Component;
+const bool IsAliveObj(const shared_ptr<GameObj>& obj)noexcept;
+const glm::mat4& GetMatrix(const shared_ptr<GameObj>& obj)noexcept;
+
+static constexpr const auto NotComponentNullptr = std::views::filter([](const shared_ptr<Component>& pComp)noexcept {return nullptr != pComp; });
+static constexpr const auto OnlyAliveObject = std::views::filter(IsAliveObj);
+static constexpr const auto ApplyObjWorldMatrix = std::views::transform(GetMatrix);

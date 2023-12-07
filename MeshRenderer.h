@@ -9,6 +9,7 @@ class Model;
 class MeshRenderer :
     public Component
 {
+    friend class InstancingMgr;
     COMP_CLONE(MeshRenderer)
 private:
     vector<shared_ptr<Mesh>> m_vecMesh;
@@ -17,6 +18,8 @@ private:
     shared_ptr<Model> m_pModelData;
     shared_ptr<Shader> m_pShader;
     unordered_map<string, shared_ptr<Model>> m_mapModelData;
+    bool m_bIsIntancing = false;
+    bool m_bIsActivate = true;
 public:
     MeshRenderer();
     ~MeshRenderer();
@@ -54,5 +57,8 @@ public:
     void SetMaterialDiffuse(const glm::vec3& _diffuse);
     void SetMaterialSpecular(const glm::vec3& _specular);
     void SetMaterialShine(const float _f);
+
+
+    void SetIsActivate(const bool bFlag)noexcept { m_bIsActivate = bFlag; }
 };
 
