@@ -16,6 +16,7 @@ private:
 	OBBBox	m_OBBBox;
 	shared_ptr<Transform> m_pTransform;
 	shared_ptr<CollisionHandler> m_pCollisionHandler;
+	bool m_bIsPickingObj = false;
 private:
 	void UpdateOBB()noexcept { m_OBBBox.UpdateOBB(); }
 public:
@@ -29,6 +30,9 @@ public:
 	void OnCollisionEnter(shared_ptr<Collider> _pOther);
 	void OnCollisionStay(shared_ptr<Collider> _pOther);
 	void OnCollisionExit(shared_ptr<Collider> _pOther);
+public:
+	void SetIsPicking(const bool b_)noexcept { m_bIsPickingObj = b_; }
+	const bool IsPickingObj()const noexcept { return m_bIsPickingObj; }
 public:
 	const GLint GetColCount()const noexcept { return m_iCollisionCount; }
 	const OBBBox& GetOBB()const { return m_OBBBox; }

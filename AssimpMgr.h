@@ -22,7 +22,7 @@ private:
 	vector<std::future<void>> m_fpSetBuf;
 	//SpinLock m_spinLock = {};
 private:
-	shared_ptr<Model> ProcessNode(aiNode* pNode, const aiScene* pAiScene)noexcept;
+	shared_ptr<Model> ProcessNode(aiNode* pNode, const aiScene* pAiScene,const glm::mat4 parentWorld=glm::mat4{1.f})noexcept;
 	shared_ptr<Mesh> ProcessMesh(aiMesh* pAiMesh)noexcept;
 	//void ProcessBone(vector<Vertex>& vertices, aiNode* pNode, const aiScene* pAiScene);
 	shared_ptr<Material> ProcessMaterial(aiMesh* pAiMesh,const aiScene* pAiScene)noexcept;

@@ -20,12 +20,13 @@
 
 Scene::Scene()
 {
-	//auto pCam = GameObj::make_obj();
-	//pCam->GetTransform()->SetLocalPosition({ 0.f,0.f,-1.5f });
-	//pCam->AddScript(make_shared<CamMoveScript>());
+	auto pCam = GameObj::make_obj();
+	pCam->GetTransform()->SetLocalPosition({ 0.f,1.f,-1.f });
+	pCam->AddComponent<Camera>();
+	pCam->AddScript(make_shared<CamMoveScript>());
 	////static_pointer_cast<CamMoveScript>(pCam->GetMonoBehavior("CamMoveScript"))->SetMoveSpeed(0.f);
 	////auto pHandle = pCam->AddComponent<InputHandler>();
-	//pCam->GetComp<Camera>()->SetMainCam();
+	pCam->GetComp<Camera>()->SetMainCam();
 	////pHandle->SetCommand(GLFW_KEY_W, make_shared<MoveFront>());
 	////pHandle->SetCommand(GLFW_KEY_S, make_shared<MoveBack>());
 	////pHandle->SetCommand(GLFW_KEY_A, make_shared<MoveLeft>());
@@ -34,7 +35,7 @@ Scene::Scene()
 	////pHandle->SetCommand(GLFW_KEY_E, make_shared<MoveRightRotate>());
 	////pHandle->SetCommand(GLFW_KEY_UP, make_shared<MoveUp>());
 	////pHandle->SetCommand(GLFW_KEY_DOWN, make_shared<MoveDown>());
-	//AddObject(std::move(pCam), GROUP_TYPE::DEFAULT);
+	AddObject(std::move(pCam), GROUP_TYPE::DEFAULT);
 }
 
 Scene::~Scene()
@@ -85,14 +86,23 @@ void Scene::Start()
 
 void Scene::Update()
 {
+	//std::ranges::for_each(m_vecObj
+	//	| std::views::join
+	//	| ::OnlyAliveObject
+	//	, std::mem_fn(&GameObj::Update));
 	for (auto& vec : m_vecObj)
 	{
-		//for (auto& obj : vec)
-		//{
-		//	//Mgr(ThreadMgr)->Enqueue(&GameObj::Update, obj.get());
-		//	
-		//}
-		std::ranges::for_each(vec, std::mem_fn(&GameObj::Update));
+		for (auto& obj : vec)
+		{
+			//Mgr(ThreadMgr)->Enqueue(&GameObj::Update, obj.get());
+			if (obj->IsAlive())
+			{
+				obj->Update();
+			}
+			
+		}
+	
+		//std::ranges::for_each(vec, std::mem_fn(&GameObj::Update));
 	}
 
 	//WaitUpdate();
@@ -105,11 +115,18 @@ void Scene::Update()
 
 void Scene::LateUpdate()
 {
+	//std::ranges::for_each(m_vecObj
+	//	| std::views::join
+	//	| ::OnlyAliveObject
+	//	, std::mem_fn(&GameObj::LateUpdate));
 	for (auto& vec : m_vecObj)
 	{
 		for (auto& obj : vec)
 		{
-			obj->LateUpdate();
+			if (obj->IsAlive())
+			{
+				obj->LateUpdate();
+			}
 		}
 	}
 
@@ -121,11 +138,18 @@ void Scene::LateUpdate()
 
 void Scene::LastUpdate()
 {
+	//std::ranges::for_each(m_vecObj
+	//	| std::views::join
+	//	| ::OnlyAliveObject
+	//	, std::mem_fn(&GameObj::LastUpdate));
 	for (auto& vec : m_vecObj)
 	{
 		for (auto& obj : vec)
 		{
-			obj->LastUpdate();
+			if (obj->IsAlive())
+			{
+				obj->LastUpdate();
+			}
 		}
 	}
 
@@ -139,28 +163,50 @@ void Scene::LastUpdate()
 
 void Scene::PreFinalUpdate()
 {
+	//std::ranges::for_each(m_vecObj
+	//	| std::views::join
+	//	| ::OnlyAliveObject
+	//	, [](const shared_ptr<GameObj>& obj)noexcept {
+	//		Mgr(ThreadMgr)->Enqueue([obj = obj.get(), pTrans = obj->GetTransform().get()]()noexcept {
+	//			obj->MarkTransformDirty();
+	//			pTrans->UpdateTransfromHierarchy();
+	//			});
+	//	});
+
 	for (const auto& vec : m_vecObj)
 	{
 		const auto cache = vec.data();
 		const ushort num = (const ushort)vec.size();
 		for (ushort i = 0; i < num; ++i)
 		{
-			Mgr(ThreadMgr)->Enqueue([obj = cache[i].get(), pTrans = cache[i]->GetTransform().get()]()noexcept {
-				obj->MarkTransformDirty();
-				pTrans->UpdateTransfromHierarchy();
-				});
+			if (cache[i]->IsAlive())
+			{
+				Mgr(ThreadMgr)->Enqueue([obj = cache[i].get(), pTrans = cache[i]->GetTransform().get()]()noexcept {
+					obj->MarkTransformDirty();
+					pTrans->UpdateTransfromHierarchy();
+					});
+			}
 		}
 	}
 
 	Mgr(ThreadMgr)->WaitAllJob();
 
+	//std::ranges::for_each(m_vecObj
+	//	| std::views::join
+	//	| ::OnlyAliveObject
+	//	, [](const shared_ptr<GameObj>& obj)noexcept {
+	//		Mgr(ThreadMgr)->Enqueue(&GameObj::ColliderUpdate, obj.get());
+	//	});
 	for (const auto& vec : m_vecObj)
 	{
 		const auto cache = vec.data();
 		const ushort num = (const ushort)vec.size();
 		for (ushort i = 0; i < num; ++i)
 		{
-			Mgr(ThreadMgr)->Enqueue(&GameObj::ColliderUpdate, cache[i].get());
+			if (cache[i]->IsAlive())
+			{
+				Mgr(ThreadMgr)->Enqueue(&GameObj::ColliderUpdate, cache[i].get());
+			}
 		}
 	}
 
@@ -170,13 +216,22 @@ void Scene::PreFinalUpdate()
 void Scene::FinalUpdate()
 {
 
+	//std::ranges::for_each(m_vecObj
+	//	| std::views::join
+	//	| ::OnlyAliveObject
+	//	, [](const shared_ptr<GameObj>& obj)noexcept {
+	//		Mgr(ThreadMgr)->Enqueue(&GameObj::FinalUpdate, obj.get());
+	//	});
 	for (const auto& vec : m_vecObj)
 	{
 		const auto cache = vec.data();
 		const ushort num = (const ushort)vec.size();
 		for (ushort i = 0; i < num; ++i)
 		{
-			Mgr(ThreadMgr)->Enqueue(&GameObj::FinalUpdate, cache[i].get());
+			if (cache[i]->IsAlive())
+			{
+				Mgr(ThreadMgr)->Enqueue(&GameObj::FinalUpdate, cache[i].get());
+			}
 			//++m_iNumOfJob;
 		}
 	}
@@ -373,6 +428,7 @@ void Scene::LoadForPractice(string_view _strPracticeName)
 void Scene::SetSkyBox(SKYBOX_TYPE _eSkyBoxType,string_view _strSkyBoxName,string_view _strTextureName)
 {
 	m_skyBox = make_shared<SkyBox>(_eSkyBoxType,_strSkyBoxName, _strTextureName);
+	m_skyBox->InitGameObj();
 }
 
 //void Scene::WaitUpdate() 

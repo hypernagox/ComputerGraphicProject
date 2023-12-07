@@ -39,6 +39,7 @@ public:
 	template<typename Func, typename... Args>
 		requires std::invocable<Func, Args...>
 	void SetUpdateFunction(Func&& fp, Args&&... args) { m_function = std::bind(fp, args...);}
+	void SetActivate(const bool b_)noexcept { m_bOnAttach = b_; }
 	void Update();
 	void Render();
 };

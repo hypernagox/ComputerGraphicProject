@@ -48,15 +48,20 @@ int main()
     curScene->AddUpdateFp(SCENE_ADDED_UPDATE::PRERENDER, &Update);
 
     {
-        auto pLight = Mgr(AssimpMgr)->Load("SimpleShaderHasColorLight.glsl","MyCube.fbx");
+        auto pLight = Mgr(AssimpMgr)->Load("EnvironmentShader.glsl","MyCube.fbx");
         auto l = pLight->AddComponent<Light>();
         l->SetCurLightType(LIGHT_TYPE::DIRECTIONAL);
         l->SetLightPos({ -5,5,0 });
+        auto mate = make_shared<Material>();
+        mate->AddTexture2D("magical_forest_fantasy_6k.jpg");
+        mate->SetMaterialDiffuse({ .3f,.3f,.3f });
+        mate->SetMaterialSpecular({ .3f,.3f,.3f });
+        pLight->GetComp<MeshRenderer>()->AddMaterial(mate);
         pLight->GetTransform()->SetLocalScale(0.1f);
         pLight->GetTransform()->SetLocalRotation(90.f, X_AXIS);
         pLight->GetTransform()->SetLookAt({ -3.5f,-1.2f,-1.2f });
-        l->SetSpecular(glm::vec3{ 1.5f,1.5f,1.5f }*10.f);
-        l->SetDiffuse(glm::vec3{ 1.5f,1.5f,1.5f }*10.f);
+        l->SetSpecular(glm::vec3{ 1.5f,1.5f,1.5f }*5.f);
+        l->SetDiffuse(glm::vec3{ 1.5f,1.5f,1.5f }*5.f);
         curScene->AddObject(pLight, GROUP_TYPE::MONSTER);
         pLight->SetObjName("light");
         auto pCol = pLight->AddComponent<Collider>();
@@ -79,6 +84,24 @@ int main()
             },COLLISION_TYPE::COL_ENTER);
         
     }
+    {
+        auto pLight = Mgr(AssimpMgr)->Load("EnvironmentShader.glsl", "MySphereRed.fbx");
+        auto l = pLight->AddComponent<Light>();
+        l->SetCurLightType(LIGHT_TYPE::POINT);
+        l->SetDiffuse({ 5.1f,.1f,.1f });
+        l->SetSpecular({ 5.1f,.1f,.1f });
+        auto m = pLight->GetComp<MeshRenderer>();
+        auto mate = make_shared<Material>();
+        mate->AddTexture2D("magical_forest_fantasy_6k.jpg");
+        mate->SetMaterialDiffuse({ .3f,.3f,.3f });
+        mate->SetMaterialSpecular({ .3f,.3f,.3f });
+        m->AddMaterial(mate);
+        pLight->GetTransform()->SetLocalScale(0.1f);
+        pLight->GetTransform()->SetLocalRotation(90.f, X_AXIS);
+        pLight->GetTransform()->SetLocalPosition({ 0,5,0 });
+        curScene->AddObject(pLight, GROUP_TYPE::MONSTER);
+    }
+
     Mgr(CollisionMgr)->RegisterGroup(GROUP_TYPE::MONSTER, GROUP_TYPE::PROJ_PLAYER);
     {
         auto player = make_shared <Player>();

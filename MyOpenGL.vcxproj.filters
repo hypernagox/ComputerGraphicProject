@@ -202,6 +202,9 @@
     <Filter Include="Engine\04. Object\SkyBox">
       <UniqueIdentifier>{03f5631f-e45d-42e5-b0cd-229e0aa72f47}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Engine\02. Manager\InstancingMgr">
+      <UniqueIdentifier>{a45b1f83-aa97-4604-a08e-aa48628f6598}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -389,6 +392,9 @@
     </ClCompile>
     <ClCompile Include="SkyBox.cpp">
       <Filter>Engine\04. Object\SkyBox</Filter>
+    </ClCompile>
+    <ClCompile Include="InstancingMgr.cpp">
+      <Filter>Engine\02. Manager\InstancingMgr</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -621,6 +627,9 @@
     <ClInclude Include="SkyBox.h">
       <Filter>Engine\04. Object\SkyBox</Filter>
     </ClInclude>
+    <ClInclude Include="InstancingMgr.h">
+      <Filter>Engine\02. Manager\InstancingMgr</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resource\Shader\CubeShader.glsl">
@@ -651,10 +660,13 @@
     <None Include="Resource\Shader\SkyBoxShaderCube.glsl">
       <Filter>Engine\04. Object\SkyBox</Filter>
     </None>
+    <None Include="Resource\Shader\EnvironmentShader.glsl">
+      <Filter>Engine\03. Element\Shader\ShaderCodes</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Resource\Shader\AnimShader.glsl">
-      <Filter>Engine\03. Element\Shader\ShaderCodes</Filter>
+      <Filter>Engine\02. Manager\RayCaster</Filter>
     </Text>
   </ItemGroup>
 </Project>

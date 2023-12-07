@@ -36,9 +36,7 @@ bool testAxis(const glm::vec3& axis, const OBBBox& box1, const OBBBox& box2, flo
 	const float proj2 = projectOntoAxis(box2, axis);
 	const float distance = glm::abs(glm::dot(box2.getCenter() - box1.getCenter(), axis));
 
-	outOverLap = (proj1 + proj2) - distance;
-
-	return 0.f <= outOverLap;
+	return std::numeric_limits<float>::epsilon() < (outOverLap = (proj1 + proj2) - distance);
 }
 
 void CollisionInfo::IsCollision() noexcept
@@ -114,10 +112,10 @@ void CollisionMgr::Init()
 	m_colShader = Mgr(ResMgr)->GetRes<Shader>("CollisionBoxShader.glsl");
 	m_colShader->Use();
 	m_arrCollisionBox = std::array<glm::vec3, 8> {
-		glm::vec3(-1, -1, -1), glm::vec3(1, -1, -1),
-			glm::vec3(1, 1, -1), glm::vec3(-1, 1, -1),
-			glm::vec3(-1, -1, 1), glm::vec3(1, -1, 1),
-			glm::vec3(1, 1, 1), glm::vec3(-1, 1, 1)
+		glm::vec3(-0.5f, 0.0f, -0.5f), glm::vec3(0.5f, 0.0f, -0.5f),
+			glm::vec3(0.5f, 1.0f, -0.5f), glm::vec3(-0.5f, 1.0f, -0.5f),
+			glm::vec3(-0.5f, 0.0f, 0.5f), glm::vec3(0.5f, 0.0f, 0.5f),
+			glm::vec3(0.5f, 1.0f, 0.5f), glm::vec3(-0.5f, 1.0f, 0.5f)
 	};
 	m_indices = std::array<GLuint, 24>{
 		0, 1, 1, 2, 2, 3, 3, 0,

@@ -17,6 +17,9 @@ private:
 	list<CoRoutine> m_listCoTask;
 	EventHandler m_eveHandler = {};
 	vector<shared_ptr<GameObj>> m_vecDeadObj;
+
+	vector<function<void(void)>> m_vecInternalEventBuffer;
+	vector<GameEvent> m_vecInternalGameEventBuffer;
 public:
 	void Init();
 	void Update();
@@ -49,5 +52,7 @@ public:
 		m_listCoTask.clear();
 		m_vecDeadObj.clear();
 	}
+
+	void CheckMemPool()const noexcept;
 };
 

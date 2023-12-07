@@ -13,8 +13,8 @@ thread_local ofstream outVertexData;
 thread_local ifstream inVert;
 
 Model::Model()
-	:Resource{RESOURCE_TYPE::MODEL}
-	,m_pModelTransform{make_shared<Transform>()}
+	:Resource{ RESOURCE_TYPE::MODEL }
+	,m_pModelTransform{ make_shared<Transform>() }
 {
 }
 
@@ -69,11 +69,11 @@ void Model::UpdateModelTransform() noexcept
 	m_pModelTransform->UpdateTransfromHierarchy();
 }
 
-void Model::Render(const shared_ptr<Shader>& pShader_, const bool bIsMeshRendererMaterialEmpty_)noexcept
+void Model::Render(const shared_ptr<Shader>& pShader_, const bool bIsMeshRendererMaterialEmpty_, const glm::mat4& ownerMatrix)noexcept
 {
 	if (m_bIsActivate)
 	{
-		pShader_->SetUniformMat4(m_pModelTransform->GetLocalToWorldMatrix(), "uModel");
+		pShader_->SetUniformMat4(ownerMatrix * m_pModelTransform->GetLocalToWorldMatrix(), "uModel");
 
 		for (auto& material : m_vecMaterial)
 		{
@@ -103,7 +103,7 @@ void Model::Render(const shared_ptr<Shader>& pShader_, const bool bIsMeshRendere
 
 	for (auto& child : m_vecChildModel)
 	{
-		child->Render(pShader_, bIsMeshRendererMaterialEmpty_);
+		child->Render(pShader_, bIsMeshRendererMaterialEmpty_,ownerMatrix);
 	}
 }
 

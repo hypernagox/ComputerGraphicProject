@@ -29,17 +29,17 @@ void ThreadMgr::Init()
 				std::function<void(void)> task;
 				{
 					std::unique_lock<SpinLock> lock{ m_spinLock };
-					//m_cvQ.wait(lock, [this] () noexcept {
-					//	return not m_jobQ.empty() || m_bStopRequest;
-					//	});
-					m_cvQ.wait(lock, [this,&task]() noexcept {
-						return m_jobQ.try_pop(task) || m_bStopRequest;
+					m_cvQ.wait(lock, [this] () noexcept {
+						return not m_jobQ.empty() || m_bStopRequest;
 						});
+					//m_cvQ.wait(lock, [this,&task]() noexcept {
+					//	return m_jobQ.try_pop(task) || m_bStopRequest;
+					//	});
 					if (m_bStopRequest)
 					{
 						return;
 					}
-					//m_jobQ.pop(task,lock);
+					m_jobQ.pop(task,lock);
 				}
 
 				task();
@@ -61,17 +61,17 @@ void ThreadMgr::Init()
 				std::function<void(void)> task;
 				{
 					std::unique_lock<SpinLock> lock{ m_spinLockFuture };
-					//m_cvQFuture.wait(lock, [this]() noexcept {
-					//	return not m_futureQ.empty() || m_bStopRequest;
-					//	});
-					m_cvQFuture.wait(lock, [this,&task]() noexcept {
-						return m_futureQ.try_pop(task) || m_bStopRequest;
+					m_cvQFuture.wait(lock, [this]() noexcept {
+						return not m_futureQ.empty() || m_bStopRequest;
 						});
+					//m_cvQFuture.wait(lock, [this,&task]() noexcept {
+					//	return m_futureQ.try_pop(task) || m_bStopRequest;
+					//	});
 					if (m_bStopRequest)
 					{
 						return;
 					}
-					//m_futureQ.pop(task, lock);
+					m_futureQ.pop(task, lock);
 				}
 
 				task();

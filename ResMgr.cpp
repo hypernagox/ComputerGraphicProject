@@ -4,6 +4,7 @@
 
 ResMgr::ResMgr()
 {
+	m_mapResNameAndMeshData.reserve(1024);
 }
 
 ResMgr::~ResMgr()

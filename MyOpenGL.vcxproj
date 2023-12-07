@@ -28,6 +28,7 @@
     <ClCompile Include="CollisionMgr.cpp" />
     <ClCompile Include="DirectionalLight.cpp" />
     <ClCompile Include="EventHandler.cpp" />
+    <ClCompile Include="InstancingMgr.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="PannelUI.cpp" />
     <ClCompile Include="Particle.cpp" />
@@ -72,6 +73,7 @@
     <ClInclude Include="inc\imgui-master\imstb_textedit.h" />
     <ClInclude Include="inc\imgui-master\imstb_truetype.h" />
     <ClInclude Include="InputHandler.h" />
+    <ClInclude Include="InstancingMgr.h" />
     <ClInclude Include="KeyMgr.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="Material.h" />
@@ -177,6 +179,7 @@
     <None Include="Resource\Shader\CollisionBoxShader.glsl" />
     <None Include="Resource\Shader\CubeShader.glsl" />
     <None Include="Resource\Shader\DefaultShader.glsl" />
+    <None Include="Resource\Shader\EnvironmentShader.glsl" />
     <None Include="Resource\Shader\ObserverShader.glsl" />
     <None Include="Resource\Shader\SimpleShader.glsl" />
     <None Include="Resource\Shader\SimpleShaderHasColor.glsl" />

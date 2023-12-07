@@ -10,6 +10,14 @@
 #include "Texture2D.h"
 #include "CubeMapTex.h"
 #include "Model.h"
+#include "IterateHashTable.hpp"
+
+struct MeshData
+{
+	glm::mat4 meshWorldMat = glm::mat4{ 1.f };
+	vector<Vertex>* vertexPtr = nullptr;
+	vector<GLuint>* indexPtr = nullptr;
+};
 
 class ResMgr
 	:public Singleton<ResMgr>
@@ -19,7 +27,9 @@ class ResMgr
 	~ResMgr();
 private:
 	using ResourceMap = std::unordered_map<string, shared_ptr<Resource>>;
+	using MeshList = IterateHashTable<string, vector<MeshData>>;
 	array<ResourceMap, RESOURCE_TYPE_COUNT> m_mapRes;
+	std::unordered_map<string, MeshList> m_mapResNameAndMeshData;
 private:
 	void InitShader();
 	void InitTexture2D();
@@ -28,7 +38,11 @@ private:
 	RESOURCE_TYPE GetResType()const;
 public:
 	void Init();
-
+	auto& GetMeshList(string_view strResName)noexcept { return m_mapResNameAndMeshData[strResName.data()]; }
+	void AddMeshList(string_view resName,string_view partsName,const glm::mat4& meshMat, vector<Vertex>& v,vector<GLuint>& u)noexcept
+	{
+		m_mapResNameAndMeshData[resName.data()][partsName.data()].emplace_back(meshMat, &v, &u);
+	}
 	template<typename T> requires std::derived_from<T,Resource>
 	shared_ptr<T> Load(string_view _strFilePath, string_view _strResName);
 
@@ -88,32 +102,32 @@ inline shared_ptr<T> ResMgr::GetRes(string_view _strResName)const
 
 }
 
-template<> 
-inline shared_ptr<Model> ResMgr::GetRes<Model>(string_view _strResName)const
-{
-	const RESOURCE_TYPE resType = GetResType<Model>();
-	const ResourceMap& resMap = m_mapRes[etoi(resType)];
-
-	const auto findIt = resMap.find(_strResName.data());
-
-	if (resMap.end() != findIt)
-	{
-		return std::make_shared<Model>(*static_pointer_cast<Model>(findIt->second));
-	}
-	else
-	{
-		try {
-			if (resMap.end() == findIt)
-				throw std::runtime_error("Please Check Path And FileName\n");
-		}
-		catch (const std::runtime_error& e) {
-			std::cerr << e.what();
-			//assert(false);
-			//exit(0);
-		}
-		return nullptr;
-	}
-}
+//template<> 
+//inline shared_ptr<Model> ResMgr::GetRes<Model>(string_view _strResName)const
+//{
+//	const RESOURCE_TYPE resType = GetResType<Model>();
+//	const ResourceMap& resMap = m_mapRes[etoi(resType)];
+//
+//	const auto findIt = resMap.find(_strResName.data());
+//
+//	if (resMap.end() != findIt)
+//	{
+//		return std::make_shared<Model>(*static_pointer_cast<Model>(findIt->second));
+//	}
+//	else
+//	{
+//		try {
+//			if (resMap.end() == findIt)
+//				throw std::runtime_error("Please Check Path And FileName\n");
+//		}
+//		catch (const std::runtime_error& e) {
+//			std::cerr << e.what();
+//			//assert(false);
+//			//exit(0);
+//		}
+//		return nullptr;
+//	}
+//}
 
 
 template<typename T> requires std::derived_from<T, Resource>

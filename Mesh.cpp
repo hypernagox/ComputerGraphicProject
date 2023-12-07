@@ -56,12 +56,19 @@ void Mesh::SetBuffers()
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecIdx.size() * sizeof(GLuint), m_vecIdx.data(), GL_STATIC_DRAW);
 
     glBindVertexArray(0);
+
+    // TODO
+    // CPU데이터들 지우기 추가했음
+    m_numOfVertices = (GLuint)m_vecVertex.size();
+    m_numOfIndices = (GLuint)m_vecIdx.size();
+   // m_vecVertex.clear();
+   // m_vecIdx.clear();
 }
 
 void Mesh::Render() const
 {
     glBindVertexArray(vao);
-    glDrawElements(GL_TRIANGLES, (GLsizei)m_vecIdx.size(), GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, (GLsizei)m_numOfIndices, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }
 

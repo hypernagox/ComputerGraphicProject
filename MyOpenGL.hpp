@@ -46,3 +46,4 @@
 #include "DirectionalLight.h"
 #include "SpotLight.h"
 #include "SkyBox.h"
+#include "InstancingMgr.h"

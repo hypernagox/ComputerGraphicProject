@@ -116,10 +116,16 @@ void GameObj::Start()
 
 void GameObj::Update()
 {
+    //std::ranges::for_each(m_vecScripts,
+    //    std::mem_fn(&MonoBehavior::Update));
     for (const auto& mono : m_vecScripts)
     {
         mono->Update();
     }
+   // std::ranges::for_each(m_arrComp
+   //     | ::NotComponentNullptr,
+   //     std::mem_fn(&Component::Update));
+    
     for (const auto& comp : m_arrComp)
     {
         if (comp)
@@ -127,9 +133,15 @@ void GameObj::Update()
             comp->Update();
         }
     }
+   // std::ranges::for_each(m_vecChildObj
+   //     | ::OnlyAliveObject
+   //     , std::mem_fn(&GameObj::Update));
     for (const auto& child : m_vecChildObj)
     {
-        child->Update();
+        if (child->IsAlive())
+        {
+            child->Update();
+        }
     }
 
    // m_bIsUpdateFinish.store(true);
@@ -137,10 +149,27 @@ void GameObj::Update()
 
 void GameObj::LateUpdate()
 {
+    //std::ranges::for_each(m_vecScripts,
+    //    std::mem_fn(&MonoBehavior::LateUpdate));
     for (const auto& mono : m_vecScripts)
     {
         mono->LateUpdate();
     }
+
+    //std::ranges::for_each(m_arrComp
+    //    | ::NotComponentNullptr,
+    //    std::mem_fn(&Component::LateUpdate));
+
+   // for (const auto& comp : m_arrComp)
+   // {
+   //     if (comp)
+   //     {
+   //         comp->Update();
+   //     }
+   // }
+   //std::ranges::for_each(m_vecChildObj
+   //    | ::OnlyAliveObject
+   //    , std::mem_fn(&GameObj::LateUpdate));
     for (const auto& comp : m_arrComp)
     {
         if (comp)
@@ -150,41 +179,73 @@ void GameObj::LateUpdate()
     }
     for (const auto& child : m_vecChildObj)
     {
-        child->LateUpdate();
+        if (child->IsAlive())
+        {
+            child->LateUpdate();
+        }
     }
 }
 
 void GameObj::LastUpdate()
 {
-    for (const auto& mono : m_vecScripts)
-    {
-        mono->LastUpdate();
-    }
-    for (const auto& comp : m_arrComp)
-    {
-        if (comp)
-        {
-            comp->LastUpdate();
-        }
-    }
-    for (const auto& child : m_vecChildObj)
-    {
-        child->LastUpdate();
-    }
+  for (const auto& mono : m_vecScripts)
+  {
+      mono->LastUpdate();
+  }
+   // std::ranges::for_each(m_vecScripts,
+   //     std::mem_fn(&MonoBehavior::LastUpdate));
+   //
+   // std::ranges::for_each(m_arrComp
+   //     | ::NotComponentNullptr,
+   //     std::mem_fn(&Component::LastUpdate));
+
+    //for (const auto& comp : m_arrComp)
+    //{
+    //    if (comp)
+    //    {
+    //        comp->Update();
+    //    }
+    //}
+    //std::ranges::for_each(m_vecChildObj
+    //    | ::OnlyAliveObject
+    //    , std::mem_fn(&GameObj::LastUpdate));
+   for (const auto& comp : m_arrComp)
+   {
+       if (comp)
+       {
+           comp->LastUpdate();
+       }
+   }
+   for (const auto& child : m_vecChildObj)
+   {
+       if (child->IsAlive())
+       {
+           child->LastUpdate();
+       }
+   }
 }
 void GameObj::MarkTransformDirty() const noexcept
 {
-    for (const auto& comp : m_arrComp)
-    {
-        if (comp)
-        {
-            comp->MarkTransformDirty();
-        }
-    }
-    for (const auto& child : m_vecChildObj)
-    {
-        child->MarkTransformDirty();
-    }
+   // std::ranges::for_each(m_arrComp
+   //     | ::NotComponentNullptr,
+   //     std::mem_fn(&Component::MarkTransformDirty));
+  for (const auto& comp : m_arrComp)
+  {
+      if (comp)
+      {
+          comp->MarkTransformDirty();
+      }
+  }
+  for (const auto& child : m_vecChildObj)
+  {
+      if (child->IsAlive())
+      {
+          child->MarkTransformDirty();
+      }
+  }
+   // std::ranges::for_each(m_vecChildObj
+   //     | ::OnlyAliveObject
+   //     , std::mem_fn(&GameObj::MarkTransformDirty));
 }
 
 void GameObj::ColliderUpdate()noexcept
@@ -197,11 +258,19 @@ void GameObj::ColliderUpdate()noexcept
             //++numOfJob_;
         }
     }
+    //std::ranges::for_each(m_vecChildObj
+    //    | ::OnlyAliveObject
+    //    , [](const shared_ptr<GameObj>& obj)noexcept {
+    //        Mgr(ThreadMgr)->Enqueue(&GameObj::ColliderUpdate, obj.get());
+    //    });
     const auto cache = m_vecChildObj.data();
     const ushort num = (const ushort)m_vecChildObj.size();
     for (ushort i = 0; i < num; ++i)
     {
-        Mgr(ThreadMgr)->Enqueue(&GameObj::ColliderUpdate, cache[i].get());
+        if (cache[i]->IsAlive())
+        {
+            Mgr(ThreadMgr)->Enqueue(&GameObj::ColliderUpdate, cache[i].get());
+        }
     }
 }
 
@@ -222,16 +291,27 @@ void GameObj::FinalUpdate()
         m->FinalUpdate();
     }
     pTrans->ClearTransformFlag();
-    const auto cache = m_vecChildObj.data();
-    const ushort num = (const ushort)m_vecChildObj.size();
-    for (ushort i = 0; i < num; ++i)
-    {
-        Mgr(ThreadMgr)->Enqueue(&GameObj::FinalUpdate, cache[i].get());
-    }
+   //std::ranges::for_each(m_vecChildObj
+   //    | ::OnlyAliveObject
+   //    , [](const shared_ptr<GameObj>& obj)noexcept {
+   //        Mgr(ThreadMgr)->Enqueue(&GameObj::FinalUpdate, obj.get());
+   //    });
+   const auto cache = m_vecChildObj.data();
+   const ushort num = (const ushort)m_vecChildObj.size();
+   for (ushort i = 0; i < num; ++i)
+   {
+       if (cache[i]->IsAlive())
+       {
+           Mgr(ThreadMgr)->Enqueue(&GameObj::FinalUpdate, cache[i].get());
+       }
+   }
 }
 
 void GameObj::Render()
 {
+    //std::ranges::for_each(m_arrComp
+    //    | ::NotComponentNullptr,
+    //    std::mem_fn(&Component::PreRender));
     for (const auto& comp : m_arrComp)
     {
         if (comp)
@@ -248,6 +328,10 @@ void GameObj::Render()
             //Mgr(Core)->AddDrawCall([comp = comp.get()]()noexcept {comp->Render(); });
         }
     }
+   //std::ranges::for_each(m_arrComp
+   //    | ::NotComponentNullptr,
+   //    std::mem_fn(&Component::Render));
+
     auto& vecChildTransform = GetTransform()->GetChildTransform();
     const auto cache = m_vecChildObj.data();
     for (ushort idx = 0; idx < (const ushort)m_vecChildObj.size();)
@@ -320,10 +404,6 @@ void GameObj::AddComponent(shared_ptr<Component> _pComp)
     {
         Mgr(SceneMgr)->GetCurScene()->AddLights(static_pointer_cast<Light>(_pComp));
     }
-    else if (COMPONENT_TYPE::COLLIDER == static_cast<COMPONENT_TYPE>(idx))
-    {
-        Mgr(RayCaster)->AddCollider(static_pointer_cast<Collider>(_pComp));
-    }
     if (idx < COMPONENT_COUNT)
     {
         m_arrComp[idx] = std::move(_pComp);
@@ -357,6 +437,11 @@ void GameObj::AddComponent(shared_ptr<Component> _pComp)
 void GameObj::SetThisObjMainCam() const
 {
     GetComp<Camera>()->SetMainCam();
+}
+
+const glm::mat4& GameObj::GetObjectWorldTransform() const noexcept
+{
+    return static_cast<const Transform* const>(m_arrComp[etoi(COMPONENT_TYPE::TRANSFORM)].get())->GetLocalToWorldMatrix();
 }
 
 void GameObj::Save(string_view _resName,const fs::path& _savePath)
@@ -494,7 +579,7 @@ void GameObj::Load(string_view _dirName, const rapidjson::Value& doc,const fs::p
 
 void GameObj::InitGameObj()
 {
-    static const auto view_non_owner = std::views::filter([](const shared_ptr<Component>& _pComp) {
+    static constexpr const auto view_non_owner = std::views::filter([](const shared_ptr<Component>& _pComp)noexcept {
         return _pComp->GetGameObjWeak().expired(); });
    
     for (const auto& comp : m_arrComp | std::views::filter([](const shared_ptr<Component>& _pComp){
@@ -514,4 +599,14 @@ void GameObj::InitGameObj()
         }
         childObj->InitGameObj();
     }
+}
+
+const bool IsAliveObj(const shared_ptr<GameObj>& obj) noexcept
+{
+    return obj->IsAlive();
+}
+
+const glm::mat4& GetMatrix(const shared_ptr<GameObj>& obj) noexcept
+{
+    return obj->GetObjectWorldTransform();
 }

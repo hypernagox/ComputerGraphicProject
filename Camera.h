@@ -25,6 +25,9 @@ private:
 	glm::mat4 m_startMat = glm::mat4{ 1.f };
 	glm::mat4 m_endMat = glm::mat4{ 1.f };
 
+	glm::mat4 m_matViewInv = glm::mat4{ 1.f };
+	glm::mat4 m_matProjInv = glm::mat4{ 1.f };
+
 	bool	m_bIsMainCam = false;
 	float m_camOrthoFactor = 0.0005f;
 	float m_camInterpolation = 0.f;
@@ -39,6 +42,7 @@ public:
 	static void SetMainCam(shared_ptr<Camera> _pTargetCam);
 	static shared_ptr<Camera> GetObserverCam()noexcept { return g_observer; }
 	static const std::pair<glm::mat4, glm::mat4> GetMainCamProjViewMat()noexcept { return g_curMainCam->GetCamMatProjView(); }
+	static const std::pair<glm::mat4, glm::mat4> GetMainCamProjViewMatInv()noexcept { return g_curMainCam->GetCamMatProjViewInv(); }
 	Camera();
 	~Camera();
 
@@ -69,7 +73,7 @@ public:
 
 	const glm::mat4& GetCamMatView()const { return m_matView; }
 	const glm::mat4& GetCamMatProj()const { return m_matProjection; }
-
+	const std::pair<glm::mat4, glm::mat4> GetCamMatProjViewInv()const noexcept { return std::make_pair(m_matProjInv, m_matViewInv); }
 	const std::pair<glm::mat4,glm::mat4> GetCamMatProjView()const noexcept{ return std::make_pair(m_matProjection, m_matView); }
 
 	virtual void Save(string_view _resName, rapidjson::PrettyWriter<rapidjson::StringBuffer>& writer, const fs::path& _savePath) override

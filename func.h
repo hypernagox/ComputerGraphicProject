@@ -31,29 +31,25 @@ void RemoveElementAll(vector<T>& _delVec,Fp _bFp)
 	}
 }
 
-template <typename T>
-concept ContiguousContainer = requires(T a) {
-	{ a.data() } -> std::same_as<typename T::value_type*>;
-	{ a.size() } -> std::convertible_to<std::size_t>;
-};
-
-template <typename T,typename Compare> requires ContiguousContainer<T>
-void insertionSort(T& arr_,Compare cmp_)
+template <typename T, typename Compare>
+inline void insertionSort(T& arr_, Compare&& cmp_) noexcept
 {
 	using ele = std::remove_cvref_t<decltype(arr_[0])>;
 	std::span<ele> arr_s = arr_;
-	const int n = (int)arr_s.size();
-	auto arr = arr_s.data();
+	const short n = static_cast<const short>(arr_s.size());
+	const auto arr = arr_s.data();
 	std::byte key[sizeof(ele)];
-	for (int i = n - 2; i >= 0; --i) {
-		memcpy(key, arr + i, sizeof(ele));
-		int j = i + 1;
-		while (j < n && cmp_(arr[j], *reinterpret_cast<ele*>(key))) {
-			++j;
+	for (short i = 1; i < n; ++i)
+	{
+		ele* const current = arr + i;
+		short j = i - 1;
+		while (j >= 0 && cmp_(*current, arr[j])) {
+			--j;
 		}
-		if (j != i + 1) {
-			memmove(arr + i, arr + i + 1, (j - i - 1) * sizeof(ele));
-			memcpy(arr + j - 1, key, sizeof(ele));
+		if (j != i - 1) {
+			memcpy(key, current, sizeof(ele));
+			memmove(arr + j + 2, arr + j + 1, (i - j - 1) * sizeof(ele));
+			memcpy(arr + j + 1, key, sizeof(ele));
 		}
 	}
 }
