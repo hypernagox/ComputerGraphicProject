@@ -29,6 +29,9 @@ int main()
    // pObserver->GetTransform()->SetLocalRotation(0.0f);
    // pObserver->GetTransform()->SetLocalScale(0.25f);
 
+    shared_ptr<Material> material = make_shared<Material>();
+    material->AddTexture2D("stone.png");
+
     MCTilemap* tilemap = new MCTilemap();
     MCTerrainGenerator* terrainGenerator = new MCTerrainGenerator();
     MCTilemapMeshGenerator* meshGenerator = new MCTilemapMeshGenerator();
@@ -39,7 +42,8 @@ int main()
     shared_ptr<GameObj> terrainObj = GameObj::make_obj<GameObj>();
     auto renderer = terrainObj->AddComponent<MeshRenderer>();
     renderer->AddMesh(mesh);
-    renderer->SetShader("SimpleShader.glsl");
+    renderer->SetShader("DefaultShader.glsl");
+    renderer->AddMaterial(material);
     terrainObj->GetTransform()->SetLocalScale(0.1f);
     terrainObj->GetTransform()->SetLocalPosition({ -3.5f,-1.2f,-1.2f });
     const auto curScene = Mgr(SceneMgr)->GetCurScene();
@@ -60,8 +64,7 @@ int main()
         pLight->GetTransform()->SetLocalScale(0.1f);
         pLight->GetTransform()->SetLocalRotation(90.f, X_AXIS);
         pLight->GetTransform()->SetLookAt({ -3.5f,-1.2f,-1.2f });
-        l->SetSpecular(glm::vec3{ 1.5f,1.5f,1.5f }*5.f);
-        l->SetDiffuse(glm::vec3{ 1.5f,1.5f,1.5f }*5.f);
+        l->SetDiffuse(glm::vec3{ 0.5f,0.5f,0.5f });
         curScene->AddObject(pLight, GROUP_TYPE::MONSTER);
         pLight->SetObjName("light");
         auto pCol = pLight->AddComponent<Collider>();

@@ -181,11 +181,11 @@ void MCTilemapMeshGenerator::AddPlaneGreedyMesh(int map[][MCTilemap::MAP_WIDTH],
                 vertexAddCallback(x, y, x + width, y + height);
 
                 triangles.push_back(triangleIndex);
-                triangles.push_back(triangleIndex + 1);
                 triangles.push_back(triangleIndex + 2);
+                triangles.push_back(triangleIndex + 1);
                 triangles.push_back(triangleIndex + 3);
-                triangles.push_back(triangleIndex + 2);
                 triangles.push_back(triangleIndex + 1);
+                triangles.push_back(triangleIndex + 2);
 
                 normals.push_back(normal);
                 normals.push_back(normal);
