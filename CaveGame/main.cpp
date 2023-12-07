@@ -32,26 +32,26 @@ int main()
    // pObserver->GetTransform()->SetLocalScale(0.25f);
 
 
-    shared_ptr<Material> material = make_shared<Material>();
-    material->AddTexture2D("stone.png");
+    //shared_ptr<Material> material = make_shared<Material>();
+    //material->AddTexture2D("stone.png");
 
-    MCTilemap* tilemap = new MCTilemap();
-    MCTerrainGenerator* terrainGenerator = new MCTerrainGenerator();
-    MCTilemapMeshGenerator* meshGenerator = new MCTilemapMeshGenerator();
+    //MCTilemap* tilemap = new MCTilemap();
+    //MCTerrainGenerator* terrainGenerator = new MCTerrainGenerator();
+    //MCTilemapMeshGenerator* meshGenerator = new MCTilemapMeshGenerator();
+    //
+    //terrainGenerator->Generate(tilemap);
+    //shared_ptr<Mesh> mesh = meshGenerator->CreateMesh(tilemap);
+    
+    std::thread([]()noexcept {
+        MCTilemap* tilemap = new MCTilemap();
+        MCTerrainGenerator* terrainGenerator = new MCTerrainGenerator();
+        MCTilemapMeshGenerator* meshGenerator = new MCTilemapMeshGenerator();
 
-    terrainGenerator->Generate(tilemap);
-    shared_ptr<Mesh> mesh = meshGenerator->CreateMesh(tilemap);
-
-    shared_ptr<GameObj> terrainObj = GameObj::make_obj<GameObj>();
-    auto renderer = terrainObj->AddComponent<MeshRenderer>();
-    renderer->AddMesh(mesh);
-    renderer->SetShader("DefaultShader.glsl");
-    renderer->AddMaterial(material);
-    terrainObj->GetTransform()->SetLocalScale(0.1f);
-    terrainObj->GetTransform()->SetLocalPosition({ -3.5f,-1.2f,-1.2f });
+        terrainGenerator->Generate(tilemap);
+        meshGenerator->CreateMesh(tilemap); }).detach();
+    
     const auto curScene = Mgr(SceneMgr)->GetCurScene();
-  //  curScene->AddObject(pObserver, GROUP_TYPE::DEFAULT);
-    curScene->AddObject(terrainObj, GROUP_TYPE::DEFAULT);
+   
     curScene->AddUpdateFp(SCENE_ADDED_UPDATE::PRERENDER, &Update);
 
     {

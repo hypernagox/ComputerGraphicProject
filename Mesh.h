@@ -14,7 +14,7 @@ private:
 	vector<GLuint> m_vecIdx;
 	GLuint vao, vbo, ebo;
 private:
-	void SetBuffers();
+	
 	vector<Vertex>& GetVertices() { return m_vecVertex; }
 public:
 	Mesh();
@@ -47,5 +47,7 @@ public:
 	void AddIdx(indices&& _indices) { m_vecIdx = std::forward<indices>(std::move(_indices)); }
 
 	virtual void Render()const;
+
+	void SetBuffers();
 };
 

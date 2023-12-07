@@ -2,13 +2,13 @@
 #include "pch.h"
 #include "AtomicMemoryPool.hpp"
 
-//#define USE_ATOMIC_ALLOCATER
+#define USE_ATOMIC_ALLOCATER
 
 template <typename T>
 class DoubleLockQueue
 {
 	static const inline HANDLE g_handle = GetProcessHeap();
-private:
+public:
 	struct Node;
 	static inline AtomicMemoryPool<Node> g_memPool{ 1024 * 2 };
 	struct Node {

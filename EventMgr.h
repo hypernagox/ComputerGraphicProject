@@ -17,6 +17,12 @@ private:
 	list<CoRoutine> m_listCoTask;
 	EventHandler m_eveHandler = {};
 	vector<shared_ptr<GameObj>> m_vecDeadObj;
+
+	vector<function<void(void)>> m_vecInternalEventBuffer;
+	vector<GameEvent> m_vecInternalGameEventBuffer;
+
+	SpinLock m_spinLockForDangerEvent;
+	vector<function<void(void)>> m_vecEventForNeedLock;
 public:
 	void Init();
 	void Update();
@@ -26,6 +32,14 @@ public:
 	void AddEvent(GameEvent _eveStruct) { m_vecGameEvent.emplace_back(std::move(_eveStruct)); }
 	void AddCoRoutine(string_view _strName, CoRoutine&& _coTask);
 	void AddCoRoutine(CoRoutine&& _coTask);
+
+	template<typename Func, typename... Args>
+		requires std::invocable<Func, Args...>
+	void AddEventNeedLock(Func&& fp, Args&&... args)noexcept
+	{
+		std::lock_guard<SpinLock> lock{ m_spinLockForDangerEvent };
+		m_vecEventForNeedLock.emplace_back([fp = std::forward<Func>(fp), ...args = std::forward<Args>(args)]()mutable noexcept{std::invoke(std::forward<Func>(fp), std::forward<Args>(args)...); });
+	}
 
 	bool FindCoRoutine(string_view _strKey)const
 	{
@@ -49,5 +63,7 @@ public:
 		m_listCoTask.clear();
 		m_vecDeadObj.clear();
 	}
+
+	void CheckMemPool()const noexcept;
 };
 
