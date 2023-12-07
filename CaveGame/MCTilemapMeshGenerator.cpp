@@ -5,15 +5,22 @@
 
 #include <Vertex.hpp>
 #include <Mesh.h>
+#include "MeshRenderer.h"
+#include "SceneMgr.h"
+#include "Scene.h"
+#include "GameObj.h"
+#include "Material.h"
+#include "Transform.h"
+#include "EventMgr.h"
 
-shared_ptr<Mesh> MCTilemapMeshGenerator::CreateMesh(MCTilemap* tilemap)
+void MCTilemapMeshGenerator::CreateMesh(MCTilemap* tilemap)noexcept
 {
-	vector<glm::vec3> vertices;
-	vector<GLuint> triangles;
-	vector<glm::vec3> normals;
-	vector<glm::vec2> uvs;
+    vector<glm::vec3> vertices;
+    vector<GLuint> triangles;
+    vector<glm::vec3> normals;
+    vector<glm::vec2> uvs;
 
-	static int planeMap[MCTilemap::MAP_WIDTH][MCTilemap::MAP_WIDTH];
+    static int planeMap[MCTilemap::MAP_WIDTH][MCTilemap::MAP_WIDTH];
 
     for (int y = 0; y < MCTilemap::MAP_HEIGHT; y++)
     {
@@ -24,12 +31,12 @@ shared_ptr<Mesh> MCTilemapMeshGenerator::CreateMesh(MCTilemap* tilemap)
         }
 
         AddPlaneGreedyMesh(planeMap, MCTilemap::MAP_WIDTH, MCTilemap::MAP_WIDTH, [&vertices, y](int xmin, int ymin, int xmax, int ymax)
-        {
-            vertices.push_back(glm::vec3(xmin, y + 1, ymin));
-            vertices.push_back(glm::vec3(xmax, y + 1, ymin));
-            vertices.push_back(glm::vec3(xmin, y + 1, ymax));
-            vertices.push_back(glm::vec3(xmax, y + 1, ymax));
-        }, glm::vec3(0.0f, 1.0f, 0.0f), vertices, triangles, normals, uvs);
+            {
+                vertices.push_back(glm::vec3(xmin, y + 1, ymin));
+                vertices.push_back(glm::vec3(xmax, y + 1, ymin));
+                vertices.push_back(glm::vec3(xmin, y + 1, ymax));
+                vertices.push_back(glm::vec3(xmax, y + 1, ymax));
+            }, glm::vec3(0.0f, 1.0f, 0.0f), vertices, triangles, normals, uvs);
     }
 
     for (int y = 0; y < MCTilemap::MAP_HEIGHT; y++)
@@ -41,12 +48,12 @@ shared_ptr<Mesh> MCTilemapMeshGenerator::CreateMesh(MCTilemap* tilemap)
         }
 
         AddPlaneGreedyMesh(planeMap, MCTilemap::MAP_WIDTH, MCTilemap::MAP_WIDTH, [&vertices, y](int xmin, int ymin, int xmax, int ymax)
-        {
-            vertices.push_back(glm::vec3(xmax, y, ymin));
-            vertices.push_back(glm::vec3(xmin, y, ymin));
-            vertices.push_back(glm::vec3(xmax, y, ymax));
-            vertices.push_back(glm::vec3(xmin, y, ymax));
-        },glm::vec3(0.0f, -1.0f, 0.0f), vertices, triangles, normals, uvs);
+            {
+                vertices.push_back(glm::vec3(xmax, y, ymin));
+                vertices.push_back(glm::vec3(xmin, y, ymin));
+                vertices.push_back(glm::vec3(xmax, y, ymax));
+                vertices.push_back(glm::vec3(xmin, y, ymax));
+            }, glm::vec3(0.0f, -1.0f, 0.0f), vertices, triangles, normals, uvs);
     }
 
     for (int x = 0; x < MCTilemap::MAP_WIDTH; x++)
@@ -58,12 +65,12 @@ shared_ptr<Mesh> MCTilemapMeshGenerator::CreateMesh(MCTilemap* tilemap)
         }
 
         AddPlaneGreedyMesh(planeMap, MCTilemap::MAP_WIDTH, MCTilemap::MAP_HEIGHT, [&vertices, x](int xmin, int ymin, int xmax, int ymax)
-        {
-            vertices.push_back(glm::vec3(x + 1, ymin, xmin));
-            vertices.push_back(glm::vec3(x + 1, ymin, xmax));
-            vertices.push_back(glm::vec3(x + 1, ymax, xmin));
-            vertices.push_back(glm::vec3(x + 1, ymax, xmax));
-        }, glm::vec3(1.0f, 0.0f, 0.0f), vertices, triangles, normals, uvs);
+            {
+                vertices.push_back(glm::vec3(x + 1, ymin, xmin));
+                vertices.push_back(glm::vec3(x + 1, ymin, xmax));
+                vertices.push_back(glm::vec3(x + 1, ymax, xmin));
+                vertices.push_back(glm::vec3(x + 1, ymax, xmax));
+            }, glm::vec3(1.0f, 0.0f, 0.0f), vertices, triangles, normals, uvs);
     }
 
     for (int x = 0; x < MCTilemap::MAP_WIDTH; x++)
@@ -75,12 +82,12 @@ shared_ptr<Mesh> MCTilemapMeshGenerator::CreateMesh(MCTilemap* tilemap)
         }
 
         AddPlaneGreedyMesh(planeMap, MCTilemap::MAP_WIDTH, MCTilemap::MAP_HEIGHT, [&vertices, x](int xmin, int ymin, int xmax, int ymax)
-        {
-            vertices.push_back(glm::vec3(x, ymin, xmax));
-            vertices.push_back(glm::vec3(x, ymin, xmin));
-            vertices.push_back(glm::vec3(x, ymax, xmax));
-            vertices.push_back(glm::vec3(x, ymax, xmin));
-        }, glm::vec3(-1.0f, 0.0f, 0.0f), vertices, triangles, normals, uvs);
+            {
+                vertices.push_back(glm::vec3(x, ymin, xmax));
+                vertices.push_back(glm::vec3(x, ymin, xmin));
+                vertices.push_back(glm::vec3(x, ymax, xmax));
+                vertices.push_back(glm::vec3(x, ymax, xmin));
+            }, glm::vec3(-1.0f, 0.0f, 0.0f), vertices, triangles, normals, uvs);
     }
 
     for (int z = 0; z < MCTilemap::MAP_WIDTH; z++)
@@ -92,12 +99,12 @@ shared_ptr<Mesh> MCTilemapMeshGenerator::CreateMesh(MCTilemap* tilemap)
         }
 
         AddPlaneGreedyMesh(planeMap, MCTilemap::MAP_WIDTH, MCTilemap::MAP_HEIGHT, [&vertices, z](int xmin, int ymin, int xmax, int ymax)
-        {
-            vertices.push_back(glm::vec3(xmax, ymin, z + 1));
-            vertices.push_back(glm::vec3(xmin, ymin, z + 1));
-            vertices.push_back(glm::vec3(xmax, ymax, z + 1));
-            vertices.push_back(glm::vec3(xmin, ymax, z + 1));
-        }, glm::vec3(0.0f, 0.0f, 1.0f), vertices, triangles, normals, uvs);
+            {
+                vertices.push_back(glm::vec3(xmax, ymin, z + 1));
+                vertices.push_back(glm::vec3(xmin, ymin, z + 1));
+                vertices.push_back(glm::vec3(xmax, ymax, z + 1));
+                vertices.push_back(glm::vec3(xmin, ymax, z + 1));
+            }, glm::vec3(0.0f, 0.0f, 1.0f), vertices, triangles, normals, uvs);
     }
 
     for (int z = 0; z < MCTilemap::MAP_WIDTH; z++)
@@ -109,30 +116,43 @@ shared_ptr<Mesh> MCTilemapMeshGenerator::CreateMesh(MCTilemap* tilemap)
         }
 
         AddPlaneGreedyMesh(planeMap, MCTilemap::MAP_WIDTH, MCTilemap::MAP_HEIGHT, [&vertices, z](int xmin, int ymin, int xmax, int ymax)
-        {
-            vertices.push_back(glm::vec3(xmin, ymin, z));
-            vertices.push_back(glm::vec3(xmax, ymin, z));
-            vertices.push_back(glm::vec3(xmin, ymax, z));
-            vertices.push_back(glm::vec3(xmax, ymax, z));
-        }, glm::vec3(0.0f, 0.0f, -1.0f), vertices, triangles, normals, uvs);
+            {
+                vertices.push_back(glm::vec3(xmin, ymin, z));
+                vertices.push_back(glm::vec3(xmax, ymin, z));
+                vertices.push_back(glm::vec3(xmin, ymax, z));
+                vertices.push_back(glm::vec3(xmax, ymax, z));
+            }, glm::vec3(0.0f, 0.0f, -1.0f), vertices, triangles, normals, uvs);
     }
 
     vector<Vertex> sVertices;
     for (int index = 0; index < vertices.size(); ++index)
     {
-        Vertex v( vertices[index] );
-       // v.position.y = -v.position.y;
+        Vertex v(vertices[index]);
+        // v.position.y = -v.position.y;
         v.normal = normals[index];
         v.color = glm::vec4{ glm::abs(v.normal),1.f };
-      
+
         v.uv = uvs[index];
         sVertices.push_back(v);
     }
 
-    shared_ptr<Mesh> mesh = make_shared<Mesh>();
-    
-    mesh->Init(sVertices, triangles);
-    return mesh;
+    shared_ptr<Mesh> mesh = make_shared<Mesh>(sVertices, triangles);
+
+    Mgr(EventMgr)->AddEventNeedLock([mesh]()noexcept {
+        shared_ptr<Material> material = make_shared<Material>();
+        material->AddTexture2D("stone.png");
+        shared_ptr<GameObj> terrainObj = GameObj::make_obj();
+        auto renderer = terrainObj->AddComponent<MeshRenderer>();
+        renderer->AddMesh(mesh);
+        renderer->SetShader("DefaultShader.glsl");
+        renderer->AddMaterial(material);
+        terrainObj->GetTransform()->SetLocalScale(0.1f);
+        terrainObj->GetTransform()->SetLocalPosition({ -3.5f,-1.2f,-1.2f });
+        mesh->SetBuffers();
+        const auto curScene = Mgr(SceneMgr)->GetCurScene();
+        curScene->AddObject(terrainObj, GROUP_TYPE::DEFAULT);
+        });
+      
 }
 
 void MCTilemapMeshGenerator::AddPlaneGreedyMesh(int map[][MCTilemap::MAP_WIDTH], int mapWidth, int mapHeight, function<void(int, int, int, int)>&& vertexAddCallback, glm::vec3 normal, vector<glm::vec3>& vertices, vector<GLuint>& triangles, vector<glm::vec3>& normals, vector<glm::vec2>& uvs)

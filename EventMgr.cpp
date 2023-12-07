@@ -71,6 +71,20 @@ void EventMgr::Update()
 		eve();
 	}
 
+	m_vecInternalEventBuffer.swap(m_vecEventForNeedLock);
+
+	for (const auto& eve : m_vecInternalEventBuffer)
+	{
+		eve();
+	}
+
+	m_vecInternalEventBuffer.clear();
+
+	for (const auto& eve : m_vecEvent)
+	{
+		eve();
+	}
+
 	m_vecEvent.clear();
 	m_vecGameEvent.clear();
 	m_vecDeadObj.clear();

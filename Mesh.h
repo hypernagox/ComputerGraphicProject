@@ -17,7 +17,7 @@ private:
 	GLuint m_numOfVertices = 0;
 	GLuint m_numOfIndices = 0;
 private:
-	void SetBuffers();
+	
 	vector<Vertex>& GetVertices() { return m_vecVertex; }
 public:
 	Mesh();
@@ -50,5 +50,7 @@ public:
 	void AddIdx(indices&& _indices) { m_vecIdx = std::forward<indices>(std::move(_indices)); }
 
 	virtual void Render()const;
+
+	void SetBuffers();
 };
 
