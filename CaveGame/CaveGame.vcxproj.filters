@@ -28,6 +28,9 @@
     <Filter Include="CaveObject\Bullet">
       <UniqueIdentifier>{255ff973-96de-47f8-915a-4b14e32d44bc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="CaveObject\ChunkMesh">
+      <UniqueIdentifier>{46bcdba9-83ac-463b-8756-8a3b0e9ae578}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -53,6 +56,9 @@
     </ClCompile>
     <ClCompile Include="Bullet.cpp">
       <Filter>CaveObject\Bullet</Filter>
+    </ClCompile>
+    <ClCompile Include="ChunkMesh.cpp">
+      <Filter>CaveObject\ChunkMesh</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -88,6 +94,9 @@
     </ClInclude>
     <ClInclude Include="Bullet.h">
       <Filter>CaveObject\Bullet</Filter>
+    </ClInclude>
+    <ClInclude Include="ChunkMesh.h">
+      <Filter>CaveObject\ChunkMesh</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

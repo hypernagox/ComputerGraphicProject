@@ -11,7 +11,7 @@ private:
 
 	std::function<void(void)> m_fpChangeCamMode[3];
 
-	float m_fMoveSpeed = 1.f;
+	float m_fMoveSpeed = 10.f;
 	float m_fCamSensivity = 0.1f;
 
 	glm::vec3 m_cameraAngleAxis = glm::zero<glm::vec3>();

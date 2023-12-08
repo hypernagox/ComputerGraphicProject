@@ -50,6 +50,11 @@ void Scene::AddObject(shared_ptr<GameObj> _pObj, GROUP_TYPE _eType)
 
 void Scene::Awake()
 {
+	for (auto& chunk : m_arrChunkMesh | std::views::filter([](auto& p)noexcept{return nullptr != p ;}))
+	{
+		chunk->Awake();
+	}
+
 	for (auto& vec : m_vecObj)
 	{
 		for (auto& obj : vec)
@@ -75,6 +80,11 @@ void Scene::Awake()
 
 void Scene::Start()
 {
+	for (auto& chunk : m_arrChunkMesh | std::views::filter([](auto& p)noexcept{return nullptr != p ;}))
+	{
+		chunk->Start();
+	}
+
 	for (auto& vec : m_vecObj)
 	{
 		for (auto& obj : vec)
@@ -87,9 +97,15 @@ void Scene::Start()
 void Scene::Update()
 {
 	//std::ranges::for_each(m_vecObj
-	//	| std::views::join
+	//	| std::views::filter([](auto& p)noexcept{return nullptr != p ;})
 	//	| ::OnlyAliveObject
 	//	, std::mem_fn(&GameObj::Update));
+
+	for (auto& chunk : m_arrChunkMesh | std::views::filter([](auto& p)noexcept{return nullptr != p ;}))
+	{
+		chunk->Update();
+	}
+
 	for (auto& vec : m_vecObj)
 	{
 		for (auto& obj : vec)
@@ -116,9 +132,16 @@ void Scene::Update()
 void Scene::LateUpdate()
 {
 	//std::ranges::for_each(m_vecObj
-	//	| std::views::join
+	//	| std::views::filter([](auto& p)noexcept{return nullptr != p ;})
 	//	| ::OnlyAliveObject
 	//	, std::mem_fn(&GameObj::LateUpdate));
+
+	for (auto& chunk : m_arrChunkMesh | std::views::filter([](auto& p)noexcept{return nullptr != p ;}))
+	{
+		chunk->LateUpdate();
+	}
+
+
 	for (auto& vec : m_vecObj)
 	{
 		for (auto& obj : vec)
@@ -139,9 +162,16 @@ void Scene::LateUpdate()
 void Scene::LastUpdate()
 {
 	//std::ranges::for_each(m_vecObj
-	//	| std::views::join
+	//	| std::views::filter([](auto& p)noexcept{return nullptr != p ;})
 	//	| ::OnlyAliveObject
 	//	, std::mem_fn(&GameObj::LastUpdate));
+
+	for (auto& chunk : m_arrChunkMesh | std::views::filter([](auto& p)noexcept{return nullptr != p ;}))
+	{
+		chunk->LastUpdate();
+	}
+
+
 	for (auto& vec : m_vecObj)
 	{
 		for (auto& obj : vec)
@@ -164,7 +194,7 @@ void Scene::LastUpdate()
 void Scene::PreFinalUpdate()
 {
 	//std::ranges::for_each(m_vecObj
-	//	| std::views::join
+	//	| std::views::filter([](auto& p)noexcept{return nullptr != p ;})
 	//	| ::OnlyAliveObject
 	//	, [](const shared_ptr<GameObj>& obj)noexcept {
 	//		Mgr(ThreadMgr)->Enqueue([obj = obj.get(), pTrans = obj->GetTransform().get()]()noexcept {
@@ -192,7 +222,7 @@ void Scene::PreFinalUpdate()
 	Mgr(ThreadMgr)->WaitAllJob();
 
 	//std::ranges::for_each(m_vecObj
-	//	| std::views::join
+	//	| std::views::filter([](auto& p)noexcept{return nullptr != p ;})
 	//	| ::OnlyAliveObject
 	//	, [](const shared_ptr<GameObj>& obj)noexcept {
 	//		Mgr(ThreadMgr)->Enqueue(&GameObj::ColliderUpdate, obj.get());
@@ -217,11 +247,17 @@ void Scene::FinalUpdate()
 {
 
 	//std::ranges::for_each(m_vecObj
-	//	| std::views::join
+	//	| std::views::filter([](auto& p)noexcept{return nullptr != p ;})
 	//	| ::OnlyAliveObject
 	//	, [](const shared_ptr<GameObj>& obj)noexcept {
 	//		Mgr(ThreadMgr)->Enqueue(&GameObj::FinalUpdate, obj.get());
 	//	});
+
+	for (auto& chunk : m_arrChunkMesh | std::views::filter([](auto& p)noexcept{return nullptr != p ;}))
+	{
+		Mgr(ThreadMgr)->Enqueue(&GameObj::FinalUpdate, chunk.get());
+	}
+
 	for (const auto& vec : m_vecObj)
 	{
 		const auto cache = vec.data();
@@ -333,6 +369,11 @@ void Scene::PreRender()
 
 void Scene::Render()
 {
+	for (auto& chunk : m_arrChunkMesh | std::views::filter([](auto& p)noexcept{return nullptr != p ;}))
+	{
+		chunk->Render();
+	}
+
 	for (auto& vec : m_vecObj)
 	{
 		//for (const auto& obj : vec)

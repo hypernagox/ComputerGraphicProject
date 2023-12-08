@@ -12,36 +12,55 @@
 #include "Material.h"
 #include "Transform.h"
 #include "EventMgr.h"
+#include "ChunkMesh.h"
 
 void MCTilemapMeshGenerator::CreateMeshAll(MCTilemap* tilemap)
 {
+    shared_ptr<Material> material[36];
+
+    shared_ptr<ChunkMesh> pChunkDatas[36];
+
+    for (int i = 0; i < 36; ++i)
+    {
+        material[i] = make_shared<Material>();
+        material[i]->AddTexture2D("sand.png");
+        pChunkDatas[i] = make_shared<ChunkMesh>();
+        pChunkDatas[i]->SetChunkMaterial(material[i]);
+    }
+    
+   
     for (int chunkX = 0; chunkX < MCTilemap::CHUNK_SIZE; ++chunkX)
     {
         for (int chunkZ = 0; chunkZ < MCTilemap::CHUNK_SIZE; ++chunkZ)
         {
-            shared_ptr<Mesh> mesh = this->CreateMeshFromChunk(tilemap, chunkX, chunkZ);
-
-            Mgr(EventMgr)->AddEventNeedLock([=]() noexcept
-                {
-                    mesh->SetBuffers();
-
-                    shared_ptr<Material> material = make_shared<Material>();
-                    material->AddTexture2D("sand.png");
-
-                    shared_ptr<GameObj> terrainObj = GameObj::make_obj();
-                    terrainObj->GetTransform()->SetLocalScale(0.1f);
-                    terrainObj->GetTransform()->SetLocalPosition({ chunkX * MCTileChunk::CHUNK_WIDTH * 0.1f, 0.0f, chunkZ * MCTileChunk::CHUNK_WIDTH * 0.1f });
-
-                    auto renderer = terrainObj->AddComponent<MeshRenderer>();
-                    renderer->AddMesh(mesh);
-                    renderer->SetShader("DefaultFogShader.glsl");
-                    renderer->AddMaterial(material);
-
-                    const auto curScene = Mgr(SceneMgr)->GetCurScene();
-                    curScene->AddObject(terrainObj, GROUP_TYPE::DEFAULT);
-                });
+            for (int textureID = 0; textureID < 36; ++textureID)
+            {
+                shared_ptr<Mesh> mesh = this->CreateMeshFromChunk(tilemap, chunkX, chunkZ);
+                shared_ptr<GameObj> terrainObj = GameObj::make_obj();
+                terrainObj->GetTransform()->SetLocalScale(0.1f);
+                terrainObj->GetTransform()->SetLocalPosition({ chunkX * MCTileChunk::CHUNK_WIDTH * 0.1f, 0.0f, chunkZ * MCTileChunk::CHUNK_WIDTH * 0.1f });
+                auto renderer = terrainObj->AddComponent<MeshRenderer>();
+                renderer->AddMesh(mesh);
+                pChunkDatas[textureID]->AddChild(terrainObj);
+            }
         }
     }
+
+    Mgr(EventMgr)->AddEventNeedLock([pChunkDatas]() noexcept
+        {   
+            const auto curScene = Mgr(SceneMgr)->GetCurScene();
+            for (int i = 0; i < 36; ++i)
+            {
+                Mgr(ThreadMgr)->Enqueue(&ChunkMesh::MergeMeshData, pChunkDatas[i].get());
+            }
+            Mgr(ThreadMgr)->WaitAllJob();
+            for (int i = 0; i < 36; ++i)
+            {
+                pChunkDatas[i]->InitChunkMesh("DefaultFogShader.glsl");
+
+                curScene->AddChunkMesh(i, pChunkDatas[i]);
+            }
+        });
 }
 
 shared_ptr<Mesh> MCTilemapMeshGenerator::CreateMeshFromChunk(MCTilemap* tilemap, int chunkX, int chunkZ) noexcept

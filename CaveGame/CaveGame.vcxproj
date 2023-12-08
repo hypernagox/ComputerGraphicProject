@@ -146,6 +146,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Bullet.cpp" />
+    <ClCompile Include="ChunkMesh.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MCTerrainGenerator.cpp" />
     <ClCompile Include="MCTilemap.cpp" />
@@ -164,6 +165,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Bullet.h" />
+    <ClInclude Include="ChunkMesh.h" />
     <ClInclude Include="CustomMath.hpp" />
     <ClInclude Include="MCTerrainGenerator.h" />
     <ClInclude Include="MCTilemap.h" />

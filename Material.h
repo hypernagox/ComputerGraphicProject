@@ -10,6 +10,7 @@ class Material
 	friend class MeshRenderer;
 	friend class Model;
 	friend class InstancingMgr;
+	friend class ChunkMesh;
 private:
 	glm::vec3 m_ambient = glm::vec3{ 1.f,1.f,1.f };
 	glm::vec3 m_diffuse = glm::vec3{ 1.f,1.f,1.f };

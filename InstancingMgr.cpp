@@ -326,7 +326,6 @@ void InstancingMgr::Render() noexcept
 		
 		for (const auto& [partsName, renderInfoList] : m_mapResNameAndPartsRenderInfo[resName])
 		{
-			m_pShaderForInstancingAndEnv->Use();
 			for (const auto& renderInfo : renderInfoList)
 			{
 				glBindVertexArray(renderInfo.meshVAO);

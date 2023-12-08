@@ -16,13 +16,11 @@ private:
 	GLuint vao, vbo, ebo;
 	GLuint m_numOfVertices = 0;
 	GLuint m_numOfIndices = 0;
-private:
-	
-	vector<Vertex>& GetVertices() { return m_vecVertex; }
 public:
 	Mesh();
 	~Mesh();
-
+	vector<Vertex>& GetVertices() noexcept { return m_vecVertex; }
+	vector<GLuint>& GetIndicies() noexcept { return m_vecIdx; }
 	template <typename V, typename I>
 	Mesh(V&& _vertices, I&& _indices) : Resource{RESOURCE_TYPE::MESH}
 		,m_vecVertex{ std::forward<V>(_vertices) }, m_vecIdx{ std::forward<I>(_indices) } { }

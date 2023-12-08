@@ -178,6 +178,7 @@
     <None Include="cpp.hint" />
     <None Include="Resource\Shader\CollisionBoxShader.glsl" />
     <None Include="Resource\Shader\CubeShader.glsl" />
+    <None Include="Resource\Shader\DefaultFogShader.glsl" />
     <None Include="Resource\Shader\DefaultShader.glsl" />
     <None Include="Resource\Shader\EnvironmentShader.glsl" />
     <None Include="Resource\Shader\EnvironmentShaderInstancing.glsl" />

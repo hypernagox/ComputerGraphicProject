@@ -21,11 +21,12 @@ class SkyBox;
 class Scene
 {
 private:
+	array<shared_ptr<GameObj>, 36> m_arrChunkMesh;
+	
 	vector<shared_ptr<GameObj>> m_vecObj[etoi(GROUP_TYPE::END)];
 	vector<weak_ptr<Light>> m_vecLights;
 	shared_ptr<SkyBox> m_skyBox;
 	array<Delegate, etoi(SCENE_ADDED_UPDATE::END)> m_arrAddedUpdateFp;
-	//int m_iNumOfJob = 0;
 public:
 	vector<shared_ptr<GameObj>>& GetGroupObj(GROUP_TYPE _eType) { return m_vecObj[etoi(_eType)]; }
 	Scene();
@@ -64,5 +65,10 @@ public:
 	void LoadForPractice(string_view _strPracticeName);
 	//void WaitUpdate();
 	void SetSkyBox(SKYBOX_TYPE _eSkyBoxType,string_view _strSkyBoxName, string_view _strTextureName);
+
+	void AddChunkMesh(const uint iTexID, shared_ptr<GameObj> pChunkMesh)noexcept
+	{
+		m_arrChunkMesh[iTexID] = std::move(pChunkMesh);
+	}
 };
 
