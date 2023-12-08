@@ -106,6 +106,8 @@ void Core::Init(const GLuint _winWidth, const GLuint _winHeight)
 {
 	glfwInit();
 	glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
+	glfwWindowHint(GLFW_SAMPLES, 4);
+	glEnable(GL_MULTISAMPLE);
 	
 	m_pWinInfo = glfwCreateWindow(1, 1, "MyOpenGL", nullptr, nullptr);
 

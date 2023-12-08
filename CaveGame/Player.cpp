@@ -19,34 +19,55 @@ void Player::ChangeCamType() noexcept
 
 void Player::UpdatePlayerCamFpsMode() noexcept
 {
-	const float sign = 2 == m_curCamMode ? -1.f : 1.f;
-	const auto camTrans = GetTransform();
-
+	const auto camTrans = m_cameraAnchor->GetTransform();
 	glm::vec2 offset = Mgr(KeyMgr)->GetMouseDelta() * m_fCamSensivity;
 
-	m_fPitchOffsetAcc = glm::clamp(m_fPitchOffsetAcc + (offset.y * sign), -90.0f, 90.0f);
-	offset.y = m_fPitchOffsetAcc - (m_fPitchOffsetAcc - offset.y * sign);
+	m_cameraAngleAxis += glm::vec3(offset.y, offset.x, 0.0f);
+	m_cameraAngleAxis.x = glm::clamp(m_cameraAngleAxis.x, -89.0f, 89.0f);
 
-	const glm::quat camQuat = camTrans->GetWorldRotationRecursion();
-	const glm::quat pitch = glm::angleAxis(glm::radians(offset.y), GetRightByQuat(camQuat));
-	const glm::quat yaw = glm::angleAxis(glm::radians(offset.x), Y_AXIS);
-	const glm::vec3 newLookVec = yaw * pitch * GetLookByQuat(camQuat);
-
-	camTrans->SetLocalRotation(glm::quatLookAtLH(glm::normalize(newLookVec), Y_AXIS));
+	m_cameraAngleAxisSmooth = m_cameraAngleAxisSmooth + (m_cameraAngleAxis - m_cameraAngleAxisSmooth) * Mgr(TimeMgr)->GetDT() * 16.0f;
+	camTrans->SetLocalRotation(glm::quat(glm::radians(m_cameraAngleAxisSmooth)));
 }
 
 void Player::InitCamDirection() noexcept
 {
-	GetTransform()->SetLookAt(GetPlayerLook());
+	m_rendererObj->GetTransform()->SetLocalRotation(glm::quat(glm::vec3(0.0f, glm::radians(-90.0f), 0.0f)));
 }
 
 Player::Player()
 {
-	*static_cast<GameObj*>(this) = *Mgr(AssimpMgr)->Load("SimpleShaderHasColorLight.glsl", "MyCube.fbx");
-	auto pCam = make_shared<Camera>();
-	pCam->SetNear(6.f);
-	m_arrComp[etoi(COMPONENT_TYPE::CAMERA)] = pCam;
-	GetTransform()->SetLocalScale(0.01f);
+	shared_ptr<Material> material = make_shared<Material>();
+	material->AddTexture2D("player.png");
+	m_rendererObj = Mgr(AssimpMgr)->Load("DefaultShader.glsl", "Player.obj");
+	m_rendererObj->GetTransform()->SetLocalScale(0.03f);
+
+	auto renderer = m_rendererObj->GetComp<MeshRenderer>();
+	renderer->SetShader("DefaultShader.glsl");
+	renderer->AddMaterial(material);
+
+	m_fpChangeCamMode[0] = [this]()noexcept {
+		m_cameraObj->GetTransform()->SetLocalPosition(glm::zero<glm::vec3>());
+		m_cameraObj->GetTransform()->SetLocalRotation(glm::identity<glm::quat>());
+		};
+	m_fpChangeCamMode[1] = [this]()noexcept {
+		m_cameraObj->GetTransform()->SetLocalPosition(glm::vec3(0.0f, 0.0f, -0.75f));
+		m_cameraObj->GetTransform()->SetLocalRotation(glm::identity<glm::quat>());
+		};
+	m_fpChangeCamMode[2] = [this]()noexcept {
+		m_cameraObj->GetTransform()->SetLocalPosition(glm::vec3(0.0f, 0.0f, 0.75f));
+		m_cameraObj->GetTransform()->SetLocalRotation(glm::quat(glm::vec3(0.0f, glm::pi<float>(), 0.0f)));
+		};
+
+	m_cameraAnchor = make_obj<GameObj>();
+	m_cameraAnchor->GetTransform()->SetLocalPosition(glm::vec3(0.0f, 0.2f, 0.0f));
+
+	m_cameraObj = make_obj<GameObj>();
+	m_fpChangeCamMode[m_curCamMode]();
+	m_cameraObj->GetTransform()->SetLocalScale(0.01f);
+
+	auto pCam = m_cameraObj->AddComponent<Camera>();
+	pCam->SetNear(6.0f);
+	pCam->SetMainCam();
 }
 
 Player::~Player()
@@ -56,16 +77,11 @@ Player::~Player()
 void Player::Start()
 {
 	GameObj::Start();
-	m_fpChangeCamMode[0] = [this]()noexcept {GetComp<Camera>()->SetMainCam(); };
-	m_fpChangeCamMode[1] = [this]()noexcept {
-		const auto pChild = static_pointer_cast<PlayerCam>(m_vecChildObj.front());
-		pChild->SetThisObjMainCam();
-		pChild->ReverseCam();
-		};
-	m_fpChangeCamMode[2] = [this]()noexcept {
-		static_pointer_cast<PlayerCam>(m_vecChildObj.front())->ReverseCam();
-		};
 	InitCamDirection();
+
+	AddChild(m_rendererObj);
+	AddChild(m_cameraAnchor);
+	m_cameraAnchor->AddChild(m_cameraObj);
 }
 
 void Player::Update()
@@ -106,9 +122,8 @@ void Player::Update()
 	}
 	if (KEY_TAP(GLFW_KEY_F5))
 	{
-		m_fpChangeCamMode[m_curCamMode]();
 		m_curCamMode = wrapAround(m_curCamMode + 1, 0, 3);
-		m_fPitchOffsetAcc = 0.f;
+		m_fpChangeCamMode[m_curCamMode]();
 	}
 	if (KEY_TAP(GLFW_MOUSE_BUTTON_LEFT))
 	{

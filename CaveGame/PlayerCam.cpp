@@ -14,6 +14,7 @@ PlayerCam::PlayerCam()
 
 PlayerCam::~PlayerCam()
 {
+
 }
 
 void PlayerCam::ReverseCam() noexcept

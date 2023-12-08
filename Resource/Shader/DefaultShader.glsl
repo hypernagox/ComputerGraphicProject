@@ -188,15 +188,19 @@ vec3 CalculatePointLight(PointLightData light, vec3 normal, vec3 fragPos,vec3 vi
 vec3 CalculateSpotLight(SpotLightData light, vec3 normal, vec3 fragPos,vec3 viewpos) ;
 vec3 CalculateDirectionalLight(DirectionalLightData light, vec3 normal, vec3 fragPos,vec3 viewpos) ;
 
-vec3 defaultAmbient = vec3(.5, .5, .5);
+vec3 defaultAmbient = vec3(0.0, 0.0, 0.0);
 uniform Material material;
+
 void main()
 {
-    vec3 result = vec3(.1,.1,.1);
+    vec3 result = vec3(0.0, 0.0, 0.0);
     vec3 normal = Normal;
     vec3 fragPos = FragPos;
+    vec4 texColor = texture(uTexture2D, TexCoords);
 
-    
+    if (texColor.a < 0.1)
+        discard;
+
     for (int i = 0; i < lightCounts.x; ++i)
     {
         result += CalculatePointLight(pointLights[i], normal, fragPos,vec3(0,0,0));
@@ -211,10 +215,10 @@ void main()
     
     if(lightCounts.z > 0)
     {
-    result += CalculateDirectionalLight(dirLight, normal, fragPos,vec3(0,0,0));
+        result += CalculateDirectionalLight(dirLight, normal, fragPos,vec3(0,0,0));
     }
    
-   FragColor = min(vec4(result,1.f) * texture(uTexture2D,TexCoords), vec4(1.0, 1.0, 1.0, 1.0));
+    FragColor = min(vec4(result, 1.0) * texColor, vec4(1.0, 1.0, 1.0, 1.0));
     
     
 }
