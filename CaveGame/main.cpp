@@ -18,7 +18,7 @@ int main()
     Mgr(Core)->Init();
     Mgr(Core)->SetClearColor(RGBA_WHITE);
 
-    glfwSetInputMode(Mgr(Core)->GetWinInfo(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    //glfwSetInputMode(Mgr(Core)->GetWinInfo(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     std::thread([]()noexcept {
         MCTilemap* tilemap = new MCTilemap();
@@ -50,6 +50,10 @@ int main()
         pLight->SetObjName("light");
         auto pCol = pLight->AddComponent<Collider>();
         pCol->SetColBoxScale({ 5,5,5 });
+
+        Mgr(RayCaster)->RegisterMeshRayIntersect(pLight);
+       // Mgr(InstancingMgr)->AddInstancingList(pLight);
+
         pCol->GetCollisionHandler()->SetCollisionHandlerFunc([l,pLight](auto& a, auto& b) {
             static auto s = l->GetLightSpecular();
             static auto d = l->GetLightDiffuse();

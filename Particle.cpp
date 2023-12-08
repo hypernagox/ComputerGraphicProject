@@ -2,12 +2,19 @@
 #include "Particle.h"
 #include "PannelUI.h"
 #include "Transform.h"
+#include "RigidBody.h"
+#include "InstancingMgr.h"
+#include "SceneMgr.h"
+#include "Scene.h"
+#include "EventMgr.h"
+#include "MeshRenderer.h"
+#include "Shader.h"
 
-std::mt19937 Particle::g_rng = std::mt19937{ std::random_device{}() };
-std::uniform_real_distribution<float> Particle::g_urd = std::uniform_real_distribution<float>{ 0.f, 360.f };
+std::unordered_map<string, shared_ptr<MeshRenderer>> Particle::g_mapMeshRenderer;
 
-Particle::Particle()
+Particle::Particle()noexcept
 {
+	AddComponent<RigidBody>();
 }
 
 Particle::~Particle()
@@ -16,35 +23,34 @@ Particle::~Particle()
 
 void Particle::Update()
 {
-	const auto pTrans = m_pPolyForRender->GetTransform();
+	GameObj::Update();
 	m_fLife -= DT;
-	m_vVelocity += glm::vec2{ 0.f,1.f } *480.0f * DT;
-	m_vMidPos += m_vVelocity * DT;
-	m_pPolyForRender->SetUIPosition(m_vMidPos);
-	pTrans->SetLocalScale(pTrans->GetLocalScale() - (0.5f * DT));
-	//m_pPolyForRender->Update();
-	m_pPolyForRender->FinalUpdate();
-	//pTrans->FinalUpdate();
-}
-
-void Particle::Render()
-{
-	m_pPolyForRender->Render();
 	if (0.f >= m_fLife)
 	{
+		DestroyObj(this->shared_from_this());
 		m_bIsActivate = false;
 	}
 }
 
-void Particle::ActivateParticle(const glm::vec2& vMidPos_, const glm::vec3& vColor_)
+void Particle::ActivateParticle(shared_ptr<MeshRenderer> pMeshRenderer,string_view strResName_, const glm::vec3& worldPos_, const glm::vec3& scale_)noexcept
 {
+	auto shared_this = this->shared_from_this();
+	auto iter = g_mapMeshRenderer.find(strResName_.data());
+	if (g_mapMeshRenderer.end() == iter)
+	{
+		iter = g_mapMeshRenderer.emplace_hint(iter, strResName_, make_shared<MeshRenderer>(*pMeshRenderer));
+	}
+	AddComponent(iter->second);
 	m_bIsActivate = true;
-	m_fLife = 2.f;
-	m_vMidPos = vMidPos_;
-	const float fDeg = glm::radians(g_urd(g_rng));
-	m_vVelocity = glm::vec2(std::cosf(fDeg),std::sinf(fDeg)) * g_particleSpeed;
-	const glm::vec2 particleLT = m_vMidPos - m_particleSize / 2.f;
-	const glm::vec2 particleRB = m_vMidPos + m_particleSize / 2.f;
-	m_pPolyForRender = UI::CreateUI<PannelUI>(particleLT, particleRB);
-	m_pPolyForRender->SetColor(vColor_);
+	const auto pTrans = GetTransform();
+	SetResName(strResName_);
+	pTrans->SetLocalPosition(worldPos_);
+	pTrans->SetLocalScale(scale_);
+	const glm::vec3 yVel = glm::sphericalRand(g_particleSpeed);
+	m_fLife = 2.f + yVel.y * 0.1f;
+	GetComp<RigidBody>()->SetVelocity(yVel);
+	Mgr(InstancingMgr)->AddInstancingList(shared_this);
+	Mgr(SceneMgr)->GetCurScene()->AddObject(std::move(shared_this), GROUP_TYPE::PARTICLE);
+
+	
 }

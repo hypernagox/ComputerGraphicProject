@@ -81,6 +81,8 @@ enum class GROUP_TYPE
 	PLAYER_WEAPON,
 	DROP_ITEM,
 
+	PARTICLE,
+
 	UI = 31,
 
 	END = 32,

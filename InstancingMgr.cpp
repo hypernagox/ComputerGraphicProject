@@ -76,9 +76,12 @@ InstancingMgr::~InstancingMgr()
 	glDeleteBuffers(1, &instanceVBO);
 }
 
-void InstancingMgr::InitInstanceData(string_view strResName,shared_ptr<Model> pModel) noexcept
+void InstancingMgr::InitInstanceData(string_view strResName,shared_ptr<Model> pModel, const bool bIsEnv_) noexcept
 {
-	m_pShaderForInstancing->Use();
+	const shared_ptr<Shader>& target_shader = bIsEnv_ ? m_pShaderForInstancingAndEnv : m_pShaderForInstancing;
+
+	target_shader->Use();
+
 	const ushort num = (const ushort)pModel->m_vecMesh.size();
 	for (ushort i=0;i< num ;++i)
 	{
@@ -101,11 +104,15 @@ void InstancingMgr::InitInstanceData(string_view strResName,shared_ptr<Model> pM
 void InstancingMgr::Init()
 {
 	m_pShaderForInstancing = Mgr(ResMgr)->GetRes<Shader>("InstancingShader.glsl");
+	m_pShaderForInstancingAndEnv = Mgr(ResMgr)->GetRes<Shader>("EnvironmentShaderInstancing.glsl");
+
 	m_InstanceList.reserve(1000);
 	m_mapResNameAndPartsModelMat.reserve(1000);
 	m_mapResNameAndPartsUpdateMat.reserve(1000);
 	m_mapResNameAndPartsRenderInfo.reserve(1000);
 	m_setResNameForUnique.reserve(1000);
+	m_mapEnvMappingObj.reserve(1000);
+
 	m_pShaderForInstancing->Use();
 
 	glGenBuffers(1, &instanceVBO);
@@ -125,17 +132,26 @@ void InstancingMgr::AddInstancingList(shared_ptr<GameObj> pObj) noexcept
 
 	if (not m_setResNameForUnique.contains(strResName))
 	{
+		string_view shaderName = mr->GetShader()->GetResName();
+
+		const bool bIsEnv = shaderName == "EnvironmentShaderInstancing.glsl" || shaderName == "EnvironmentShader.glsl";
+
 		for (const auto& [modelName, modelData] : modelMap)
 		{
-			modelData->m_bIsActivate = false;
+			//modelData->m_bIsActivate = false;
 			if (not modelData->m_vecMesh.empty())
 			{
 				m_mapResNameAndPartsModelMat[strResName][modelName] = modelData->m_matWorld;
-				InitInstanceData(strResName,modelData);
+				InitInstanceData(strResName,modelData,bIsEnv);
 			}
 		}
 		m_InstanceList[strResName].emplace_back(pObj);
 		m_setResNameForUnique.emplace(strResName);
+
+		if (bIsEnv)
+		{
+			m_mapEnvMappingObj.emplace(strResName,mr->GetMaterial().front()->GetTex().front());
+		}
 	}
 	else
 	{
@@ -295,12 +311,22 @@ void InstancingMgr::Render() noexcept
 
 	m_vecTemporaryObject.clear();
 
-	m_pShaderForInstancing->Use();
-
 	for (const auto& resName : m_InstanceList | std::views::keys)
 	{
+		const auto iter = m_mapEnvMappingObj.find(resName);
+		if (m_mapEnvMappingObj.end() != iter)
+		{
+			m_pShaderForInstancingAndEnv->Use();
+			iter->second->BindTexture();
+		}
+		else
+		{
+			m_pShaderForInstancing->Use();
+		}
+		
 		for (const auto& [partsName, renderInfoList] : m_mapResNameAndPartsRenderInfo[resName])
 		{
+			m_pShaderForInstancingAndEnv->Use();
 			for (const auto& renderInfo : renderInfoList)
 			{
 				glBindVertexArray(renderInfo.meshVAO);

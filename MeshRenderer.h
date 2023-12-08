@@ -10,6 +10,7 @@ class MeshRenderer :
     public Component
 {
     friend class InstancingMgr;
+public:
     COMP_CLONE(MeshRenderer)
 private:
     vector<shared_ptr<Mesh>> m_vecMesh;

@@ -1,28 +1,25 @@
 #pragma once
+#include "GameObj.h"
 
-class PannelUI;
+class GameObj;
+class MeshRenderer;
 
 class Particle
+	:public GameObj
 {
-	static constexpr float g_particleSpeed = 60.0f;
-	static std::mt19937 g_rng;
-	static std::uniform_real_distribution<float> g_urd;
+	static constexpr float g_particleSpeed = 5.0f;
+	static std::unordered_map<string, shared_ptr<MeshRenderer>> g_mapMeshRenderer;
 private:
-	glm::vec2 m_particleSize = { 10.f,10.f };
-	glm::vec2 m_vMidPos;
-	glm::vec2 m_vVelocity;
-	shared_ptr<PannelUI> m_pPolyForRender;
+	string m_strParticleResName;
 	bool m_bIsActivate = false;
 	float m_fLife = 0.f;
 public:
-	Particle();
+	Particle()noexcept;
 	~Particle();
 	Particle(const Particle&) = delete;
 	Particle operator = (const Particle&) = delete;
-	void SetParticleSize(const glm::vec2& vSize_) { m_particleSize = vSize_; }
-	void ActivateParticle(const glm::vec2& vMidPos_,const glm::vec3& vColor_);
+	void ActivateParticle(shared_ptr<MeshRenderer> pMeshRenderer,string_view strResName_,const glm::vec3& worldPos_,const glm::vec3& scale_)noexcept;
 	bool IsActivate()const { return m_bIsActivate; }
-	void Update();
-	void Render();
+	void Update() override;
 };
 
