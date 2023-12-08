@@ -1,10 +1,17 @@
 #pragma once
 
+class Tile
+{
+public:
+	static const int TEXTURES[][6];
+	static const int TILE_OPAQUE[];
+};
+
 class MCTileChunk
 {
 public:
-	static constexpr int CHUNK_WIDTH = 16;
-	static constexpr int CHUNK_HEIGHT = 16;
+	static constexpr int CHUNK_WIDTH = 32;
+	static constexpr int CHUNK_HEIGHT = 32;
 
 private:
 	int tileData[CHUNK_WIDTH][CHUNK_HEIGHT][CHUNK_WIDTH];

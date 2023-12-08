@@ -99,9 +99,9 @@ int main()
         /*player->AddChild(make_shared<PlayerCam>());*/
     }
 
-    auto clouds = Mgr(AssimpMgr)->Load("DefaultFogShader.glsl", "MyCube.fbx");
+    auto clouds = Mgr(AssimpMgr)->Load("CloudShader.glsl", "MyCube.fbx");
     clouds->GetTransform()->SetLocalPosition(glm::vec3(25.6f, 12.8f, 25.6f));
-    clouds->GetTransform()->SetLocalScale(glm::vec3(10.0f, 1.0f, 10.0f));
+    clouds->GetTransform()->SetLocalScale(glm::vec3(32.0f, 1.0f, 32.0f));
     curScene->AddObject(clouds, GROUP_TYPE::DEFAULT);
 
     shared_ptr<Material> material = make_shared<Material>();

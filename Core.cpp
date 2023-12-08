@@ -132,10 +132,10 @@ void Core::Init(const GLuint _winWidth, const GLuint _winHeight)
 	glClearColor(m_ClearColor.r, m_ClearColor.g, m_ClearColor.b, m_ClearColor.a);
 
 	glEnable(GL_DEPTH_TEST);
-	//glEnable(GL_CULL_FACE);
-	//
-	//glCullFace(GL_BACK);
-	//glFrontFace(GL_CW);
+	glEnable(GL_CULL_FACE);
+	
+	glCullFace(GL_BACK);
+	glFrontFace(GL_CW);
 
 	glDepthRange(0.0F, 1.0F);
 	glClearDepthf(1.0F);
