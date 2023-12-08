@@ -7,7 +7,8 @@ class Mesh;
 class MCTilemapMeshGenerator
 {
 public:
-	void CreateMesh(MCTilemap* tilemap)noexcept;
-	void AddPlaneGreedyMesh(int map[][MCTilemap::MAP_WIDTH], int mapWidth, int mapHeight, function<void(int, int, int, int)>&& vertexAddCallback, glm::vec3 normal, vector<glm::vec3>& vertices, vector<GLuint>& triangles, vector<glm::vec3>& normals, vector<glm::vec2>& uvs);
+	void CreateMeshAll(MCTilemap* tilemap);
+	shared_ptr<Mesh> CreateMeshFromChunk(MCTilemap* tilemap, int chunkX, int chunkZ) noexcept;
+	void AddPlaneGreedyMesh(int map[][MCTileChunk::CHUNK_WIDTH], int mapWidth, int mapHeight, function<void(int, int, int, int)>&& vertexAddCallback, glm::vec3 normal, vector<glm::vec3>& vertices, vector<GLuint>& triangles, vector<glm::vec3>& normals, vector<glm::vec2>& uvs);
 };
 

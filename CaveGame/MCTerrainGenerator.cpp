@@ -11,7 +11,7 @@ void MCTerrainGenerator::Generate(MCTilemap* tilemap)
 		{
 			for (int z = 0; z < MCTilemap::MAP_WIDTH; ++z)
 			{
-				float perlinValue = glm::perlin(glm::vec3(x, y, z) * 0.1f);
+				float perlinValue = Perlin::Noise(x * 0.1f, y * 0.1f, z * 0.1f);
 				int tile = perlinValue * 8.0f + 8.0f - y > 0.0f;
 				tilemap->SetTile(x, y, z, tile);
 			}

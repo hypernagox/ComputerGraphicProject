@@ -20,16 +20,13 @@ int main()
 
     glfwSetInputMode(Mgr(Core)->GetWinInfo(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    shared_ptr<Material> material = make_shared<Material>();
-    material->AddTexture2D("stone.png");
-
     std::thread([]()noexcept {
         MCTilemap* tilemap = new MCTilemap();
         MCTerrainGenerator* terrainGenerator = new MCTerrainGenerator();
         MCTilemapMeshGenerator* meshGenerator = new MCTilemapMeshGenerator();
 
         terrainGenerator->Generate(tilemap);
-        meshGenerator->CreateMesh(tilemap); }).detach();
+        meshGenerator->CreateMeshAll(tilemap); }).detach();
 
     const auto curScene = Mgr(SceneMgr)->GetCurScene();
     curScene->AddUpdateFp(SCENE_ADDED_UPDATE::PRERENDER, &Update);
@@ -47,8 +44,8 @@ int main()
         pLight->GetTransform()->SetLocalScale(0.1f);
         pLight->GetTransform()->SetLocalRotation(90.f, X_AXIS);
         pLight->GetTransform()->SetLookAt({ -3.5f,-1.2f,-1.2f });
-        l->SetAmbient(glm::vec3{ 0.75f, 0.75f, 0.75f });
-        l->SetDiffuse(glm::vec3{ 0.8f, 0.8f, 0.8f });
+        l->SetAmbient(glm::vec3{ 0.5f, 0.5f, 0.5f });
+        l->SetDiffuse(glm::vec3{ 1.0f, 1.0f, 1.0f });
         curScene->AddObject(pLight, GROUP_TYPE::MONSTER);
         pLight->SetObjName("light");
         auto pCol = pLight->AddComponent<Collider>();
@@ -93,9 +90,21 @@ int main()
     {
         auto player = make_shared<Player>();
         player->SetObjName("player");
+        player->GetTransform()->SetLocalPosition(glm::vec3(25.6f, 1.6f, 25.6f));
         curScene->AddObject(player, GROUP_TYPE::PLAYER);
         /*player->AddChild(make_shared<PlayerCam>());*/
     }
+
+    auto clouds = Mgr(AssimpMgr)->Load("DefaultFogShader.glsl", "MyCube.fbx");
+    clouds->GetTransform()->SetLocalPosition(glm::vec3(25.6f, 12.8f, 25.6f));
+    clouds->GetTransform()->SetLocalScale(glm::vec3(10.0f, 1.0f, 10.0f));
+    curScene->AddObject(clouds, GROUP_TYPE::DEFAULT);
+
+    shared_ptr<Material> material = make_shared<Material>();
+    material->AddTexture2D("clouds.png");
+
+    auto renderer = clouds->GetComp<MeshRenderer>();
+    renderer->AddMaterial(material);
 
     curScene->SetSkyBox(SKYBOX_TYPE::SPHERE, "basic_skybox_3d_flip.fbx", "skybox.png");
     Mgr(Core)->GameLoop();

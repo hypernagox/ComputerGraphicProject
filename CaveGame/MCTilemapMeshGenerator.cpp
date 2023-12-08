@@ -13,24 +13,59 @@
 #include "Transform.h"
 #include "EventMgr.h"
 
-void MCTilemapMeshGenerator::CreateMesh(MCTilemap* tilemap)noexcept
+void MCTilemapMeshGenerator::CreateMeshAll(MCTilemap* tilemap)
 {
+    for (int chunkX = 0; chunkX < MCTilemap::CHUNK_SIZE; ++chunkX)
+    {
+        for (int chunkZ = 0; chunkZ < MCTilemap::CHUNK_SIZE; ++chunkZ)
+        {
+            shared_ptr<Mesh> mesh = this->CreateMeshFromChunk(tilemap, chunkX, chunkZ);
+
+            Mgr(EventMgr)->AddEventNeedLock([=]() noexcept
+                {
+                    mesh->SetBuffers();
+
+                    shared_ptr<Material> material = make_shared<Material>();
+                    material->AddTexture2D("sand.png");
+
+                    shared_ptr<GameObj> terrainObj = GameObj::make_obj();
+                    terrainObj->GetTransform()->SetLocalScale(0.1f);
+                    terrainObj->GetTransform()->SetLocalPosition({ chunkX * MCTileChunk::CHUNK_WIDTH * 0.1f, 0.0f, chunkZ * MCTileChunk::CHUNK_WIDTH * 0.1f });
+
+                    auto renderer = terrainObj->AddComponent<MeshRenderer>();
+                    renderer->AddMesh(mesh);
+                    renderer->SetShader("DefaultFogShader.glsl");
+                    renderer->AddMaterial(material);
+
+                    const auto curScene = Mgr(SceneMgr)->GetCurScene();
+                    curScene->AddObject(terrainObj, GROUP_TYPE::DEFAULT);
+                });
+        }
+    }
+}
+
+shared_ptr<Mesh> MCTilemapMeshGenerator::CreateMeshFromChunk(MCTilemap* tilemap, int chunkX, int chunkZ) noexcept
+{
+    MCTileChunk* chunk = tilemap->GetChunk(chunkX, chunkZ);
+    int offsetX = chunkX * MCTileChunk::CHUNK_WIDTH;
+    int offsetZ = chunkZ * MCTileChunk::CHUNK_WIDTH;
+
     vector<glm::vec3> vertices;
     vector<GLuint> triangles;
     vector<glm::vec3> normals;
     vector<glm::vec2> uvs;
 
-    static int planeMap[MCTilemap::MAP_WIDTH][MCTilemap::MAP_WIDTH];
+    static int planeMap[MCTileChunk::CHUNK_WIDTH][MCTileChunk::CHUNK_WIDTH];
 
-    for (int y = 0; y < MCTilemap::MAP_HEIGHT; y++)
+    for (int y = 0; y < MCTileChunk::CHUNK_HEIGHT; y++)
     {
-        for (int x = 0; x < MCTilemap::MAP_WIDTH; x++)
+        for (int x = 0; x < MCTileChunk::CHUNK_WIDTH; x++)
         {
-            for (int z = 0; z < MCTilemap::MAP_WIDTH; z++)
-                planeMap[x][z] = tilemap->GetTile(x, y, z) ? (y < MCTilemap::MAP_HEIGHT - 1 ? (tilemap->GetTile(x, y + 1, z) ? 0 : 1) : 1) : 0;
+            for (int z = 0; z < MCTileChunk::CHUNK_WIDTH; z++)
+                planeMap[x][z] = tilemap->GetTile(x + offsetX, y, z + offsetZ) ? (y < MCTilemap::MAP_HEIGHT - 1 ? (tilemap->GetTile(x + offsetX, y + 1, z + offsetZ) ? 0 : 1) : 1) : 0;
         }
 
-        AddPlaneGreedyMesh(planeMap, MCTilemap::MAP_WIDTH, MCTilemap::MAP_WIDTH, [&vertices, y](int xmin, int ymin, int xmax, int ymax)
+        AddPlaneGreedyMesh(planeMap, MCTileChunk::CHUNK_WIDTH, MCTileChunk::CHUNK_WIDTH, [&vertices, y](int xmin, int ymin, int xmax, int ymax)
             {
                 vertices.push_back(glm::vec3(xmin, y + 1, ymin));
                 vertices.push_back(glm::vec3(xmax, y + 1, ymin));
@@ -39,15 +74,15 @@ void MCTilemapMeshGenerator::CreateMesh(MCTilemap* tilemap)noexcept
             }, glm::vec3(0.0f, 1.0f, 0.0f), vertices, triangles, normals, uvs);
     }
 
-    for (int y = 0; y < MCTilemap::MAP_HEIGHT; y++)
+    for (int y = 0; y < MCTileChunk::CHUNK_HEIGHT; y++)
     {
-        for (int x = 0; x < MCTilemap::MAP_WIDTH; x++)
+        for (int x = 0; x < MCTileChunk::CHUNK_WIDTH; x++)
         {
-            for (int z = 0; z < MCTilemap::MAP_WIDTH; z++)
-                planeMap[x][z] = tilemap->GetTile(x, y, z) ? (y > 0 ? (tilemap->GetTile(x, y - 1, z) ? 0 : 1) : 1) : 0;
+            for (int z = 0; z < MCTileChunk::CHUNK_WIDTH; z++)
+                planeMap[x][z] = tilemap->GetTile(x + offsetX, y, z + offsetZ) ? (y > 0 ? (tilemap->GetTile(x + offsetX, y - 1, z + offsetZ) ? 0 : 1) : 1) : 0;
         }
 
-        AddPlaneGreedyMesh(planeMap, MCTilemap::MAP_WIDTH, MCTilemap::MAP_WIDTH, [&vertices, y](int xmin, int ymin, int xmax, int ymax)
+        AddPlaneGreedyMesh(planeMap, MCTileChunk::CHUNK_WIDTH, MCTileChunk::CHUNK_WIDTH, [&vertices, y](int xmin, int ymin, int xmax, int ymax)
             {
                 vertices.push_back(glm::vec3(xmax, y, ymin));
                 vertices.push_back(glm::vec3(xmin, y, ymin));
@@ -56,15 +91,15 @@ void MCTilemapMeshGenerator::CreateMesh(MCTilemap* tilemap)noexcept
             }, glm::vec3(0.0f, -1.0f, 0.0f), vertices, triangles, normals, uvs);
     }
 
-    for (int x = 0; x < MCTilemap::MAP_WIDTH; x++)
+    for (int x = 0; x < MCTileChunk::CHUNK_WIDTH; x++)
     {
-        for (int y = 0; y < MCTilemap::MAP_HEIGHT; y++)
+        for (int y = 0; y < MCTileChunk::CHUNK_HEIGHT; y++)
         {
-            for (int z = 0; z < MCTilemap::MAP_WIDTH; z++)
-                planeMap[z][y] = tilemap->GetTile(x, y, z) ? (x < MCTilemap::MAP_WIDTH - 1 ? (tilemap->GetTile(x + 1, y, z) ? 0 : 1) : 1) : 0;
+            for (int z = 0; z < MCTileChunk::CHUNK_WIDTH; z++)
+                planeMap[z][y] = tilemap->GetTile(x + offsetX, y, z + offsetZ) ? (x + offsetX < MCTilemap::MAP_WIDTH - 1 ? (tilemap->GetTile(x + offsetX + 1, y, z + offsetZ) ? 0 : 1) : 1) : 0;
         }
 
-        AddPlaneGreedyMesh(planeMap, MCTilemap::MAP_WIDTH, MCTilemap::MAP_HEIGHT, [&vertices, x](int xmin, int ymin, int xmax, int ymax)
+        AddPlaneGreedyMesh(planeMap, MCTileChunk::CHUNK_WIDTH, MCTileChunk::CHUNK_HEIGHT, [&vertices, x](int xmin, int ymin, int xmax, int ymax)
             {
                 vertices.push_back(glm::vec3(x + 1, ymin, xmin));
                 vertices.push_back(glm::vec3(x + 1, ymin, xmax));
@@ -73,15 +108,15 @@ void MCTilemapMeshGenerator::CreateMesh(MCTilemap* tilemap)noexcept
             }, glm::vec3(1.0f, 0.0f, 0.0f), vertices, triangles, normals, uvs);
     }
 
-    for (int x = 0; x < MCTilemap::MAP_WIDTH; x++)
+    for (int x = 0; x < MCTileChunk::CHUNK_WIDTH; x++)
     {
-        for (int y = 0; y < MCTilemap::MAP_HEIGHT; y++)
+        for (int y = 0; y < MCTileChunk::CHUNK_HEIGHT; y++)
         {
-            for (int z = 0; z < MCTilemap::MAP_WIDTH; z++)
-                planeMap[z][y] = tilemap->GetTile(x, y, z) ? (x > 0 ? (tilemap->GetTile(x - 1, y, z) ? 0 : 1) : 1) : 0;
+            for (int z = 0; z < MCTileChunk::CHUNK_WIDTH; z++)
+                planeMap[z][y] = tilemap->GetTile(x + offsetX, y, z + offsetZ) ? (x + offsetX > 0 ? (tilemap->GetTile(x + offsetX - 1, y, z + offsetZ) ? 0 : 1) : 1) : 0;
         }
 
-        AddPlaneGreedyMesh(planeMap, MCTilemap::MAP_WIDTH, MCTilemap::MAP_HEIGHT, [&vertices, x](int xmin, int ymin, int xmax, int ymax)
+        AddPlaneGreedyMesh(planeMap, MCTileChunk::CHUNK_WIDTH, MCTileChunk::CHUNK_HEIGHT, [&vertices, x](int xmin, int ymin, int xmax, int ymax)
             {
                 vertices.push_back(glm::vec3(x, ymin, xmax));
                 vertices.push_back(glm::vec3(x, ymin, xmin));
@@ -90,15 +125,15 @@ void MCTilemapMeshGenerator::CreateMesh(MCTilemap* tilemap)noexcept
             }, glm::vec3(-1.0f, 0.0f, 0.0f), vertices, triangles, normals, uvs);
     }
 
-    for (int z = 0; z < MCTilemap::MAP_WIDTH; z++)
+    for (int z = 0; z < MCTileChunk::CHUNK_WIDTH; z++)
     {
-        for (int y = 0; y < MCTilemap::MAP_HEIGHT; y++)
+        for (int y = 0; y < MCTileChunk::CHUNK_HEIGHT; y++)
         {
-            for (int x = 0; x < MCTilemap::MAP_WIDTH; x++)
-                planeMap[x][y] = tilemap->GetTile(x, y, z) ? (z < MCTilemap::MAP_WIDTH - 1 ? (tilemap->GetTile(x, y, z + 1) ? 0 : 1) : 1) : 0;
+            for (int x = 0; x < MCTileChunk::CHUNK_WIDTH; x++)
+                planeMap[x][y] = tilemap->GetTile(x + offsetX, y, z + offsetZ) ? (z + offsetZ < MCTilemap::MAP_WIDTH - 1 ? (tilemap->GetTile(x + offsetX, y, z + offsetZ + 1) ? 0 : 1) : 1) : 0;
         }
 
-        AddPlaneGreedyMesh(planeMap, MCTilemap::MAP_WIDTH, MCTilemap::MAP_HEIGHT, [&vertices, z](int xmin, int ymin, int xmax, int ymax)
+        AddPlaneGreedyMesh(planeMap, MCTileChunk::CHUNK_WIDTH, MCTileChunk::CHUNK_HEIGHT, [&vertices, z](int xmin, int ymin, int xmax, int ymax)
             {
                 vertices.push_back(glm::vec3(xmax, ymin, z + 1));
                 vertices.push_back(glm::vec3(xmin, ymin, z + 1));
@@ -107,15 +142,15 @@ void MCTilemapMeshGenerator::CreateMesh(MCTilemap* tilemap)noexcept
             }, glm::vec3(0.0f, 0.0f, 1.0f), vertices, triangles, normals, uvs);
     }
 
-    for (int z = 0; z < MCTilemap::MAP_WIDTH; z++)
+    for (int z = 0; z < MCTileChunk::CHUNK_WIDTH; z++)
     {
-        for (int y = 0; y < MCTilemap::MAP_HEIGHT; y++)
+        for (int y = 0; y < MCTileChunk::CHUNK_HEIGHT; y++)
         {
-            for (int x = 0; x < MCTilemap::MAP_WIDTH; x++)
-                planeMap[x][y] = tilemap->GetTile(x, y, z) ? (z > 0 ? (tilemap->GetTile(x, y, z - 1) ? 0 : 1) : 1) : 0;
+            for (int x = 0; x < MCTileChunk::CHUNK_WIDTH; x++)
+                planeMap[x][y] = tilemap->GetTile(x + offsetX, y, z + offsetZ) ? (z + offsetZ > 0 ? (tilemap->GetTile(x + offsetX, y, z + offsetZ - 1) ? 0 : 1) : 1) : 0;
         }
 
-        AddPlaneGreedyMesh(planeMap, MCTilemap::MAP_WIDTH, MCTilemap::MAP_HEIGHT, [&vertices, z](int xmin, int ymin, int xmax, int ymax)
+        AddPlaneGreedyMesh(planeMap, MCTileChunk::CHUNK_WIDTH, MCTileChunk::CHUNK_HEIGHT, [&vertices, z](int xmin, int ymin, int xmax, int ymax)
             {
                 vertices.push_back(glm::vec3(xmin, ymin, z));
                 vertices.push_back(glm::vec3(xmax, ymin, z));
@@ -128,34 +163,17 @@ void MCTilemapMeshGenerator::CreateMesh(MCTilemap* tilemap)noexcept
     for (int index = 0; index < vertices.size(); ++index)
     {
         Vertex v(vertices[index]);
-        // v.position.y = -v.position.y;
         v.normal = normals[index];
         v.color = glm::vec4{ glm::abs(v.normal),1.f };
-
         v.uv = uvs[index];
         sVertices.push_back(v);
     }
 
     shared_ptr<Mesh> mesh = make_shared<Mesh>(sVertices, triangles);
-
-    Mgr(EventMgr)->AddEventNeedLock([mesh]()noexcept {
-        shared_ptr<Material> material = make_shared<Material>();
-        material->AddTexture2D("stone.png");
-        shared_ptr<GameObj> terrainObj = GameObj::make_obj();
-        auto renderer = terrainObj->AddComponent<MeshRenderer>();
-        renderer->AddMesh(mesh);
-        renderer->SetShader("DefaultShader.glsl");
-        renderer->AddMaterial(material);
-        terrainObj->GetTransform()->SetLocalScale(0.1f);
-        terrainObj->GetTransform()->SetLocalPosition({ -3.5f,-1.2f,-1.2f });
-        mesh->SetBuffers();
-        const auto curScene = Mgr(SceneMgr)->GetCurScene();
-        curScene->AddObject(terrainObj, GROUP_TYPE::DEFAULT);
-        });
-      
+    return mesh;
 }
 
-void MCTilemapMeshGenerator::AddPlaneGreedyMesh(int map[][MCTilemap::MAP_WIDTH], int mapWidth, int mapHeight, function<void(int, int, int, int)>&& vertexAddCallback, glm::vec3 normal, vector<glm::vec3>& vertices, vector<GLuint>& triangles, vector<glm::vec3>& normals, vector<glm::vec2>& uvs)
+void MCTilemapMeshGenerator::AddPlaneGreedyMesh(int map[][MCTileChunk::CHUNK_WIDTH], int mapWidth, int mapHeight, function<void(int, int, int, int)>&& vertexAddCallback, glm::vec3 normal, vector<glm::vec3>& vertices, vector<GLuint>& triangles, vector<glm::vec3>& normals, vector<glm::vec2>& uvs)
 {
     for (int y = 0; y < mapHeight; y++)
     {
