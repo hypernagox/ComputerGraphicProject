@@ -14,13 +14,16 @@
 #include "EventMgr.h"
 #include "ChunkMesh.h"
 
+
+static constexpr uint MAX_TEXTURE = 36;
+
 void MCTilemapMeshGenerator::CreateMeshAll(MCTilemap* tilemap)
 {
-    shared_ptr<Material> material[36];
+    shared_ptr<Material> material[MAX_TEXTURE];
 
-    shared_ptr<ChunkMesh> pChunkDatas[36];
+    shared_ptr<ChunkMesh> pChunkDatas[MAX_TEXTURE];
 
-    for (int i = 0; i < 36; ++i)
+    for (int i = 0; i < MAX_TEXTURE; ++i)
     {
         material[i] = make_shared<Material>();
         material[i]->AddTexture2D("sand.png");
@@ -33,7 +36,7 @@ void MCTilemapMeshGenerator::CreateMeshAll(MCTilemap* tilemap)
     {
         for (int chunkZ = 0; chunkZ < MCTilemap::CHUNK_SIZE; ++chunkZ)
         {
-            for (int textureID = 0; textureID < 36; ++textureID)
+            for (int textureID = 0; textureID < MAX_TEXTURE; ++textureID)
             {
                 shared_ptr<Mesh> mesh = this->CreateMeshFromChunk(tilemap, chunkX, chunkZ);
                 shared_ptr<GameObj> terrainObj = GameObj::make_obj();
@@ -49,12 +52,12 @@ void MCTilemapMeshGenerator::CreateMeshAll(MCTilemap* tilemap)
     Mgr(EventMgr)->AddEventNeedLock([pChunkDatas]() noexcept
         {   
             const auto curScene = Mgr(SceneMgr)->GetCurScene();
-            for (int i = 0; i < 36; ++i)
+            for (int i = 0; i < MAX_TEXTURE; ++i)
             {
                 Mgr(ThreadMgr)->Enqueue(&ChunkMesh::MergeMeshData, pChunkDatas[i].get());
             }
             Mgr(ThreadMgr)->WaitAllJob();
-            for (int i = 0; i < 36; ++i)
+            for (int i = 0; i < MAX_TEXTURE; ++i)
             {
                 pChunkDatas[i]->InitChunkMesh("DefaultFogShader.glsl");
 
