@@ -8,6 +8,7 @@ class Shader;
 class Mesh;
 class Transform;
 class Material;
+class Texture;
 
 struct RenderInfo
 {
@@ -40,13 +41,17 @@ private:
 	std::unordered_map<string, InstancingPartsAndUpdateMat> m_mapResNameAndPartsUpdateMat;
 	std::unordered_map<string, InstancingPartsAndRenderInfo> m_mapResNameAndPartsRenderInfo;
 	std::unordered_set<string> m_setResNameForUnique;
+
+	std::unordered_map<string,shared_ptr<Texture>> m_mapEnvMappingObj;
+
 	using TempBlock = std::aligned_storage<sizeof(std::shared_ptr<GameObj>), alignof(std::shared_ptr<GameObj>)>::type;
 	//vector<vector<shared_ptr<GameObj>>> m_vecTemporaryObject;
 	vector<vector<TempBlock>> m_vecTemporaryObject;
 	shared_ptr<Shader> m_pShaderForInstancing;
+	shared_ptr<Shader> m_pShaderForInstancingAndEnv;
 	GLuint instanceVBO;
 private:
-	void InitInstanceData(string_view strResName,shared_ptr<Model> pModel)noexcept;
+	void InitInstanceData(string_view strResName,shared_ptr<Model> pModel,const bool bIsEnv_ = false)noexcept;
 public:
 	void Init();
 	void AddInstancingList(shared_ptr<GameObj> pObj)noexcept;

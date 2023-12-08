@@ -1,9 +1,15 @@
 #include "pch.h"
 #include "ParticleMgr.h"
 #include "Core.h"
+#include "Transform.h"
+#include "MeshRenderer.h"
 
-ParticleMgr::ParticleMgr()
+ParticleMgr::ParticleMgr()noexcept
 {
+	for (auto& particle : m_arrParticles)
+	{
+		particle = make_shared<Particle>();
+	}
 }
 
 ParticleMgr::~ParticleMgr()
@@ -14,33 +20,18 @@ void ParticleMgr::Init()
 {
 }
 
-void ParticleMgr::SetParticles(const glm::vec2& vPos_, const glm::vec3& vColor_, const glm::vec2& vSize_)
+void ParticleMgr::SetParticles(const shared_ptr<GameObj>& pObj_, const float fScaleRatio,const glm::vec3& worldPos)noexcept
 {
-	const unsigned short end_particles = m_iCurParticleNum + 20;
-	static const auto cache = m_arrParticles.data();
+	const unsigned short end_particles = m_iCurParticleNum + PARTICE_STEP;
+	const auto cache = m_arrParticles.data();
+	const auto pTrans = pObj_->GetTransform();
+	string_view strResName = pObj_ -> GetResName();
+	const auto mr = pObj_->GetComp<MeshRenderer>();
+	const glm::vec3 particlePos = IsZeroVector(worldPos) ? pTrans->GetWorldPosition() : worldPos;
+	const glm::vec3 particleScale = pTrans->GetLocalScale() * fScaleRatio;
 	for (unsigned short i = m_iCurParticleNum; i < end_particles; ++i)
 	{
-		cache[i].SetParticleSize(vSize_);
-		cache[i].ActivateParticle(vPos_,vColor_);
+		cache[i]->ActivateParticle(mr, strResName, particlePos, particleScale);
 	}
-	m_iCurParticleNum = (m_iCurParticleNum + 20) % 1000;
-}
-
-void ParticleMgr::Update()
-{
-	static const auto cache = m_arrParticles.data();
-	for (unsigned short i = 0; i < 1000; ++i)
-	{
-		if (cache[i].IsActivate())
-		{
-			cache[i].Update();
-		}
-	}
-	for (unsigned short i = 0; i < 1000; ++i)
-	{
-		if (cache[i].IsActivate())
-		{
-			cache[i].Render();
-		}
-	}
+	m_iCurParticleNum = (m_iCurParticleNum + PARTICE_STEP) % MAX_PARTICLE;
 }

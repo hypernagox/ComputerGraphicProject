@@ -10,6 +10,9 @@
 #include "Bullet.h"
 #include "EventMgr.h"
 #include "RayCaster.h"
+#include "MeshRenderer.h"
+
+#include "ParticleMgr.h"
 
 glm::vec3 temp;
 void Player::ChangeCamType() noexcept
@@ -130,6 +133,12 @@ void Player::Update()
 	}
 	UpdatePlayerCamFpsMode();
 	GameObj::Update();
+	//TODO юс╫ц
+	const auto [target, point] = Mgr(RayCaster)->GetPickedObjAndPoint();
+	if (target)
+	{
+		Mgr(ParticleMgr)->SetParticles(target, 0.1f, point);
+	}
 }
 
 const glm::vec3 Player::GetPlayerLook() const noexcept

@@ -18,7 +18,7 @@ int main()
     Mgr(Core)->Init();
     Mgr(Core)->SetClearColor(RGBA_WHITE);
 
-    glfwSetInputMode(Mgr(Core)->GetWinInfo(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    //glfwSetInputMode(Mgr(Core)->GetWinInfo(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     shared_ptr<Material> material = make_shared<Material>();
     material->AddTexture2D("stone.png");
@@ -53,6 +53,10 @@ int main()
         pLight->SetObjName("light");
         auto pCol = pLight->AddComponent<Collider>();
         pCol->SetColBoxScale({ 5,5,5 });
+
+        Mgr(RayCaster)->RegisterMeshRayIntersect(pLight);
+       // Mgr(InstancingMgr)->AddInstancingList(pLight);
+
         pCol->GetCollisionHandler()->SetCollisionHandlerFunc([l,pLight](auto& a, auto& b) {
             static auto s = l->GetLightSpecular();
             static auto d = l->GetLightDiffuse();
@@ -92,7 +96,8 @@ int main()
     Mgr(CollisionMgr)->RegisterGroup(GROUP_TYPE::MONSTER, GROUP_TYPE::PROJ_PLAYER);
     {
         auto player = make_shared<Player>();
-        player->SetObjName("player");
+        //player->SetObjName("player");
+        player->GetTransform()->SetLocalPosition({ 0,5,0 });
         curScene->AddObject(player, GROUP_TYPE::PLAYER);
         /*player->AddChild(make_shared<PlayerCam>());*/
     }

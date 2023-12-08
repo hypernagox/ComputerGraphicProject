@@ -30,6 +30,7 @@ MeshRenderer::MeshRenderer(const MeshRenderer& other)
 	,m_vecMesh{other.m_vecMesh}
 	,m_vecMaterial{other.m_vecMaterial}
 	,m_pShader{other.m_pShader}
+	,m_mapModelData{other.m_mapModelData}
 {
 	if (other.m_pModelData)
 	{

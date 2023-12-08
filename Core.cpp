@@ -227,7 +227,7 @@ void Core::Init(const GLuint _winWidth, const GLuint _winHeight)
 	Mgr(TimeMgr)->Init();
 }
 
-void Core::GameLoop()
+void Core::GameLoop() // << std::function<void(void)> Yups Update Loop Here
 {
 	Mgr(SceneMgr)->GetCurScene()->Awake();
 	Mgr(SceneMgr)->GetCurScene()->Start();
@@ -246,6 +246,13 @@ void Core::GameLoop()
 		
 		Mgr(KeyMgr)->Update();
 		Mgr(TimeMgr)->Update();
+
+
+		// << std::function<void(void)> Yups Update Loop Here //
+
+
+
+
 		Mgr(SceneMgr)->Update();
 
 		Mgr(SceneMgr)->PreFinalUpdate();
@@ -268,8 +275,6 @@ void Core::GameLoop()
 		{
 			g_resetMemPool.get();
 		}
-
-		Mgr(ParticleMgr)->Update();
 
 		Mgr(CollisionMgr)->RenderCollisionBox();
 
