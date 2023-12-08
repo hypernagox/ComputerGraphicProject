@@ -14,7 +14,6 @@
 
 #include "ParticleMgr.h"
 
-glm::vec3 temp;
 void Player::ChangeCamType() noexcept
 {
 
@@ -37,31 +36,75 @@ void Player::InitCamDirection() noexcept
 	m_rendererObj->GetTransform()->SetLocalRotation(glm::quat(glm::vec3(0.0f, glm::radians(-90.0f), 0.0f)));
 }
 
+void Player::MoveByView(const glm::vec3& vDelta)
+{
+	glm::vec3 vWorldDelta = glm::quat(glm::vec3(0.0f, glm::radians(m_cameraAngleAxis.y), 0.0f)) * vDelta;
+	m_vAccelation += vWorldDelta;
+	m_rendererBodyAngleY = Lerp(m_rendererBodyAngleY, m_cameraAngleAxis.y, DT * 8.0f);
+}
+
+void Player::UpdateRenderer()
+{
+	float rotationFactor = glm::length(m_vVelocity) * sin(m_fMoveTime * 10.0f) * glm::pi<float>() * 0.25f;
+
+	m_rendererBodyAngleY = glm::clamp(m_rendererBodyAngleY, m_cameraAngleAxisSmooth.y - 30.0f, m_cameraAngleAxisSmooth.y + 30.0f);
+	m_rendererObj->GetTransform()->SetLocalRotation(glm::quat(glm::vec3(0.0f, glm::radians(m_rendererBodyAngleY - 90.0f), 0.0f)));
+
+	glm::quat headRotation = glm::quat(glm::vec3(glm::radians(90.0f), glm::radians(m_cameraAngleAxisSmooth.y - m_rendererBodyAngleY), 0.0f));
+	headRotation = glm::rotate(headRotation, glm::radians(glm::clamp(-m_cameraAngleAxisSmooth.x, -60.0f, 60.0f)), glm::vec3(0.0f, 1.0f, 0.0f));
+	m_transformHead->SetLocalRotation(headRotation);
+	m_transformHeadOut->SetLocalRotation(headRotation);
+
+	m_transformLArm->SetLocalPosition(glm::vec3(rotationFactor * 120.0f, 0.0f, m_transformLArm->GetLocalPosition().z));
+	m_transformLArmOut->SetLocalPosition(glm::vec3(rotationFactor * 120.0f, 0.0f, m_transformLArmOut->GetLocalPosition().z));
+	m_transformRArm->SetLocalPosition(glm::vec3(-rotationFactor * 120.0f, 0.0f, m_transformRArm->GetLocalPosition().z));
+	m_transformRArmOut->SetLocalPosition(glm::vec3(-rotationFactor * 120.0f, 0.0f, m_transformRArmOut->GetLocalPosition().z));
+	m_transformLLeg->SetLocalPosition(glm::vec3(-rotationFactor * 120.0f, m_transformLLeg->GetLocalPosition().y, m_transformLLeg->GetLocalPosition().z));
+	m_transformLLegOut->SetLocalPosition(glm::vec3(-rotationFactor * 120.0f, m_transformLLegOut->GetLocalPosition().y, m_transformLLegOut->GetLocalPosition().z));
+	m_transformRLeg->SetLocalPosition(glm::vec3(rotationFactor * 120.0f, m_transformRLeg->GetLocalPosition().y, m_transformRLeg->GetLocalPosition().z));
+	m_transformRLegOut->SetLocalPosition(glm::vec3(rotationFactor * 120.0f, m_transformRLegOut->GetLocalPosition().y, m_transformRLegOut->GetLocalPosition().z));
+
+	m_transformLArm->SetLocalRotation(glm::quat(glm::vec3(glm::radians(90.0f), 0.0f, rotationFactor)));
+	m_transformLArmOut->SetLocalRotation(glm::quat(glm::vec3(glm::radians(90.0f), 0.0f, rotationFactor)));
+	m_transformRArm->SetLocalRotation(glm::quat(glm::vec3(glm::radians(90.0f), 0.0f, -rotationFactor)));
+	m_transformRArmOut->SetLocalRotation(glm::quat(glm::vec3(glm::radians(90.0f), 0.0f, -rotationFactor)));
+	m_transformLLeg->SetLocalRotation(glm::quat(glm::vec3(glm::radians(90.0f), 0.0f, -rotationFactor)));
+	m_transformLLegOut->SetLocalRotation(glm::quat(glm::vec3(glm::radians(90.0f), 0.0f, -rotationFactor)));
+	m_transformRLeg->SetLocalRotation(glm::quat(glm::vec3(glm::radians(90.0f), 0.0f, rotationFactor)));
+	m_transformRLegOut->SetLocalRotation(glm::quat(glm::vec3(glm::radians(90.0f), 0.0f, rotationFactor)));
+}
+
 Player::Player()
 {
-	shared_ptr<Material> material = make_shared<Material>();
-	m_rendererObj = Mgr(AssimpMgr)->Load("DefaultShader.glsl", "Player.fbx");
+	m_rendererObj = Mgr(AssimpMgr)->LoadAllPartsAsGameObj("DefaultWarpShader.glsl", "Player.fbx");
 	m_rendererObj->GetTransform()->SetLocalScale(0.0003f);
 
-	auto renderer = m_rendererObj->GetComp<MeshRenderer>();
-	renderer->SetShader("DefaultShader.glsl");
-	renderer->AddMaterial(material);
+	m_transformHead = m_rendererObj->FindChildObj("Head")->GetTransform();
+	m_transformHeadOut = m_rendererObj->FindChildObj("HeadOut")->GetTransform();
+	m_transformLArm = m_rendererObj->FindChildObj("LArm")->GetTransform();
+	m_transformLArmOut = m_rendererObj->FindChildObj("LArmOut")->GetTransform();
+	m_transformRArm = m_rendererObj->FindChildObj("RArm")->GetTransform();
+	m_transformRArmOut = m_rendererObj->FindChildObj("RArmOut")->GetTransform();
+	m_transformLLeg = m_rendererObj->FindChildObj("LLeg")->GetTransform();
+	m_transformLLegOut = m_rendererObj->FindChildObj("LLegOut")->GetTransform();
+	m_transformRLeg = m_rendererObj->FindChildObj("RLeg")->GetTransform();
+	m_transformRLegOut = m_rendererObj->FindChildObj("RLegOut")->GetTransform();
 
-	m_fpChangeCamMode[0] = [this]()noexcept {
+	m_fpChangeCamMode[0] = [this]() noexcept {
 		m_cameraObj->GetTransform()->SetLocalPosition(glm::zero<glm::vec3>());
 		m_cameraObj->GetTransform()->SetLocalRotation(glm::identity<glm::quat>());
 		};
-	m_fpChangeCamMode[1] = [this]()noexcept {
+	m_fpChangeCamMode[1] = [this]() noexcept {
 		m_cameraObj->GetTransform()->SetLocalPosition(glm::vec3(0.0f, 0.0f, -0.75f));
 		m_cameraObj->GetTransform()->SetLocalRotation(glm::identity<glm::quat>());
 		};
-	m_fpChangeCamMode[2] = [this]()noexcept {
+	m_fpChangeCamMode[2] = [this]() noexcept {
 		m_cameraObj->GetTransform()->SetLocalPosition(glm::vec3(0.0f, 0.0f, 0.75f));
 		m_cameraObj->GetTransform()->SetLocalRotation(glm::quat(glm::vec3(0.0f, glm::pi<float>(), 0.0f)));
 		};
 
 	m_cameraAnchor = make_obj<GameObj>();
-	m_cameraAnchor->GetTransform()->SetLocalPosition(glm::vec3(0.0f, 0.2f, 0.0f));
+	m_cameraAnchor->GetTransform()->SetLocalPosition(glm::vec3(0.0f, 0.1f, 0.0f));
 
 	m_cameraObj = make_obj<GameObj>();
 	m_fpChangeCamMode[m_curCamMode]();
@@ -74,6 +117,7 @@ Player::Player()
 
 Player::~Player()
 {
+
 }
 
 void Player::Start()
@@ -90,21 +134,23 @@ void Player::Update()
 {
 	const auto pPlayerTrans = GetTransform();
 
+	m_vAccelation = glm::zero<glm::vec3>();
+
 	if (KEY_HOLD(GLFW_KEY_A))
 	{
-		pPlayerTrans->AddLeftRight(-m_fMoveSpeed * DT);
+		MoveByView(glm::vec3(-1.0f, 0.0f, 0.0f) * 10.0f);
 	}
 	if (KEY_HOLD(GLFW_KEY_W))
 	{
-		pPlayerTrans->AddFrontBack(m_fMoveSpeed * DT);
+		MoveByView(glm::vec3(0.0f, 0.0f, 1.0f) * 10.0f);
 	}
 	if (KEY_HOLD(GLFW_KEY_S))
 	{
-		pPlayerTrans->AddFrontBack(-m_fMoveSpeed * DT);
+		MoveByView(glm::vec3(0.0f, 0.0f, -1.0f) * 10.0f);
 	}
 	if (KEY_HOLD(GLFW_KEY_D))
 	{
-		pPlayerTrans->AddLeftRight(m_fMoveSpeed * DT);
+		MoveByView(glm::vec3(1.0f, 0.0f, 0.0f) * 10.0f);
 	}
 	if (KEY_HOLD(GLFW_KEY_Q))
 	{
@@ -116,11 +162,11 @@ void Player::Update()
 	}
 	if (KEY_HOLD(GLFW_KEY_SPACE))
 	{
-		pPlayerTrans->AddUpDown(m_fMoveSpeed * DT);
+		MoveByView(glm::vec3(0.0f, 1.0f, 0.0f) * 10.0f);
 	}
 	if (KEY_HOLD(GLFW_KEY_LEFT_SHIFT))
 	{
-		pPlayerTrans->AddUpDown(-m_fMoveSpeed * DT);
+		MoveByView(glm::vec3(0.0f, -1.0f, 0.0f) * 10.0f);
 	}
 	if (KEY_TAP(GLFW_KEY_F5))
 	{
@@ -131,6 +177,19 @@ void Player::Update()
 	{
 		Fire();
 	}
+
+	m_vVelocity = m_vVelocity + m_vAccelation * DT;
+	float l = glm::length(m_vVelocity);
+	if (l > m_vVelocityMax)
+		m_vVelocity *= m_vVelocityMax / l;
+	if (l > 0.0f)
+		m_vVelocity = m_vVelocity - glm::normalize(m_vVelocity) * glm::min(l, 2.0f * DT);
+
+	m_fMoveTime += glm::length(m_vVelocity) * DT;
+
+	glm::vec3 position = GetTransform()->GetLocalPosition();
+	GetTransform()->SetLocalPosition(position + m_vVelocity * DT);
+
 	UpdatePlayerCamFpsMode();
 	GameObj::Update();
 	//TODO юс╫ц
@@ -139,6 +198,8 @@ void Player::Update()
 	{
 		Mgr(ParticleMgr)->SetParticles(target, 0.1f, point);
 	}
+
+	UpdateRenderer();
 }
 
 const glm::vec3 Player::GetPlayerLook() const noexcept

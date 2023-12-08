@@ -18,15 +18,14 @@ int main()
     Mgr(Core)->Init();
     Mgr(Core)->SetClearColor(RGBA_WHITE);
 
-    //glfwSetInputMode(Mgr(Core)->GetWinInfo(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(Mgr(Core)->GetWinInfo(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    std::thread([]()noexcept {
-        MCTilemap* tilemap = new MCTilemap();
-        MCTerrainGenerator* terrainGenerator = new MCTerrainGenerator();
-        MCTilemapMeshGenerator* meshGenerator = new MCTilemapMeshGenerator();
+    MCTilemap* tilemap = new MCTilemap();
+    MCTerrainGenerator* terrainGenerator = new MCTerrainGenerator();
+    MCTilemapMeshGenerator* meshGenerator = new MCTilemapMeshGenerator();
+    terrainGenerator->Generate(tilemap);
 
-        terrainGenerator->Generate(tilemap);
-        meshGenerator->CreateMeshAll(tilemap); }).detach();
+    std::thread([meshGenerator, tilemap]()noexcept { meshGenerator->CreateMeshAll(tilemap); }).detach();
 
     const auto curScene = Mgr(SceneMgr)->GetCurScene();
     curScene->AddUpdateFp(SCENE_ADDED_UPDATE::PRERENDER, &Update);
