@@ -37,9 +37,8 @@ void Player::InitCamDirection() noexcept
 Player::Player()
 {
 	shared_ptr<Material> material = make_shared<Material>();
-	material->AddTexture2D("player.png");
-	m_rendererObj = Mgr(AssimpMgr)->Load("DefaultShader.glsl", "Player.obj");
-	m_rendererObj->GetTransform()->SetLocalScale(0.03f);
+	m_rendererObj = Mgr(AssimpMgr)->Load("DefaultShader.glsl", "Player.fbx");
+	m_rendererObj->GetTransform()->SetLocalScale(0.0003f);
 
 	auto renderer = m_rendererObj->GetComp<MeshRenderer>();
 	renderer->SetShader("DefaultShader.glsl");
@@ -112,11 +111,11 @@ void Player::Update()
 	{
 		pPlayerTrans->AddWorldRotation(50.f * DT, Y_AXIS);
 	}
-	if (KEY_HOLD(GLFW_KEY_UP))
+	if (KEY_HOLD(GLFW_KEY_SPACE))
 	{
 		pPlayerTrans->AddUpDown(m_fMoveSpeed * DT);
 	}
-	if (KEY_HOLD(GLFW_KEY_DOWN))
+	if (KEY_HOLD(GLFW_KEY_LEFT_SHIFT))
 	{
 		pPlayerTrans->AddUpDown(-m_fMoveSpeed * DT);
 	}
