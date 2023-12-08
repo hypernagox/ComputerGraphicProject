@@ -15,7 +15,7 @@ ChunkMesh::~ChunkMesh()
 {
     glDeleteVertexArrays(1, &vao);
     glDeleteBuffers(1, &vbo);
-    //glDeleteBuffers(1, &ebo);
+    glDeleteBuffers(1, &ebo);
 }
 
 void ChunkMesh::MergeMeshData() noexcept
