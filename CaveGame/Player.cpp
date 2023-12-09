@@ -15,6 +15,7 @@
 #include "ParticleMgr.h"
 #include "Material.h"
 #include "PlayerShadow.h"
+#include "MCTilemap.h"
 
 void Player::ChangeCamType() noexcept
 {
@@ -76,9 +77,10 @@ void Player::UpdateRenderer()
 	m_transformRLegOut->SetLocalRotation(glm::quat(glm::vec3(glm::radians(90.0f), 0.0f, rotationFactor)));
 }
 
-Player::Player()
+Player::Player(MCTilemap* tilemap) : m_refTilemap(tilemap)
 {
 	m_rendererObj = Mgr(AssimpMgr)->LoadAllPartsAsGameObj("DefaultWarpShader.glsl", "Player.fbx");
+	m_rendererObj->GetTransform()->SetLocalPosition(glm::vec3(0.0f, 0.1f, 0.0f));
 	m_rendererObj->GetTransform()->SetLocalScale(0.0003f);
 
 	m_transformHead = m_rendererObj->FindChildObj("Head")->GetTransform();
@@ -106,15 +108,15 @@ Player::Player()
 		};
 
 	m_cameraAnchor = make_obj<GameObj>();
-	m_cameraAnchor->GetTransform()->SetLocalPosition(glm::vec3(0.0f, 0.1f, 0.0f));
+	m_cameraAnchor->GetTransform()->SetLocalPosition(glm::vec3(0.0f, 0.18f, 0.0f));
 
 	m_cameraObj = make_obj<GameObj>();
 	m_fpChangeCamMode[m_curCamMode]();
 	m_cameraObj->GetTransform()->SetLocalScale(0.01f);
 
-	auto pCam = m_cameraObj->AddComponent<Camera>();
-	pCam->SetNear(6.0f);
-	pCam->SetMainCam();
+	m_pCamera = m_cameraObj->AddComponent<Camera>();
+	m_pCamera->SetNear(0.1f);
+	m_pCamera->SetMainCam();
 }
 
 Player::~Player()
@@ -148,7 +150,7 @@ void Player::Update()
 {
 	const auto pPlayerTrans = GetTransform();
 
-	m_vAccelation = glm::zero<glm::vec3>();
+	m_vAccelation = glm::vec3(0.0f, -4.0f, 0.0f);
 
 	if (KEY_HOLD(GLFW_KEY_A))
 	{
@@ -174,9 +176,14 @@ void Player::Update()
 	{
 		pPlayerTrans->AddWorldRotation(50.f * DT, Y_AXIS);
 	}
+	if (KEY_TAP(GLFW_KEY_SPACE))
+	{
+		if (m_bGround)
+			m_vVelocity += glm::vec3(0.0f, 1.0f, 0.0f);
+	}
 	if (KEY_HOLD(GLFW_KEY_SPACE))
 	{
-		MoveByView(glm::vec3(0.0f, 1.0f, 0.0f) * 10.0f);
+		// MoveByView(glm::vec3(0.0f, 1.0f, 0.0f) * 10.0f);
 	}
 	if (KEY_HOLD(GLFW_KEY_LEFT_SHIFT))
 	{
@@ -193,16 +200,28 @@ void Player::Update()
 	}
 
 	m_vVelocity = m_vVelocity + m_vAccelation * DT;
-	float l = glm::length(m_vVelocity);
+
+	glm::vec2 vVelocityXZ = glm::vec2(m_vVelocity.x, m_vVelocity.z);
+	float l = glm::length(vVelocityXZ);
 	if (l > m_vVelocityMax)
-		m_vVelocity *= m_vVelocityMax / l;
+		vVelocityXZ *= m_vVelocityMax / l;
 	if (l > 0.0f)
-		m_vVelocity = m_vVelocity - glm::normalize(m_vVelocity) * glm::min(l, 2.0f * DT);
+		vVelocityXZ = vVelocityXZ - glm::normalize(vVelocityXZ) * glm::min(l, 4.0f * DT);
+	m_vVelocity.x = vVelocityXZ.x;
+	m_vVelocity.z = vVelocityXZ.y;
 
 	m_fMoveTime += glm::length(m_vVelocity) * DT;
 
-	glm::vec3 position = GetTransform()->GetLocalPosition();
-	GetTransform()->SetLocalPosition(position + m_vVelocity * DT);
+	glm::vec3 position = GetTransform()->GetLocalPosition() * 10.0f;
+	glm::vec3 positionPost = position + m_vVelocity * DT * 10.0f;
+
+	m_bGround = m_refTilemap->HandleCollision(position, positionPost, m_vVelocity);
+	GetTransform()->SetLocalPosition(positionPost * 0.1f);
+
+	auto pCameraTransform = m_cameraObj->GetTransform();
+	float tParam = m_fMoveTime * 10.0f;
+	float mParam = 0.004f;
+	pCameraTransform->SetLocalPosition(glm::vec3(glm::sin(tParam) * mParam, glm::sin(tParam * 2.0f) * mParam, pCameraTransform->GetLocalPosition().z));
 
 	UpdatePlayerCamFpsMode();
 	GameObj::Update();
@@ -213,6 +232,7 @@ void Player::Update()
 		Mgr(ParticleMgr)->SetParticles(target, 0.1f, point);
 	}
 
+	m_pCamera->SetCamFov(Lerp(m_pCamera->GetCamFov(), glm::radians(KEY_HOLD(GLFW_KEY_LEFT_CONTROL) ? 60.0f : 45.0f), DT * 8.0f));
 	UpdateRenderer();
 }
 
@@ -229,4 +249,3 @@ void Player::Fire()  noexcept
 	auto bullet = make_shared<Bullet>(GetTransform()->GetWorldPosition(),Mgr(RayCaster)->castRay().rayDir);
 	CreateObj(std::move(bullet), GROUP_TYPE::PROJ_PLAYER);
 }
-

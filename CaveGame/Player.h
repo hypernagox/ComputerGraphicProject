@@ -1,10 +1,14 @@
 #pragma once
 #include "GameObj.h"
 
+class MCTilemap;
+
 class Player
 	:public GameObj
 {
 private:
+	MCTilemap* m_refTilemap;
+
 	shared_ptr<GameObj> m_rendererObj;
 	shared_ptr<GameObj> m_cameraAnchor;
 	shared_ptr<GameObj> m_cameraObj;
@@ -17,7 +21,8 @@ private:
 
 	glm::vec3 m_vVelocity = glm::zero<glm::vec3>();
 	glm::vec3 m_vAccelation = glm::zero<glm::vec3>();
-	float m_vVelocityMax = 1.0f;
+	float m_vVelocityMax = 0.75f;
+	bool m_bGround = false;
 
 	glm::vec3 m_cameraAngleAxis = glm::zero<glm::vec3>();
 	glm::vec3 m_cameraAngleAxisSmooth = glm::zero<glm::vec3>();
@@ -35,6 +40,8 @@ private:
 
 	float m_rendererBodyAngleY = 0.0f;
 
+	shared_ptr<Camera> m_pCamera;
+
 	ushort m_curCamMode = 0;
 private:
 	void ChangeCamType()noexcept;
@@ -43,7 +50,7 @@ private:
 	void MoveByView(const glm::vec3& vDelta);
 	void UpdateRenderer();
 public:
-	Player();
+	Player(MCTilemap* tilemap);
 	~Player();
 
 	void Start()override;
