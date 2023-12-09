@@ -31,6 +31,9 @@
     <Filter Include="CaveObject\ChunkMesh">
       <UniqueIdentifier>{46bcdba9-83ac-463b-8756-8a3b0e9ae578}</UniqueIdentifier>
     </Filter>
+    <Filter Include="CaveObject\PlayerShadow">
+      <UniqueIdentifier>{98a129d5-1d03-42f0-9ccb-c29ecd90d519}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -59,6 +62,9 @@
     </ClCompile>
     <ClCompile Include="ChunkMesh.cpp">
       <Filter>CaveObject\ChunkMesh</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayerShadow.cpp">
+      <Filter>CaveObject\PlayerShadow</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -97,6 +103,9 @@
     </ClInclude>
     <ClInclude Include="ChunkMesh.h">
       <Filter>CaveObject\ChunkMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerShadow.h">
+      <Filter>CaveObject\PlayerShadow</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

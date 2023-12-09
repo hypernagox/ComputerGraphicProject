@@ -180,10 +180,12 @@
     <None Include="Resource\Shader\CubeShader.glsl" />
     <None Include="Resource\Shader\DefaultFogShader.glsl" />
     <None Include="Resource\Shader\DefaultShader.glsl" />
+    <None Include="Resource\Shader\DefaultWarpShader.glsl" />
     <None Include="Resource\Shader\EnvironmentShader.glsl" />
     <None Include="Resource\Shader\EnvironmentShaderInstancing.glsl" />
     <None Include="Resource\Shader\InstancingShader.glsl" />
     <None Include="Resource\Shader\ObserverShader.glsl" />
+    <None Include="Resource\Shader\ShadowShader.glsl" />
     <None Include="Resource\Shader\SimpleShader.glsl" />
     <None Include="Resource\Shader\SimpleShaderHasColor.glsl" />
     <None Include="Resource\Shader\SimpleShaderHasColorLight.glsl" />

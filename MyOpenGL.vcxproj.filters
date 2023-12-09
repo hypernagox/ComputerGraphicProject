@@ -672,6 +672,12 @@
     <None Include="Resource\Shader\DefaultFogShader.glsl">
       <Filter>Engine\03. Element\Shader\ShaderCodes</Filter>
     </None>
+    <None Include="Resource\Shader\DefaultWarpShader.glsl">
+      <Filter>Engine\03. Element\Shader\ShaderCodes</Filter>
+    </None>
+    <None Include="Resource\Shader\ShadowShader.glsl">
+      <Filter>Engine\03. Element\Shader\ShaderCodes</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Resource\Shader\AnimShader.glsl">

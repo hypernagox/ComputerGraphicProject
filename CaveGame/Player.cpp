@@ -13,6 +13,8 @@
 #include "MeshRenderer.h"
 
 #include "ParticleMgr.h"
+#include "Material.h"
+#include "PlayerShadow.h"
 
 void Player::ChangeCamType() noexcept
 {
@@ -122,12 +124,24 @@ Player::~Player()
 
 void Player::Start()
 {
-	GameObj::Start();
 	InitCamDirection();
 
 	AddChild(m_rendererObj);
 	AddChild(m_cameraAnchor);
 	m_cameraAnchor->AddChild(m_cameraObj);
+
+	for (auto& child : *m_rendererObj)
+	{
+		for (auto& mate : child->GetComp<MeshRenderer>()->GetMaterial())
+		{
+			mate->SetMaterialAmbient({ 10,10,10 });
+			mate->SetMaterialDiffuse({ 10,10,10 });
+			mate->SetMaterialSpecular({ 10,10,10 });
+		}
+	}
+	AddChild(make_shared<PlayerShadow>());
+
+	GameObj::Start();
 }
 
 void Player::Update()
@@ -215,5 +229,4 @@ void Player::Fire()  noexcept
 	auto bullet = make_shared<Bullet>(GetTransform()->GetWorldPosition(),Mgr(RayCaster)->castRay().rayDir);
 	CreateObj(std::move(bullet), GROUP_TYPE::PROJ_PLAYER);
 }
-
 
