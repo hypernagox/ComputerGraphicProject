@@ -71,7 +71,10 @@ void EventMgr::Update()
 		eve();
 	}
 
-	m_vecInternalEventBuffer.swap(m_vecEventForNeedLock);
+	{
+		std::lock_guard<SpinLock> lock{ m_spinLockForDangerEvent };
+		m_vecInternalEventBuffer.swap(m_vecEventForNeedLock);
+	}
 
 	for (const auto& eve : m_vecInternalEventBuffer)
 	{
