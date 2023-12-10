@@ -35,7 +35,7 @@ public:
     const shared_ptr<Shader>& GetShader()const { return m_pShader; }
 
     void AddMesh(shared_ptr<Mesh> _pMesh) { m_vecMesh.emplace_back(std::move(_pMesh)); }
-    std::span<shared_ptr<Mesh>> GetMesh() { return m_vecMesh; }
+    std::span<shared_ptr<Mesh>> GetMesh()noexcept { return m_vecMesh; }
 
    // void SetMaterial(shared_ptr<Material> _pMaterial) { m_pMaterial = std::move(_pMaterial); }
    // shared_ptr<Material> GetMaterial() const { return m_pMaterial; }

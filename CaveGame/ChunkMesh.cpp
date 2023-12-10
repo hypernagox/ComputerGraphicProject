@@ -31,8 +31,9 @@ void ChunkMesh::MergeMeshData() noexcept
 	for (const auto& child : children)
 	{
         child->GetTransform()->MakeFinalMat();
-		auto& v = child->GetComp<MeshRenderer>()->GetMesh().front()->GetVertices();
-        auto& i = child->GetComp<MeshRenderer>()->GetMesh().front()->GetIndicies();
+        auto& childMesh = child->GetComp<MeshRenderer>()->GetMesh().front();
+		auto& v = childMesh->GetVertices();
+        auto& i = childMesh->GetIndicies();
         const auto obj_mat = child->GetObjectWorldTransform();
         for (auto& vert : v)
         {
