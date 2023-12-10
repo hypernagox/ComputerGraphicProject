@@ -11,6 +11,8 @@
 shared_ptr<GameObj> pObserver;
 shared_ptr<Camera>  observerCam;
 
+bool g_bWireFrame = false;
+
 void Update();
 
 int main()
@@ -116,5 +118,9 @@ int main()
 
 void Update()
 {
-
+    if (KEY_TAP(GLFW_KEY_F3))
+    {
+        g_bWireFrame = !g_bWireFrame;
+        glPolygonMode(GL_FRONT_AND_BACK, g_bWireFrame ? GL_LINE : GL_FILL);
+    }
 }

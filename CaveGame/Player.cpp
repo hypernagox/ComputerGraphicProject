@@ -180,13 +180,10 @@ void Player::Update()
 	{
 		pPlayerTrans->AddWorldRotation(50.f * DT, Y_AXIS);
 	}
-	if (KEY_TAP(GLFW_KEY_SPACE))
+	if (KEY_HOLD(GLFW_KEY_SPACE))
 	{
 		if (m_bGround)
 			m_vVelocity += glm::vec3(0.0f, 1.0f, 0.0f);
-	}
-	if (KEY_HOLD(GLFW_KEY_SPACE))
-	{
 		// MoveByView(glm::vec3(0.0f, 1.0f, 0.0f) * 10.0f);
 	}
 	if (KEY_HOLD(GLFW_KEY_LEFT_SHIFT))
