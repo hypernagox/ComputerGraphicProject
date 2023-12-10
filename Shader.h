@@ -15,5 +15,6 @@ public:
 	~Shader();
 	void SetUniformMat4(const glm::mat4& _mat4,string_view _uName)const;
 	void Use() const;
+	const GLuint GetShaderID()const noexcept { return m_shaderID; }
 };
 
