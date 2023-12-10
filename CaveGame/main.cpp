@@ -96,6 +96,7 @@ int main()
         player->GetTransform()->SetLocalPosition(glm::vec3(25.6f, 1.6f, 25.6f));
         curScene->AddObject(player, GROUP_TYPE::PLAYER);
         /*player->AddChild(make_shared<PlayerCam>());*/
+        curScene->RegisterPlayer(player);
     }
 
     auto clouds = Mgr(AssimpMgr)->Load("CloudShader.glsl", "MyCube.fbx");

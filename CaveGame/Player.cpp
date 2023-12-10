@@ -36,7 +36,11 @@ void Player::UpdatePlayerCamFpsMode() noexcept
 
 void Player::InitCamDirection() noexcept
 {
-	m_rendererObj->GetTransform()->SetLocalRotation(glm::quat(glm::vec3(0.0f, glm::radians(-90.0f), 0.0f)));
+	m_cameraAngleAxis = glm::zero<glm::vec3>();
+	m_cameraAngleAxisSmooth = glm::zero<glm::vec3>();
+	m_cameraAnchor->GetTransform()->SetLocalRotation(glm::identity<glm::quat>());
+	m_rendererObj->GetTransform()->SetLocalRotation(glm::identity<glm::quat>());
+	m_pCamera->GetTransform()->SetLocalRotation(glm::identity<glm::quat>());
 }
 
 void Player::MoveByView(const glm::vec3& vDelta)

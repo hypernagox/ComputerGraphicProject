@@ -46,7 +46,6 @@ private:
 private:
 	void ChangeCamType()noexcept;
 	void UpdatePlayerCamFpsMode()noexcept;
-	void InitCamDirection()noexcept;
 	void MoveByView(const glm::vec3& vDelta);
 	void UpdateRenderer();
 public:
@@ -60,5 +59,7 @@ public:
 	const glm::vec3 GetPlayerLook()const noexcept;
 
 	void Fire()noexcept;
+
+	void InitCamDirection()noexcept;
 };
 

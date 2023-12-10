@@ -27,6 +27,7 @@ private:
 	vector<weak_ptr<Light>> m_vecLights;
 	shared_ptr<SkyBox> m_skyBox;
 	array<Delegate, etoi(SCENE_ADDED_UPDATE::END)> m_arrAddedUpdateFp;
+	shared_ptr<GameObj> m_pCurPlayer;
 public:
 	vector<shared_ptr<GameObj>>& GetGroupObj(GROUP_TYPE _eType) { return m_vecObj[etoi(_eType)]; }
 	Scene();
@@ -70,5 +71,7 @@ public:
 	{
 		m_arrChunkMesh[iTexID] = std::move(pChunkMesh);
 	}
+	void RegisterPlayer(shared_ptr<GameObj> pPlayer)noexcept { m_pCurPlayer = pPlayer; }
+	const shared_ptr<GameObj>& GetPlayer()const noexcept { return m_pCurPlayer; }
 };
 

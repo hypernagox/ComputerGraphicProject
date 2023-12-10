@@ -9,6 +9,8 @@
 
 ChunkMesh::ChunkMesh()
 {
+    m_vecChunkVertex.reserve(10000000);
+    m_vecChunkIndex.reserve(10000000);
 }
 
 ChunkMesh::~ChunkMesh()
@@ -22,8 +24,11 @@ void ChunkMesh::MergeMeshData() noexcept
 {
     GLsizei currentOffset = 0;
     GLsizei currentOffsetI= 0;
-    
-	for (const auto& child : GetChildObj())
+    const auto& children = GetChildObj();
+    const size_t num_of_child = children.size();
+    m_indexOffsets.reserve(num_of_child);
+    m_indexCounts.reserve(num_of_child);
+	for (const auto& child : children)
 	{
         child->GetTransform()->MakeFinalMat();
 		auto& v = child->GetComp<MeshRenderer>()->GetMesh().front()->GetVertices();

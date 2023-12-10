@@ -13,7 +13,7 @@
 #include "Transform.h"
 #include "EventMgr.h"
 #include "ChunkMesh.h"
-
+#include "Player.h"
 
 static constexpr uint MAX_TEXTURE = 36;
 
@@ -62,6 +62,7 @@ void MCTilemapMeshGenerator::CreateMeshAll(MCTilemap* tilemap)
                 pChunkDatas[i]->InitChunkMesh("DefaultWarpShader.glsl");
                 curScene->AddChunkMesh(i, pChunkDatas[i]);
             }
+            static_pointer_cast<Player>(curScene->GetPlayer())->InitCamDirection();
         });
 }
 
