@@ -91,7 +91,7 @@ int main()
 
     Mgr(CollisionMgr)->RegisterGroup(GROUP_TYPE::MONSTER, GROUP_TYPE::PROJ_PLAYER);
     {
-        auto player = make_shared<Player>();
+        auto player = make_shared<Player>(tilemap);
         player->SetObjName("player");
         player->GetTransform()->SetLocalPosition(glm::vec3(25.6f, 1.6f, 25.6f));
         curScene->AddObject(player, GROUP_TYPE::PLAYER);

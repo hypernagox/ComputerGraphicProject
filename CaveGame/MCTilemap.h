@@ -39,4 +39,5 @@ public:
 	void SetTile(int x, int y, int z, int tile);
 	int GetTile(int x, int y, int z) const;
 	MCTileChunk* GetChunk(int x, int z);
+	bool HandleCollision(const glm::vec3& pre_position, glm::vec3& position, glm::vec3& velocity);
 };

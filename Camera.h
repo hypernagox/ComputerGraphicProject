@@ -71,6 +71,9 @@ public:
 	PROJECTION_TYPE GetCamProjType()const { return m_eProjType; }
 	void SetCamProjType(PROJECTION_TYPE _eType) { m_eProjType = _eType; }
 
+	float GetCamFov() const { return m_fov; }
+	void SetCamFov(float fov_) { m_fov = fov_; }
+
 	const glm::mat4& GetCamMatView()const { return m_matView; }
 	const glm::mat4& GetCamMatProj()const { return m_matProjection; }
 	const std::pair<glm::mat4, glm::mat4> GetCamMatProjViewInv()const noexcept { return std::make_pair(m_matProjInv, m_matViewInv); }
