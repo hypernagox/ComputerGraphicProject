@@ -41,6 +41,7 @@ void Player::InitCamDirection() noexcept
 	m_cameraAnchor->GetTransform()->SetLocalRotation(glm::identity<glm::quat>());
 	m_rendererObj->GetTransform()->SetLocalRotation(glm::identity<glm::quat>());
 	m_pCamera->GetTransform()->SetLocalRotation(glm::identity<glm::quat>());
+	GetTransform()->SetLocalRotation(glm::identity<glm::quat>());
 }
 
 void Player::MoveByView(const glm::vec3& vDelta)
@@ -174,11 +175,11 @@ void Player::Update()
 	}
 	if (KEY_HOLD(GLFW_KEY_Q))
 	{
-		pPlayerTrans->AddWorldRotation(-50.f * DT, Y_AXIS);
+		m_cameraAngleAxis.y -= 50.0f * DT;
 	}
 	if (KEY_HOLD(GLFW_KEY_E))
 	{
-		pPlayerTrans->AddWorldRotation(50.f * DT, Y_AXIS);
+		m_cameraAngleAxis.y += 50.0f * DT;
 	}
 	if (KEY_HOLD(GLFW_KEY_SPACE))
 	{
