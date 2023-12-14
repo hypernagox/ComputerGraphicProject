@@ -678,6 +678,9 @@
     <None Include="Resource\Shader\ShadowShader.glsl">
       <Filter>Engine\03. Element\Shader\ShaderCodes</Filter>
     </None>
+    <None Include="Resource\Shader\UIShader.glsl">
+      <Filter>Engine\02. Manager\UIMgr\UI</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Resource\Shader\AnimShader.glsl">

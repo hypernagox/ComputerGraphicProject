@@ -10,8 +10,8 @@ void PannelUI::ResetUIState()
 	std::ranges::for_each(*GetRootUI(), std::mem_fn(&UI::ResetUIState));
 }
 
-PannelUI::PannelUI(const glm::vec2& _LT, const glm::vec2& _RB)
-	:UI{_LT,_RB}
+PannelUI::PannelUI(const glm::vec2 midPos, string_view strTexName, const float scaleFactor)
+	:UI{midPos,strTexName,scaleFactor}
 {
 }
 
@@ -21,16 +21,6 @@ PannelUI::PannelUI()
 
 PannelUI::~PannelUI()
 {
-}
-
-void PannelUI::Update()
-{
-	UI::Update();
-}
-
-void PannelUI::Render()
-{
-	MyPolygon::Render();
 }
 
 void PannelUI::SetZDepth()

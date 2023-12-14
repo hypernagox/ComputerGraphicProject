@@ -5,6 +5,9 @@
 #include "KeyMgr.h"
 #include "Transform.h"
 #include "PathMgr.h"
+#include "Mesh.h"
+#include "Texture2D.h"
+#include "ResMgr.h"
 
 float UI::g_curMaxZDepth = 0.f;
 
@@ -13,12 +16,12 @@ bool UI::ptInRect(const glm::vec2& point, const glm::vec2& leftTop, const glm::v
 		point.y >= leftTop.y && point.y <= rightBottom.y;
 }
 
-SimpleVertex UI::wc2GL(const glm::vec2& point) {
+glm::vec3 UI::wc2GL(const glm::vec2& point) {
 	const auto [width, height] = Mgr(Core)->GetWidthHeight();
 	return glm::vec3{
 		(point.x / width) * 2.0f - 1.0f, 
 		1.0f - (point.y / height) * 2.0f,
-		0.0f
+		0.f
 	};
 }
 
@@ -27,25 +30,25 @@ glm::vec2 UI::gl2WC(const glm::vec3& point) {
 	return glm::vec2{ point.x + width / 2.f, height / 2.f - point.y };
 }
 
-vector<SimpleVertex> UI::makeRect(const glm::vec2& LT, const glm::vec2& RB, glm::vec3& glCenter) {
-	vector<SimpleVertex> temp(4);
-
-	temp[0] = wc2GL(LT);           
-	temp[1] = wc2GL(glm::vec2(RB.x, LT.y)); 
-	temp[2] = wc2GL(RB);        
-	temp[3] = wc2GL(glm::vec2(LT.x, RB.y));
-	for (const auto& v : temp) {
-		glCenter += v.pos;
-	}
-	glCenter /= static_cast<float>(temp.size());
-
-	for (auto& v : temp) 
-	{
-		v.pos -= glCenter;
-	}
-
-	return temp;
-}
+//vector<SimpleVertex> UI::makeRect(const glm::vec2& LT, const glm::vec2& RB, glm::vec3& glCenter) {
+//	vector<SimpleVertex> temp(4);
+//
+//	temp[0] = wc2GL(LT);           
+//	temp[1] = wc2GL(glm::vec2(RB.x, LT.y)); 
+//	temp[2] = wc2GL(RB);        
+//	temp[3] = wc2GL(glm::vec2(LT.x, RB.y));
+//	for (const auto& v : temp) {
+//		glCenter += v.pos;
+//	}
+//	glCenter /= static_cast<float>(temp.size());
+//
+//	for (auto& v : temp) 
+//	{
+//		v.pos -= glCenter;
+//	}
+//
+//	return temp;
+//}
 
 UI_STATE UI::UpdateCurUIState()
 {
@@ -119,7 +122,7 @@ void UI::Load(string_view _dirName, const rapidjson::Value& doc, const fs::path&
 	}
 	glm::vec3 glCenter{};
 
-	makeRect(m_arrLTRB[LT], m_arrLTRB[RB], glCenter);
+	//makeRect(m_arrLTRB[LT], m_arrLTRB[RB], glCenter);
 	GetTransform()->SetLocalPosition(glCenter);
 	
 	UI::g_curMaxZDepth -= 0.01f;
@@ -145,21 +148,58 @@ void UI::SetZDepthUI()
 	m_fCurZDepth = g_curMaxZDepth;
 }
 
-UI::UI(const glm::vec2& _LT, const glm::vec2& _RB,glm::vec3 glCenter)
-	:MyPolygon{makeRect(_LT,_RB,glCenter)}
-	, m_arrLTRB{ {_LT,_RB} }
-	, m_fCurZDepth {UI::g_curMaxZDepth -= 0.01f}
+UI::UI(const glm::vec2 midPos, string_view strTexName, const float scaleFactor)
+	: m_fCurZDepth {UI::g_curMaxZDepth -= 0.01f}
+	, m_uiMesh{make_shared<Mesh>()}
+	, m_uiTex{ Mgr(ResMgr)->GetRes<Texture2D>(strTexName) }
 {
-	try {
-		if(_LT.x >= _RB.x || _LT.y >= _RB.y)
-			throw std::runtime_error("Point value Error");
-	}
-	catch (const std::runtime_error& e) {
-		std::cerr << e.what();
-		exit(0);
-	}
+	const auto [w,h] = m_uiTex->GetTexWH();
+	const glm::vec2 half_size{ w / 2.f,h / 2.f };
+
+	m_arrLTRB[LT] = midPos - half_size * scaleFactor;
+	m_arrLTRB[RB] = midPos + half_size * scaleFactor;
+
+	const auto glLT = wc2GL(m_arrLTRB[LT]);
+	const auto glRB = wc2GL(m_arrLTRB[RB]);
+
+	
+	const glm::vec3 glCenter = (glLT + glRB) / 2.0f;
+	const glm::vec3 displacement = -glCenter;
+
+	
 	GetTransform()->SetLocalPosition(glCenter);
-	GetComp<Camera>()->SetCamProjType(PROJECTION_TYPE::ORTHOGRAPHIC);
+
+	
+	const vector<glm::vec3> temp_vertex = 
+	{
+		glm::vec3(glLT.x + displacement.x, glLT.y + displacement.y, 0.0f),
+		glm::vec3(glRB.x + displacement.x, glLT.y + displacement.y, 0.0f),
+		glm::vec3(glRB.x + displacement.x, glRB.y + displacement.y, 0.0f),
+		glm::vec3(glLT.x + displacement.x, glRB.y + displacement.y, 0.0f)
+	};
+
+	static const vector<GLuint> temp_index = { 0, 1, 2, 0, 2, 3 };
+
+	static const vector<glm::vec2> temp_uv = 
+	{
+		glm::vec2(0.0f, 1.0f),
+		glm::vec2(1.0f, 1.0f),
+		glm::vec2(1.0f, 0.0f),
+		glm::vec2(0.0f, 0.0f)
+	};
+
+	vector<Vertex> vert;
+	vert.reserve(4);
+
+	for (int i = 0; i < 4; ++i)
+	{
+		Vertex v;
+		v.position = temp_vertex[i];
+		v.uv = temp_uv[i];
+		vert.emplace_back(v);
+	}
+
+	m_uiMesh->Init(vert, temp_index);
 }
 
 UI::~UI()
@@ -169,4 +209,12 @@ UI::~UI()
 void UI::Update()
 {
 	m_eCurUIState = UpdateCurUIState();
+}
+
+void UI::Render()
+{
+	m_uiTex->BindTexture();
+	Mgr(ResMgr)->GetRes<Shader>("UIShader.glsl")->SetUniformMat4(GetObjectWorldTransform(), "uModel");
+	m_uiMesh->Render();
+	m_uiTex->UnBindTexture();
 }

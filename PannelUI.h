@@ -12,8 +12,6 @@ private:
 	vector<shared_ptr<Button>> m_vecButton;
 private:
 	void ResetUIState();
-protected:
-	PannelUI(const glm::vec2& _LT, const glm::vec2& _RB);
 public:
 	 PannelUI();
 	~PannelUI();
@@ -21,8 +19,7 @@ public:
 	shared_ptr<PannelUI> GetRootUI() {
 		return m_parentUI.expired() ? this->PannelUI::shared_from_this() : m_parentUI.lock()->GetRootUI();
 	}
-	void Update();
-	void Render()override;
+	
 	void SetZDepth();
 	void DragMoveUI();
 	void SetUIScaleAll(const float _fRatio);
@@ -31,6 +28,7 @@ public:
 	void ExecuteClickEvent();
 	void SetUIPosition(const glm::vec2& WCpos_);
 public:
+	PannelUI(const glm::vec2 midPos, string_view strTexName, const float scaleFactor = 1.f);
 	shared_ptr<const PannelUI> shared_from_this() const { return static_pointer_cast<const PannelUI>(GameObj::shared_from_this());}
 	shared_ptr<PannelUI> shared_from_this() { return static_pointer_cast<PannelUI>(GameObj::shared_from_this()); }
 	class iterator_UI

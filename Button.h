@@ -5,12 +5,9 @@ class Button
 	:public UI
 {
 	friend class PannelUI;
-protected:
-	Button(const glm::vec2& _LT, const glm::vec2& _RB);
 public:
 	Button();
 	~Button();
-
-	void Render()override{ MyPolygon::Render(); }
+	Button(const glm::vec2 midPos, string_view strTexName, const float scaleFactor = 1.f);
 };
 

@@ -8,6 +8,9 @@
 #include "ThreadMgr.h"
 #include "Core.h"
 #include "Camera.h"
+#include "ResMgr.h"
+#include "Shader.h"
+#include "PannelUI.h"
 
 const std::function<bool(const UI*, const UI*)> UIMgr::cmpZDepth = [](const UI* a, const UI* b){ return *a  < *b; };
 
@@ -22,6 +25,13 @@ UIMgr::~UIMgr()
 void UIMgr::Init()
 {
 	m_vecUI.reserve(100);
+
+	auto quick_bar = make_shared<PannelUI>(glm::vec2{1400,1375}, "gui.png",6.f);
+	m_vecUI.emplace_back(quick_bar);
+
+	const auto [w, h] = Mgr(Core)->GetWidthHeight();
+	auto cross_line = make_shared<PannelUI>(glm::vec2{ w,h }/2.f, "cross.png", 2.f);
+	m_vecUI.emplace_back(cross_line);
 }
 
 void UIMgr::Update()
@@ -95,13 +105,23 @@ void UIMgr::Render()
 
 	static UBOData& sceneData = Mgr(Core)->GetUBOData();
 	sceneData.projMat = sceneData.viewMat = glm::mat4{ 1.f };
+	//sceneData.viewMat = glm::mat4{ 1.f };
+	//sceneData.projMat = 
 	Mgr(Core)->BindUBOData();
+
+	Mgr(ResMgr)->GetRes<Shader>("UIShader.glsl")->Use();
+
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	for (auto& ui : m_setUI)
 	{
 		//ui->ClearComponentWaitFlag();
 		ui->Render();
 	}
+
+	glDisable(GL_BLEND);
 
 	//insertionSort(m_vecUI, [](const shared_ptr<PannelUI>& a, const shared_ptr<PannelUI>& b) {return *a < *b; });
 	

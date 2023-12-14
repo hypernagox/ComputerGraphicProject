@@ -12,16 +12,19 @@ enum class UI_STATE
 	END
 };
 
+
 class MyPolygon;
+class Mesh;
+class Texture2D;
 
 class UI
 	:public MyPolygon
 {
 public:
 	static bool ptInRect(const glm::vec2& point, const glm::vec2& leftTop, const glm::vec2& rightBottom);
-	static SimpleVertex wc2GL(const glm::vec2& point);
+	static glm::vec3 wc2GL(const glm::vec2& point);
 	static glm::vec2 gl2WC(const glm::vec3& point);
-	static vector<SimpleVertex> makeRect(const glm::vec2& LT, const glm::vec2& RB, glm::vec3& glCenter);
+	//static vector<SimpleVertex> makeRect(const glm::vec2& LT, const glm::vec2& RB, glm::vec3& glCenter);
 protected:
 	static float g_curMaxZDepth;
 	enum UI_RECT{LT,RB,END};
@@ -32,10 +35,12 @@ private:
 	Delegate m_ClickedEvent;
 protected:
 	array<glm::vec2, UI_RECT::END> m_arrLTRB;
+	shared_ptr<Texture2D> m_uiTex;
+	shared_ptr<Mesh> m_uiMesh;
+
 	float m_fCurZDepth = 0.f;
 	bool m_bIsActivate = true;
 	UI_STATE UpdateCurUIState();
-	UI(const glm::vec2& _LT, const glm::vec2& _RB,glm::vec3 glCenter ={});
 protected:
 	void Save(string_view _resName, rapidjson::PrettyWriter<rapidjson::StringBuffer>& writer, const fs::path& _savePath)override;
 	
@@ -60,6 +65,7 @@ public:
 	void SetUIScale(const float _fRatio);
 	void SetZDepthUI();
 	virtual ~UI();
+	UI(const glm::vec2 midPos, string_view strTexName,const float scaleFactor = 1.f);
 	UI(const UI&) = delete;
 	UI& operator = (const UI&) = delete;
 
@@ -74,7 +80,7 @@ public:
 	UI_STATE GetCurUIState()const { return m_eCurUIState; }
 
 	void Update();
-	void Render() override = 0;
+	void Render() override;
 
 	auto operator <=> (const UI& _other) const {return m_fCurZDepth <=> _other.m_fCurZDepth;}
 

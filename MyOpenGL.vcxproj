@@ -191,6 +191,7 @@
     <None Include="Resource\Shader\SimpleShaderHasColorLight.glsl" />
     <None Include="Resource\Shader\SkyBoxShaderCube.glsl" />
     <None Include="Resource\Shader\SkyBoxShaderSphere.glsl" />
+    <None Include="Resource\Shader\UIShader.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Resource\Shader\AnimShader.glsl" />

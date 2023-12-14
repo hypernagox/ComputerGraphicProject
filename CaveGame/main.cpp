@@ -20,7 +20,7 @@ int main()
     Mgr(Core)->Init();
     Mgr(Core)->SetClearColor(RGBA_WHITE);
 
-    glfwSetInputMode(Mgr(Core)->GetWinInfo(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    //glfwSetInputMode(Mgr(Core)->GetWinInfo(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     MCTilemap* tilemap = new MCTilemap();
     MCTerrainGenerator* terrainGenerator = new MCTerrainGenerator();

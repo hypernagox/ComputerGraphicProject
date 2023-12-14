@@ -277,8 +277,8 @@ void Core::GameLoop() // << std::function<void(void)> Yups Update Loop Here
 
 		//DrawCall();
 
-		//Mgr(UIMgr)->Update();
-		//Mgr(UIMgr)->Render();
+		Mgr(UIMgr)->Update();
+		Mgr(UIMgr)->Render();
 
 		//DrawCall();
 		Mgr(EventMgr)->Update();
