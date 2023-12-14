@@ -15,9 +15,9 @@
 #pragma comment(lib,"assimp-vc143-mt.lib")
 #endif 
 
-
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
+#include <glm/gtx/norm.hpp>
 #include <glm/gtx/string_cast.hpp> 
 #include <glm/gtc/type_ptr.hpp> 
 

@@ -29,6 +29,8 @@ int main()
 
     std::thread([meshGenerator, tilemap]()noexcept { meshGenerator->CreateMeshAll(tilemap); }).detach();
 
+    Mgr(SoundMgr)->PlayBGM("calm3.ogg");
+
     const auto curScene = Mgr(SceneMgr)->GetCurScene();
     curScene->AddUpdateFp(SCENE_ADDED_UPDATE::PRERENDER, &Update);
 
@@ -38,7 +40,7 @@ int main()
         l->SetCurLightType(LIGHT_TYPE::DIRECTIONAL);
         l->SetLightPos({ -5,5,0 });
         auto mate = make_shared<Material>();
-        mate->AddTexture2D("magical_forest_fantasy_6k.jpg");
+        mate->AddTexture2D("skybox.png");
         mate->SetMaterialDiffuse({ .3f,.3f,.3f });
         mate->SetMaterialSpecular({ .3f,.3f,.3f });
         pLight->GetComp<MeshRenderer>()->AddMaterial(mate);
@@ -81,7 +83,7 @@ int main()
         l->SetSpecular({ 5.1f,.1f,.1f });
         auto m = pLight->GetComp<MeshRenderer>();
         auto mate = make_shared<Material>();
-        mate->AddTexture2D("magical_forest_fantasy_6k.jpg");
+        mate->AddTexture2D("skybox.png");
         mate->SetMaterialDiffuse({ .3f,.3f,.3f });
         mate->SetMaterialSpecular({ .3f,.3f,.3f });
         m->AddMaterial(mate);
