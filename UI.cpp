@@ -155,9 +155,10 @@ UI::UI(const glm::vec2 midPos, string_view strTexName, const float scaleFactor)
 {
 	const auto [w,h] = m_uiTex->GetTexWH();
 	const glm::vec2 half_size{ w / 2.f,h / 2.f };
+	const float fScaleFactor = Mgr(Core)->GetScaleFactor();
 
-	m_arrLTRB[LT] = midPos - half_size * scaleFactor;
-	m_arrLTRB[RB] = midPos + half_size * scaleFactor;
+	m_arrLTRB[LT] = midPos * fScaleFactor - half_size * scaleFactor;
+	m_arrLTRB[RB] = midPos * fScaleFactor + half_size * scaleFactor;
 
 	const auto glLT = wc2GL(m_arrLTRB[LT]);
 	const auto glRB = wc2GL(m_arrLTRB[RB]);

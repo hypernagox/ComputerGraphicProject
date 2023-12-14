@@ -72,13 +72,15 @@ private:
 	GLuint m_ubo;
 	HWND m_hWnd;
 	HDC m_hDC;       
-	HGLRC m_hglrc;  
+	HGLRC m_hglrc;
+	mutable float m_fScaleFactor = 1.f;
 private:
 	void SetUBO();
 	std::tuple<int, int, int, int> AdjustWinSize(GLuint width_, GLuint height_, HWND hwnd)const noexcept;
 	std::tuple<int, int, int, int> AdjustWinSize(HWND hwnd)const noexcept;
 	void PrepareStart()const noexcept;
 public:
+	const float GetScaleFactor()const noexcept { return m_fScaleFactor; }
 	void BindUBOData()const noexcept {
 		glBindBuffer(GL_UNIFORM_BUFFER, m_ubo);
 		glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(UBOData), &m_uboMatLight);

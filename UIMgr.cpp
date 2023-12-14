@@ -26,11 +26,11 @@ void UIMgr::Init()
 {
 	m_vecUI.reserve(100);
 
-	auto quick_bar = make_shared<PannelUI>(glm::vec2{1400,1375}, "gui.png",6.f);
+	auto quick_bar = make_shared<PannelUI>(glm::vec2{700,675}, "gui.png",6.f);
 	m_vecUI.emplace_back(quick_bar);
 
 	const auto [w, h] = Mgr(Core)->GetWidthHeight();
-	auto cross_line = make_shared<PannelUI>(glm::vec2{ w,h }/2.f, "cross.png", 2.f);
+	auto cross_line = make_shared<PannelUI>(glm::vec2{ w,h } /4.f, "cross.png", 2.f);
 	m_vecUI.emplace_back(cross_line);
 }
 

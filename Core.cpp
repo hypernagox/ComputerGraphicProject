@@ -55,10 +55,10 @@ std::tuple<int, int, int, int> Core::AdjustWinSize(GLuint width_, GLuint height_
 	const int monitorHeight = monitorInfo.rcMonitor.bottom - monitorInfo.rcMonitor.top;
 
 	const UINT dpi = GetDpiForWindow(hwnd);
-	const float scaleFactor = dpi / 96.0f;
+	m_fScaleFactor = dpi / 96.0f;
 
-	const int adjustedWidth = static_cast<int>(width_ * scaleFactor);
-	const int adjustedHeight = static_cast<int>(height_ * scaleFactor);
+	const int adjustedWidth = static_cast<int>(width_ * m_fScaleFactor);
+	const int adjustedHeight = static_cast<int>(height_ * m_fScaleFactor);
 
 	const int posX = (monitorWidth - adjustedWidth) / 2;
 	const int posY = (monitorHeight - adjustedHeight) / 2;
@@ -76,9 +76,9 @@ std::tuple<int, int, int, int> Core::AdjustWinSize(HWND hwnd) const noexcept
 	const int monitorHeight = monitorInfo.rcMonitor.bottom - monitorInfo.rcMonitor.top;
 
 	const UINT dpi = GetDpiForWindow(hwnd);
-	const float scaleFactor = dpi / 96.0f;
+	m_fScaleFactor = dpi / 96.0f;
 
-	int adjustedWidth = static_cast<int>(monitorWidth * scaleFactor);
+	int adjustedWidth = static_cast<int>(monitorWidth * m_fScaleFactor);
 	int adjustedHeight = adjustedWidth / 2;
 
 
