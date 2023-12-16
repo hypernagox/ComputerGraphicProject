@@ -26,11 +26,15 @@ void UIMgr::Init()
 {
 	m_vecUI.reserve(100);
 
-	auto quick_bar = make_shared<PannelUI>(glm::vec2{700,675}, "gui.png",6.f);
+	const auto [width, height] = Mgr(Core)->GetWidthHeight();
+	const float fScaleFactor = Mgr(Core)->GetScaleFactor();
+	const float w = width / fScaleFactor;
+	const float h = height / fScaleFactor;
+
+	auto quick_bar = make_shared<PannelUI>(glm::vec2{w/2.f,h - 25.f * fScaleFactor}, "gui.png",4.f);
 	m_vecUI.emplace_back(quick_bar);
 
-	const auto [w, h] = Mgr(Core)->GetWidthHeight();
-	auto cross_line = make_shared<PannelUI>(glm::vec2{ w,h } /4.f, "cross.png", 2.f);
+	auto cross_line = make_shared<PannelUI>(glm::vec2{ w,h } /2.f, "cross.png", 2.f);
 	m_vecUI.emplace_back(cross_line);
 }
 
@@ -104,8 +108,11 @@ void UIMgr::Render()
 	glClear(GL_DEPTH_BUFFER_BIT);
 
 	static UBOData& sceneData = Mgr(Core)->GetUBOData();
-	sceneData.projMat = sceneData.viewMat = glm::mat4{ 1.f };
-	//sceneData.viewMat = glm::mat4{ 1.f };
+	sceneData.viewMat = glm::mat4{ 1.f };
+
+	const auto [width, height] = Mgr(Core)->GetWidthHeight();
+	sceneData.projMat = glm::orthoLH(0.0f, width, height, 0.0f, -1.0f, 1.0f);
+	sceneData.viewMat = glm::mat4{ 1.f };
 	//sceneData.projMat = 
 	Mgr(Core)->BindUBOData();
 

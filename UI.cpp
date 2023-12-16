@@ -154,21 +154,23 @@ UI::UI(const glm::vec2 midPos, string_view strTexName, const float scaleFactor)
 	, m_uiTex{ Mgr(ResMgr)->GetRes<Texture2D>(strTexName) }
 {
 	const auto [w,h] = m_uiTex->GetTexWH();
-	const glm::vec2 half_size{ w / 2.f,h / 2.f };
 	const float fScaleFactor = Mgr(Core)->GetScaleFactor();
+	const glm::vec2 half_size{ (w * fScaleFactor) / 2.f,(h * fScaleFactor) / 2.f };
 
 	m_arrLTRB[LT] = midPos * fScaleFactor - half_size * scaleFactor;
 	m_arrLTRB[RB] = midPos * fScaleFactor + half_size * scaleFactor;
 
-	const auto glLT = wc2GL(m_arrLTRB[LT]);
-	const auto glRB = wc2GL(m_arrLTRB[RB]);
+	//const auto glLT = wc2GL(m_arrLTRB[LT]);
+	//const auto glRB = wc2GL(m_arrLTRB[RB]);
 
+	const auto glLT = glm::vec3(m_arrLTRB[LT],0.f);
+	const auto glRB = glm::vec3(m_arrLTRB[RB],0.f);
 	
 	const glm::vec3 glCenter = (glLT + glRB) / 2.0f;
-	const glm::vec3 displacement = -glCenter;
-
+	//const glm::vec3 displacement = -glCenter;
+	const glm::vec3 displacement = {};
 	
-	GetTransform()->SetLocalPosition(glCenter);
+	//GetTransform()->SetLocalPosition(glCenter);
 
 	
 	const vector<glm::vec3> temp_vertex = 
