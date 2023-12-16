@@ -5,9 +5,11 @@
 #include "Transform.h"
 #include "Core.h"
 #include "Shader.h"
+#include "MCTilemap.h"
 
-PlayerShadow::PlayerShadow()
+PlayerShadow::PlayerShadow(const MCTilemap* tilemap)
 {
+    m_pTilemap = tilemap;
 }
 
 PlayerShadow::~PlayerShadow()
@@ -46,39 +48,38 @@ void PlayerShadow::Start()
     mr->AddMesh(mesh);
     mr->SetShader("ShadowShader.glsl");
     GetTransform()->SetLocalScale(0.05f);
-    GetTransform()->SetLocalPosition({ 0,-0.1f,0 });
 
     GetParentGameObj().lock()->GetTransform()->MakeFinalMat();
 
     m_fPlayerOriginY = GetParentGameObj().lock()->GetTransform()->GetWorldPosition().y;
+    m_fShadowAlpha = 0.5f;
 }
 
 void PlayerShadow::Update()
 {
-   // const auto lightDir = glm::normalize(Mgr(Core)->GetUBOData().dirLight.lData.direction);
-
-    const auto lightDir = Y_AXIS;
     const auto pParentTrans = GetParentGameObj().lock()->GetTransform();
     const auto pTrans = GetTransform();
 
-    const float angle = glm::acos(glm::dot(lightDir, Y_AXIS));
-    
-    const glm::vec3 parentPos = Y_AXIS;
-    const glm::vec3 b = parentPos + glm::vec3{0,0.1f,0};
-    const float len = glm::length(b);
+    glm::vec3 worldPosition = pParentTrans->GetLocalPosition() * 10.0f;
+    glm::ivec3 tilePosition = glm::floor(worldPosition);
 
-    const glm::vec3 a = lightDir * (1.f / glm::cos(angle)) * len;
-   
-    const glm::vec3 res = glm::normalize(a + b) * glm::tan(angle) * len;
+    tilePosition.x = glm::clamp(tilePosition.x, 0, MCTilemap::MAP_WIDTH - 1);
+    tilePosition.y = glm::clamp(tilePosition.y, 0, MCTilemap::MAP_HEIGHT - 1);
+    tilePosition.z = glm::clamp(tilePosition.z, 0, MCTilemap::MAP_WIDTH - 1);
 
-    auto c = (res - parentPos);
-    c.y = -0.1f;
+    int y = tilePosition.y;
+    while (y >= 0)
+    {
+        if (m_pTilemap->GetTile(tilePosition.x, y, tilePosition.z) > 0)
+            break;
+        --y;
+    }
 
-    pTrans->SetLocalPosition(c);
+    float distance = worldPosition.y - y - 1;
+    pTrans->SetLocalPosition(glm::vec3(0.0f, -distance / 10.0f + 0.005f, 0.0f));
 
     const float fDelta = 0.1f * (pParentTrans->GetWorldPosition().y - m_fPlayerOriginY);
-    pTrans->SetLocalScale(0.05f + fDelta);
-    m_fShadowAlpha = glm::clamp(1.f - fDelta * 20.f,0.f,1.f);
+    pTrans->SetLocalScale(0.03f / (1.0f + glm::abs(distance)));
     GameObj::Update();
 }
 

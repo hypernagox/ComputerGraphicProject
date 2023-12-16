@@ -45,8 +45,7 @@ int main()
         mate->SetMaterialSpecular({ .3f,.3f,.3f });
         pLight->GetComp<MeshRenderer>()->AddMaterial(mate);
         pLight->GetTransform()->SetLocalScale(0.1f);
-        pLight->GetTransform()->SetLocalRotation(90.f, X_AXIS);
-        pLight->GetTransform()->SetLookAt({ -3.5f,-1.2f,-1.2f });
+        pLight->GetTransform()->SetLocalRotation(45.0f, X_AXIS);
         l->SetAmbient(glm::vec3{ 0.5f, 0.5f, 0.5f });
         l->SetDiffuse(glm::vec3{ 1.0f, 1.0f, 1.0f });
         curScene->AddObject(pLight, GROUP_TYPE::MONSTER);

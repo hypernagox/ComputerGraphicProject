@@ -108,7 +108,8 @@ CoRoutine Camera::UpdateChangeProj() noexcept
 {
 	for (m_camInterpolation; m_camInterpolation <= 1.f; m_camInterpolation += DT)
 	{
-		m_matProjection = glm::mix(m_startMat, m_endMat, m_camInterpolation);
+		float t = (1.0f - glm::cos(m_camInterpolation * glm::pi<float>())) * 0.5f;
+		m_matProjection = glm::mix(m_startMat, m_endMat, t);
 		co_await std::suspend_always{};
 	}
 	m_eProjType = PROJECTION_TYPE::PERSPECTIVE == m_eProjType ? PROJECTION_TYPE::ORTHOGRAPHIC : PROJECTION_TYPE::PERSPECTIVE;

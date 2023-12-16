@@ -86,7 +86,7 @@ void Player::UpdateRenderer()
 Player::Player(MCTilemap* tilemap) : m_refTilemap(tilemap)
 {
 	m_rendererObj = Mgr(AssimpMgr)->LoadAllPartsAsGameObj("DefaultWarpShader.glsl", "Player.fbx");
-	m_rendererObj->GetTransform()->SetLocalPosition(glm::vec3(0.0f, 0.1f, 0.0f));
+	m_rendererObj->GetTransform()->SetLocalPosition(glm::vec3(0.0f, 0.11f, 0.0f));
 	m_rendererObj->GetTransform()->SetLocalScale(0.0003f);
 
 	m_transformHead = m_rendererObj->FindChildObj("Head")->GetTransform();
@@ -118,7 +118,6 @@ Player::Player(MCTilemap* tilemap) : m_refTilemap(tilemap)
 
 	m_cameraObj = make_obj<GameObj>();
 	m_fpChangeCamMode[m_curCamMode]();
-	m_cameraObj->GetTransform()->SetLocalScale(0.01f);
 
 	m_pCamera = m_cameraObj->AddComponent<Camera>();
 	m_pCamera->SetNear(0.1f);
@@ -147,7 +146,7 @@ void Player::Start()
 			mate->SetMaterialSpecular({ 10,10,10 });
 		}
 	}
-	AddChild(make_shared<PlayerShadow>());
+	AddChild(make_shared<PlayerShadow>(m_refTilemap));
 
 	GameObj::Start();
 }
@@ -157,6 +156,11 @@ void Player::Update()
 	const auto pPlayerTrans = GetTransform();
 
 	m_vAccelation = glm::vec3(0.0f, -4.0f, 0.0f);
+
+	if (KEY_TAP(GLFW_KEY_T))
+	{
+		m_pCamera->StartChangeCamProjType();
+	}
 
 	if (KEY_HOLD(GLFW_KEY_A))
 	{
@@ -213,12 +217,6 @@ void Player::Update()
 	m_vVelocity.x = vVelocityXZ.x;
 	m_vVelocity.z = vVelocityXZ.y;
 
-	float old_fMoveTime = m_fMoveTime;
-	m_fMoveTime += glm::length(m_vVelocity) * DT;
-
-	if (m_bGround && glm::mod(old_fMoveTime, 0.25f) > glm::mod(m_fMoveTime, 0.25f))
-		Mgr(SoundMgr)->PlayEffect(std::format("grass{}.ogg", (int)(m_fMoveTime * 4) % 4 + 1));
-
 	glm::vec3 position = GetTransform()->GetLocalPosition() * 10.0f;
 	glm::vec3 positionPost = position + m_vVelocity * DT * 10.0f;
 
@@ -226,8 +224,14 @@ void Player::Update()
 	m_bGround = m_refTilemap->HandleCollision(position, positionPost, m_vVelocity);
 	GetTransform()->SetLocalPosition(positionPost * 0.1f);
 
+	float old_fMoveTime = m_fMoveTime;
+	m_fMoveTime += glm::length(m_vVelocity) * DT;
+
+	if (m_bGround && glm::mod(old_fMoveTime, 0.25f) > glm::mod(m_fMoveTime, 0.25f))
+		Mgr(SoundMgr)->PlayEffect(std::format("grass{}.ogg", (int)(m_fMoveTime * 4) % 4 + 1), 0.25f);
+
 	if (!old_bGround && m_bGround)
-		Mgr(SoundMgr)->PlayEffect("grass2.ogg");
+		Mgr(SoundMgr)->PlayEffect("grass2.ogg", 0.25f);
 
 	auto pCameraTransform = m_cameraObj->GetTransform();
 	float tParam = m_fMoveTime * 10.0f;
