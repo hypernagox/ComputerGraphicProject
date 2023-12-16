@@ -45,10 +45,20 @@ void MCTilemap::SetTile(int x, int y, int z, int tile)
 	tileChunk[x / modulo][z / modulo].SetTile(x % modulo, y, z % modulo, tile);
 }
 
+void MCTilemap::SetTile(const glm::ivec3& v, int tile)
+{
+	SetTile(v.x, v.y, v.z, tile);
+}
+
 int MCTilemap::GetTile(int x, int y, int z) const
 {
 	constexpr int modulo = MCTileChunk::CHUNK_WIDTH;
 	return tileChunk[x / modulo][z / modulo].GetTile(x % modulo, y, z % modulo);
+}
+
+int MCTilemap::GetTile(const glm::ivec3& v) const
+{
+	return GetTile(v.x, v.y, v.z);
 }
 
 MCTileChunk* MCTilemap::GetChunk(int x, int z)
@@ -200,4 +210,57 @@ bool MCTilemap::HandleCollision(const glm::vec3& pre_position, glm::vec3& positi
 	velocity = post_vel;
 
 	return landed;
+}
+
+RaycastResult MCTilemap::RaycastTile(const glm::vec3& start_position, const glm::vec3& direction, float distance) const
+{
+	glm::vec3 tracePosition = start_position;
+
+	while (true)
+	{
+		glm::vec3 intersectionDelta;
+		glm::vec3 faceDirection = glm::zero<glm::vec3>();
+
+		for (int i = 0; i < 3; i++)
+		{
+			if (direction[i] == 0.0f)
+				continue;
+
+			int nextStep = direction[i] > 0.0f ? glm::floor(tracePosition[i]) + 1 : glm::ceil(tracePosition[i]) - 1;
+			glm::vec3 v = direction / direction[i] * (nextStep - tracePosition[i]);
+
+			if (glm::length2(v) < glm::length2(intersectionDelta))
+			{
+				intersectionDelta = v;
+
+				switch (i)
+				{
+				case 0:
+					faceDirection = direction[0] < 0.0f ? glm::vec3(1.0f, 0.0f, 0.0f) : glm::vec3(-1.0f, 0.0f, 0.0f);
+					break;
+
+				case 1:
+					faceDirection = direction[1] < 0.0f ? glm::vec3(0.0f, 1.0f, 0.0f) : glm::vec3(0.0f, -1.0f, 0.0f);
+					break;
+
+				case 2:
+					faceDirection = direction[2] < 0.0f ? glm::vec3(0.0f, 0.0f, 1.0f) : glm::vec3(0.0f, 0.0f, -1.0f);
+					break;
+				}
+			}
+		}
+
+		tracePosition += intersectionDelta;
+
+		if (tracePosition.y < 0.0f || tracePosition.y > MCTilemap::MAP_HEIGHT)
+			return RaycastResult();
+
+		glm::ivec3 tilePosition = glm::ivec3();
+		for (int i = 0; i < 3; i++)
+			tilePosition[i] = direction[i] > 0.0f ? glm::floor(tracePosition[i]) : glm::ceil(tracePosition[i]) - 1;
+
+		int tile = GetTile(tilePosition);
+		if (tile > 0)
+			return RaycastResult{ true, tracePosition, faceDirection, tilePosition };
+	}
 }

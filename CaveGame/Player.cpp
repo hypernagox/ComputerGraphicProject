@@ -16,6 +16,7 @@
 #include "Material.h"
 #include "PlayerShadow.h"
 #include "MCTilemap.h"
+#include "SoundMgr.h"
 
 void Player::ChangeCamType() noexcept
 {
@@ -212,13 +213,21 @@ void Player::Update()
 	m_vVelocity.x = vVelocityXZ.x;
 	m_vVelocity.z = vVelocityXZ.y;
 
+	float old_fMoveTime = m_fMoveTime;
 	m_fMoveTime += glm::length(m_vVelocity) * DT;
+
+	if (m_bGround && glm::mod(old_fMoveTime, 0.25f) > glm::mod(m_fMoveTime, 0.25f))
+		Mgr(SoundMgr)->PlayEffect(std::format("grass{}.ogg", (int)(m_fMoveTime * 4) % 4 + 1));
 
 	glm::vec3 position = GetTransform()->GetLocalPosition() * 10.0f;
 	glm::vec3 positionPost = position + m_vVelocity * DT * 10.0f;
 
+	bool old_bGround = m_bGround;
 	m_bGround = m_refTilemap->HandleCollision(position, positionPost, m_vVelocity);
 	GetTransform()->SetLocalPosition(positionPost * 0.1f);
+
+	if (!old_bGround && m_bGround)
+		Mgr(SoundMgr)->PlayEffect("grass2.ogg");
 
 	auto pCameraTransform = m_cameraObj->GetTransform();
 	float tParam = m_fMoveTime * 10.0f;
@@ -227,6 +236,7 @@ void Player::Update()
 
 	UpdatePlayerCamFpsMode();
 	GameObj::Update();
+
 	//TODO юс╫ц
 	const auto [target, point] = Mgr(RayCaster)->GetPickedObjAndPoint();
 	if (target)
@@ -238,16 +248,13 @@ void Player::Update()
 	UpdateRenderer();
 }
 
-const glm::vec3 Player::GetPlayerLook() const noexcept
+glm::vec3 Player::GetPlayerLook() const noexcept
 {
-	const glm::vec3 worldCoords = NDC2World(ScreenToOpenGL2D(Mgr(KeyMgr)->GetMousePos()));
-	const auto pTrans = GetTransform();
-	const glm::vec3 curPos = pTrans->GetWorldPositionAccRecursion();
-	return glm::normalize(worldCoords - curPos);
+	return glm::rotate(glm::quat(glm::vec3(glm::radians(m_cameraAngleAxisSmooth.x), glm::radians(m_cameraAngleAxis.y), 0.0f)), glm::vec3(0.0f, 0.0f, 1.0f));
 }
 
 void Player::Fire()  noexcept
 {
-	auto bullet = make_shared<Bullet>(GetTransform()->GetWorldPosition(),Mgr(RayCaster)->castRay().rayDir);
+	auto bullet = make_shared<Bullet>(GetTransform()->GetWorldPosition(), GetPlayerLook());
 	CreateObj(std::move(bullet), GROUP_TYPE::PROJ_PLAYER);
 }

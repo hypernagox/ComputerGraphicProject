@@ -7,6 +7,14 @@ public:
 	static const int TILE_OPAQUE[];
 };
 
+struct RaycastResult
+{
+	bool hit;
+	glm::fvec3 hitPosition;
+	glm::fvec3 hitNormal;
+	glm::ivec3 hiyTilePosition;
+};
+
 class MCTileChunk
 {
 public:
@@ -37,7 +45,11 @@ public:
 	MCTilemap();
 
 	void SetTile(int x, int y, int z, int tile);
+	void SetTile(const glm::ivec3& v, int tile);
 	int GetTile(int x, int y, int z) const;
+	int GetTile(const glm::ivec3& v) const;
 	MCTileChunk* GetChunk(int x, int z);
 	bool HandleCollision(const glm::vec3& pre_position, glm::vec3& position, glm::vec3& velocity);
+	RaycastResult RaycastTile(const glm::vec3& start_position, const glm::vec3& direction, float distance) const;
+
 };
