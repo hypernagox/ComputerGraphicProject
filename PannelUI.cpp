@@ -74,7 +74,9 @@ void PannelUI::AddChild(shared_ptr<PannelUI> _pUI)
 	GameObj::AddChild(_pUI);
 	const glm::vec3 diff = GetTransform()->GetLocalPosition() - _pUI->GetTransform()->GetLocalPosition();
 	for (auto& p : _pUI->m_arrLTRB)p -= glm::vec2{ diff };
-	_pUI->GetTransform()->SetLocalPosition({});
+
+	_pUI->GetTransform()->SetLocalPosition({ -m_uiSize.x + _pUI->m_uiMid.x ,-m_uiSize.y + _pUI->m_uiMid.y ,0.f});
+	
 	_pUI->m_fCurZDepth = m_fCurZDepth;
 	_pUI->m_parentUI = static_pointer_cast<PannelUI>(shared_from_this());
 	m_childUI.emplace_back(std::move(_pUI));

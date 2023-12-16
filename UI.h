@@ -40,13 +40,26 @@ protected:
 
 	float m_fCurZDepth = 0.f;
 	bool m_bIsActivate = true;
+	glm::vec2 m_originMid = {};
+
+	glm::vec2 m_uiSize = {};
+	glm::vec2 m_uiMid = {};
+
 	UI_STATE UpdateCurUIState();
+	Delegate m_uiCallback;
 protected:
 	void Save(string_view _resName, rapidjson::PrettyWriter<rapidjson::StringBuffer>& writer, const fs::path& _savePath)override;
 	
 	void Load(string_view _dirName, const rapidjson::Value& doc, const fs::path& _loadPath) override;
 	
 public:
+	template<typename Func, typename... Args>
+		requires std::invocable<Func, Args...>
+	void AddUICallBack(Func&& fp, Args&&... args)noexcept
+	{
+		m_uiCallback += std::bind_front(std::forward<Func>(fp), std::forward<Args>(args)...);
+	}
+
 	void ExecuteOnClickEvent()
 	{
 		if (m_onClickEvent)

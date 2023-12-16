@@ -9,8 +9,8 @@
 
 ChunkMesh::ChunkMesh()
 {
-    m_vecChunkVertex.reserve(10000000);
-    m_vecChunkIndex.reserve(10000000);
+    m_vecChunkVertex.reserve(1000000);
+    m_vecChunkIndex.reserve(1000000);
 }
 
 ChunkMesh::~ChunkMesh()

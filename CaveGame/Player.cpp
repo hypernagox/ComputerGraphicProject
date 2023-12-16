@@ -199,7 +199,7 @@ void Player::Update()
 	}
 	if (KEY_TAP(GLFW_MOUSE_BUTTON_LEFT))
 	{
-		Fire();
+		//Fire();
 	}
 
 	m_vVelocity = m_vVelocity + m_vAccelation * DT;

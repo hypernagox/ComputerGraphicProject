@@ -152,33 +152,28 @@ UI::UI(const glm::vec2 midPos, string_view strTexName, const float scaleFactor)
 	: m_fCurZDepth {UI::g_curMaxZDepth -= 0.01f}
 	, m_uiMesh{make_shared<Mesh>()}
 	, m_uiTex{ Mgr(ResMgr)->GetRes<Texture2D>(strTexName) }
+	, m_originMid{midPos}
 {
 	const auto [w,h] = m_uiTex->GetTexWH();
 	const float fScaleFactor = Mgr(Core)->GetScaleFactor();
 	const glm::vec2 half_size{ (w * fScaleFactor) / 2.f,(h * fScaleFactor) / 2.f };
 
-	m_arrLTRB[LT] = midPos * fScaleFactor - half_size * scaleFactor;
-	m_arrLTRB[RB] = midPos * fScaleFactor + half_size * scaleFactor;
+	m_uiSize = half_size;
+	m_uiMid = m_originMid * fScaleFactor;
 
-	//const auto glLT = wc2GL(m_arrLTRB[LT]);
-	//const auto glRB = wc2GL(m_arrLTRB[RB]);
+	m_arrLTRB[LT] = m_originMid * fScaleFactor - half_size * scaleFactor;
+	m_arrLTRB[RB] = m_originMid * fScaleFactor + half_size * scaleFactor;
 
-	const auto glLT = glm::vec3(m_arrLTRB[LT],0.f);
-	const auto glRB = glm::vec3(m_arrLTRB[RB],0.f);
-	
-	const glm::vec3 glCenter = (glLT + glRB) / 2.0f;
-	//const glm::vec3 displacement = -glCenter;
-	const glm::vec3 displacement = {};
-	
-	//GetTransform()->SetLocalPosition(glCenter);
 
+	GetTransform()->SetLocalPosition(glm::vec3{ m_originMid * fScaleFactor,0.f });
+	GetTransform()->SetLocalScale(scaleFactor);
 	
 	const vector<glm::vec3> temp_vertex = 
 	{
-		glm::vec3(glLT.x + displacement.x, glLT.y + displacement.y, 0.0f),
-		glm::vec3(glRB.x + displacement.x, glLT.y + displacement.y, 0.0f),
-		glm::vec3(glRB.x + displacement.x, glRB.y + displacement.y, 0.0f),
-		glm::vec3(glLT.x + displacement.x, glRB.y + displacement.y, 0.0f)
+		glm::vec3{-half_size.x,-half_size.y,0.f},
+		glm::vec3{ half_size.x,-half_size.y,0.f},
+		glm::vec3{ half_size.x, half_size.y,0.f},
+		glm::vec3{-half_size.x, half_size.y,0.f},
 	};
 
 	static const vector<GLuint> temp_index = { 0, 1, 2, 0, 2, 3 };
@@ -211,11 +206,32 @@ UI::~UI()
 
 void UI::Update()
 {
+	if (m_pParentGameObj.expired())
+	{
+		const auto pTrans = GetTransform();
+		const auto [w, h] = Mgr(Core)->GetScaleFactorWH();
+		const auto newLocal = glm::vec3{ m_originMid.x * w,m_originMid.y * h ,0.f };
+		pTrans->SetLocalPosition(newLocal);
+		pTrans->SetLocalScale(glm::vec3{ w, h, 0.f });
+	}
+
 	m_eCurUIState = UpdateCurUIState();
+	m_uiCallback();
+
+	for (const auto& childUI : m_vecChildObj)
+	{
+		childUI->Update();
+	}
+
 }
 
 void UI::Render()
 {
+	for (const auto& childUI : m_vecChildObj)
+	{
+		childUI->Render();
+	}
+
 	m_uiTex->BindTexture();
 	Mgr(ResMgr)->GetRes<Shader>("UIShader.glsl")->SetUniformMat4(GetObjectWorldTransform(), "uModel");
 	m_uiMesh->Render();

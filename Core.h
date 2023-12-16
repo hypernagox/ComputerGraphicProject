@@ -74,13 +74,19 @@ private:
 	HDC m_hDC;       
 	HGLRC m_hglrc;
 	mutable float m_fScaleFactor = 1.f;
+	mutable float m_fScaleFactorW = 1.f;
+	mutable float m_fScaleFactorH = 1.f;
 private:
 	void SetUBO();
 	std::tuple<int, int, int, int> AdjustWinSize(GLuint width_, GLuint height_, HWND hwnd)const noexcept;
 	std::tuple<int, int, int, int> AdjustWinSize(HWND hwnd)const noexcept;
 	void PrepareStart()const noexcept;
 public:
+	const auto GetScaleFactorWH()const noexcept { return std::make_pair(m_fScaleFactorW, m_fScaleFactorH); }
 	const float GetScaleFactor()const noexcept { return m_fScaleFactor; }
+	void SetScaleFactorW(const float _fX)noexcept { m_fScaleFactorW = _fX; }
+	void SetScaleFactorH(const float _fY)noexcept { m_fScaleFactorH = _fY; }
+
 	void BindUBOData()const noexcept {
 		glBindBuffer(GL_UNIFORM_BUFFER, m_ubo);
 		glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(UBOData), &m_uboMatLight);

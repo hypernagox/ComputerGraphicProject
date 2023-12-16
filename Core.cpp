@@ -124,6 +124,8 @@ void Core::Init(const GLuint _winWidth, const GLuint _winHeight)
 
 	wglMakeCurrent(m_hDC, m_hglrc);
 
+	m_fScaleFactorW = m_fScaleFactorH = m_fScaleFactor;
+
 	glewInit();
 
 	const GLubyte* version = glGetString(GL_VERSION);
@@ -158,9 +160,17 @@ void Core::Init(const GLuint _winWidth, const GLuint _winHeight)
 		});
 
 	glfwSetFramebufferSizeCallback(m_pWinInfo, [](GLFWwindow* _window, int width, int height) {
+		static const auto [prevW, prevH] = Mgr(Core)->GetWidthHeight();
+		static const auto factor = Mgr(Core)->GetScaleFactor();
+		width = 0 == width ? 1 : width;
+		height = 0 == height ? 1 : height;
 		Mgr(Core)->SetWinWidth(width);
 		Mgr(Core)->SetWinHeight(height);
 		glViewport(0, 0, width, height);
+
+		Mgr(Core)->SetScaleFactorW((float)width /((float)prevW/factor));
+		Mgr(Core)->SetScaleFactorH((float)height / ((float)prevH/factor));
+
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		Mgr(SceneMgr)->Update();

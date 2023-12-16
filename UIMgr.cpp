@@ -31,11 +31,14 @@ void UIMgr::Init()
 	const float w = width / fScaleFactor;
 	const float h = height / fScaleFactor;
 
-	auto quick_bar = make_shared<PannelUI>(glm::vec2{w/2.f,h - 25.f * fScaleFactor}, "gui.png",4.f);
+	auto quick_bar = make_shared<PannelUI>(glm::vec2{w/2.f,h - 10.f * fScaleFactor}, "gui.png",4.f);
 	m_vecUI.emplace_back(quick_bar);
 
 	auto cross_line = make_shared<PannelUI>(glm::vec2{ w,h } /2.f, "cross.png", 2.f);
 	m_vecUI.emplace_back(cross_line);
+
+	//auto temp = make_shared<PannelUI>(glm::vec2{ 10,10 }, "cross.png", 1.f);
+	//quick_bar->AddChild(temp);
 }
 
 void UIMgr::Update()
@@ -79,7 +82,7 @@ void UIMgr::Update()
 	for (auto& ui : m_vecUI)
 	{
 		if (!ui->IsActivate())continue;
-		ui->MyPolygon::FinalUpdate();
+		ui->FinalUpdate();
 		m_setUI.emplace(ui.get());
 	}
 	Mgr(ThreadMgr)->WaitAllJob();
@@ -113,7 +116,7 @@ void UIMgr::Render()
 	const auto [width, height] = Mgr(Core)->GetWidthHeight();
 	sceneData.projMat = glm::orthoLH(0.0f, width, height, 0.0f, -1.0f, 1.0f);
 	sceneData.viewMat = glm::mat4{ 1.f };
-	//sceneData.projMat = 
+	
 	Mgr(Core)->BindUBOData();
 
 	Mgr(ResMgr)->GetRes<Shader>("UIShader.glsl")->Use();

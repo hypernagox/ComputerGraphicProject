@@ -226,7 +226,7 @@ RaycastResult MCTilemap::RaycastTile(const glm::vec3& start_position, const glm:
 			if (direction[i] == 0.0f)
 				continue;
 
-			int nextStep = direction[i] > 0.0f ? glm::floor(tracePosition[i]) + 1 : glm::ceil(tracePosition[i]) - 1;
+			int nextStep = direction[i] > 0.0f ? (int)glm::floor(tracePosition[i]) + 1 : (int)glm::ceil(tracePosition[i]) - 1;
 			glm::vec3 v = direction / direction[i] * (nextStep - tracePosition[i]);
 
 			if (glm::length2(v) < glm::length2(intersectionDelta))
@@ -257,7 +257,7 @@ RaycastResult MCTilemap::RaycastTile(const glm::vec3& start_position, const glm:
 
 		glm::ivec3 tilePosition = glm::ivec3();
 		for (int i = 0; i < 3; i++)
-			tilePosition[i] = direction[i] > 0.0f ? glm::floor(tracePosition[i]) : glm::ceil(tracePosition[i]) - 1;
+			tilePosition[i] = direction[i] > 0.0f ? (int)glm::floor(tracePosition[i]) : (int)glm::ceil(tracePosition[i]) - 1;
 
 		int tile = GetTile(tilePosition);
 		if (tile > 0)
