@@ -68,7 +68,7 @@ void Mesh::SetBuffers()
 void Mesh::Render() const
 {
     glBindVertexArray(vao);
-    glDrawElements(GL_TRIANGLES, (GLsizei)m_numOfIndices, GL_UNSIGNED_INT, 0);
+    glDrawElements(m_ePolygonMode, (GLsizei)m_numOfIndices, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }
 

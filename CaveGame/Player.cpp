@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "Mesh.h"
 #include "KeyMgr.h"
 #include "TimeMgr.h"
 #include "Player.h"
@@ -17,6 +18,35 @@
 #include "PlayerShadow.h"
 #include "MCTilemap.h"
 #include "SoundMgr.h"
+#include <ResMgr.h>
+
+shared_ptr<GameObj> Player::CreateCursorBlockObj() const
+{
+	shared_ptr<GameObj> obj = make_obj<GameObj>();
+	auto meshRenderer = obj->AddComponent<MeshRenderer>();
+
+	vector<Vertex> vertices;
+	for (int i = 0; i < 8; ++i)
+	{
+		Vertex v;
+		v.position = glm::vec3(i % 2, i / 2 % 2, i / 4 % 2) - glm::one<glm::vec3>() * 0.5f;
+		v.color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+		vertices.push_back(v);
+	}
+	vector<GLuint> indices{
+		0, 1, 0, 2, 3, 1, 3, 2,
+		0, 4, 1, 5, 2, 6, 3, 7,
+		4, 5, 4, 6, 7, 5, 7, 6
+	};
+
+	shared_ptr<Mesh> mesh = make_shared<Mesh>(vertices, indices);
+	mesh->SetPolygonMode(GL_LINES);
+	mesh->SetBuffers();
+	meshRenderer->AddMesh(mesh);
+	meshRenderer->SetShader("CursorBlockShader.glsl");
+
+	return obj;
+}
 
 void Player::ChangeCamType() noexcept
 {
@@ -43,6 +73,13 @@ void Player::InitCamDirection() noexcept
 	m_rendererObj->GetTransform()->SetLocalRotation(glm::identity<glm::quat>());
 	m_pCamera->GetTransform()->SetLocalRotation(glm::identity<glm::quat>());
 	GetTransform()->SetLocalRotation(glm::identity<glm::quat>());
+}
+
+void Player::UpdateTileManipulation()
+{
+	glm::vec3 wv = m_cameraAnchor->GetTransform()->GetWorldPosition() * 10.0f;
+	const RaycastResult result = m_refTilemap->RaycastTile(wv, this->GetPlayerLook(), 10.0f);
+	m_cursorBlockObj->GetTransform()->SetLocalPosition((glm::vec3(result.hitTilePosition) + glm::one<glm::vec3>() * 0.5f) / 10.0f - GetTransform()->GetLocalPosition());
 }
 
 void Player::MoveByView(const glm::vec3& vDelta)
@@ -83,6 +120,38 @@ void Player::UpdateRenderer()
 	m_transformRLegOut->SetLocalRotation(glm::quat(glm::vec3(glm::radians(90.0f), 0.0f, rotationFactor)));
 }
 
+void Player::UpdateCameraTransform(shared_ptr<Transform> pCameraTransfrom)
+{
+	glm::vec3 wv = m_cameraAnchor->GetTransform()->GetWorldPosition() * 10.0f;
+	const float fMaxDist = 5.0f;
+	switch (m_curCamMode)
+	{
+	case 0:
+		pCameraTransfrom->SetLocalPosition(glm::zero<glm::vec3>());
+		pCameraTransfrom->SetLocalRotation(glm::identity<glm::quat>());
+		break;
+	case 1:
+	{
+		const RaycastResult result = m_refTilemap->RaycastTile(wv, -this->GetPlayerLook(), fMaxDist);
+		float target = -(result.hit ? glm::distance(wv, result.hitPosition) : fMaxDist);
+		pCameraTransfrom->SetLocalPosition(glm::vec3(0.0f, 0.0f, glm::max(target, glm::mix(pCameraTransfrom->GetLocalPosition().z / 0.1f, target, DT * 8.0f))) * 0.1f);
+		pCameraTransfrom->SetLocalRotation(glm::identity<glm::quat>());
+	}
+		break;
+	case 2:
+	{
+		const RaycastResult result = m_refTilemap->RaycastTile(wv, this->GetPlayerLook(), fMaxDist);
+		float target = result.hit ? glm::distance(wv, result.hitPosition) : fMaxDist;
+		pCameraTransfrom->SetLocalPosition(glm::vec3(0.0f, 0.0f, glm::min(target, glm::mix(pCameraTransfrom->GetLocalPosition().z / 0.1f, target, DT * 8.0f))) * 0.1f);
+		pCameraTransfrom->SetLocalRotation(glm::quat(glm::vec3(0.0f, glm::pi<float>(), 0.0f)));
+		break;
+	}
+	}
+	float tParam = m_fMoveTime * 10.0f;
+	float mParam = 0.004f;
+	pCameraTransfrom->SetLocalPosition(glm::vec3(glm::sin(tParam) * mParam, glm::sin(tParam * 2.0f) * mParam, pCameraTransfrom->GetLocalPosition().z));
+}
+
 Player::Player(MCTilemap* tilemap) : m_refTilemap(tilemap)
 {
 	m_rendererObj = Mgr(AssimpMgr)->LoadAllPartsAsGameObj("DefaultWarpShader.glsl", "Player.fbx");
@@ -105,11 +174,11 @@ Player::Player(MCTilemap* tilemap) : m_refTilemap(tilemap)
 		m_cameraObj->GetTransform()->SetLocalRotation(glm::identity<glm::quat>());
 		};
 	m_fpChangeCamMode[1] = [this]() noexcept {
-		m_cameraObj->GetTransform()->SetLocalPosition(glm::vec3(0.0f, 0.0f, -0.75f));
+		m_cameraObj->GetTransform()->SetLocalPosition(glm::zero<glm::vec3>());
 		m_cameraObj->GetTransform()->SetLocalRotation(glm::identity<glm::quat>());
 		};
 	m_fpChangeCamMode[2] = [this]() noexcept {
-		m_cameraObj->GetTransform()->SetLocalPosition(glm::vec3(0.0f, 0.0f, 0.75f));
+		m_cameraObj->GetTransform()->SetLocalPosition(glm::zero<glm::vec3>());
 		m_cameraObj->GetTransform()->SetLocalRotation(glm::quat(glm::vec3(0.0f, glm::pi<float>(), 0.0f)));
 		};
 
@@ -120,8 +189,11 @@ Player::Player(MCTilemap* tilemap) : m_refTilemap(tilemap)
 	m_fpChangeCamMode[m_curCamMode]();
 
 	m_pCamera = m_cameraObj->AddComponent<Camera>();
-	m_pCamera->SetNear(0.1f);
+	m_pCamera->SetNear(0.01f);
 	m_pCamera->SetMainCam();
+
+	m_cursorBlockObj = CreateCursorBlockObj();
+	m_cursorBlockObj->GetTransform()->SetLocalScale(glm::one<glm::vec3>() * 0.105f);
 }
 
 Player::~Player()
@@ -135,6 +207,7 @@ void Player::Start()
 
 	AddChild(m_rendererObj);
 	AddChild(m_cameraAnchor);
+	AddChild(m_cursorBlockObj);
 	m_cameraAnchor->AddChild(m_cameraObj);
 
 	for (auto& child : *m_rendererObj)
@@ -233,12 +306,9 @@ void Player::Update()
 	if (!old_bGround && m_bGround)
 		Mgr(SoundMgr)->PlayEffect("grass2.ogg", 0.25f);
 
-	auto pCameraTransform = m_cameraObj->GetTransform();
-	float tParam = m_fMoveTime * 10.0f;
-	float mParam = 0.004f;
-	pCameraTransform->SetLocalPosition(glm::vec3(glm::sin(tParam) * mParam, glm::sin(tParam * 2.0f) * mParam, pCameraTransform->GetLocalPosition().z));
-
 	UpdatePlayerCamFpsMode();
+	UpdateTileManipulation();
+	UpdateCameraTransform(m_cameraObj->GetTransform());
 	GameObj::Update();
 
 	//TODO юс╫ц
@@ -254,7 +324,7 @@ void Player::Update()
 
 glm::vec3 Player::GetPlayerLook() const noexcept
 {
-	return glm::rotate(glm::quat(glm::vec3(glm::radians(m_cameraAngleAxisSmooth.x), glm::radians(m_cameraAngleAxis.y), 0.0f)), glm::vec3(0.0f, 0.0f, 1.0f));
+	return glm::rotate(glm::quat(glm::vec3(glm::radians(m_cameraAngleAxisSmooth.x), glm::radians(m_cameraAngleAxisSmooth.y), 0.0f)), glm::vec3(0.0f, 0.0f, 1.0f));
 }
 
 void Player::Fire()  noexcept

@@ -214,11 +214,12 @@ bool MCTilemap::HandleCollision(const glm::vec3& pre_position, glm::vec3& positi
 
 RaycastResult MCTilemap::RaycastTile(const glm::vec3& start_position, const glm::vec3& direction, float distance) const
 {
+	RaycastResult result = RaycastResult{ false, glm::zero<glm::vec3>(), glm::zero<glm::vec3>(), glm::zero<glm::ivec3>() };
 	glm::vec3 tracePosition = start_position;
 
-	while (true)
+	while (glm::distance2(start_position, tracePosition) <= distance * distance)
 	{
-		glm::vec3 intersectionDelta;
+		glm::vec3 intersectionDelta = glm::one<glm::vec3>() * 1e+9f;
 		glm::vec3 faceDirection = glm::zero<glm::vec3>();
 
 		for (int i = 0; i < 3; i++)
@@ -229,38 +230,43 @@ RaycastResult MCTilemap::RaycastTile(const glm::vec3& start_position, const glm:
 			int nextStep = direction[i] > 0.0f ? (int)glm::floor(tracePosition[i]) + 1 : (int)glm::ceil(tracePosition[i]) - 1;
 			glm::vec3 v = direction / direction[i] * (nextStep - tracePosition[i]);
 
-			if (glm::length2(v) < glm::length2(intersectionDelta))
+			if (glm::length2(v) >= glm::length2(intersectionDelta))
+				continue;
+
+			intersectionDelta = v;
+			switch (i)
 			{
-				intersectionDelta = v;
+			case 0:
+				faceDirection = direction[0] < 0.0f ? glm::vec3(1.0f, 0.0f, 0.0f) : glm::vec3(-1.0f, 0.0f, 0.0f);
+				break;
 
-				switch (i)
-				{
-				case 0:
-					faceDirection = direction[0] < 0.0f ? glm::vec3(1.0f, 0.0f, 0.0f) : glm::vec3(-1.0f, 0.0f, 0.0f);
-					break;
+			case 1:
+				faceDirection = direction[1] < 0.0f ? glm::vec3(0.0f, 1.0f, 0.0f) : glm::vec3(0.0f, -1.0f, 0.0f);
+				break;
 
-				case 1:
-					faceDirection = direction[1] < 0.0f ? glm::vec3(0.0f, 1.0f, 0.0f) : glm::vec3(0.0f, -1.0f, 0.0f);
-					break;
-
-				case 2:
-					faceDirection = direction[2] < 0.0f ? glm::vec3(0.0f, 0.0f, 1.0f) : glm::vec3(0.0f, 0.0f, -1.0f);
-					break;
-				}
+			case 2:
+				faceDirection = direction[2] < 0.0f ? glm::vec3(0.0f, 0.0f, 1.0f) : glm::vec3(0.0f, 0.0f, -1.0f);
+				break;
 			}
 		}
 
 		tracePosition += intersectionDelta;
 
-		if (tracePosition.y < 0.0f || tracePosition.y > MCTilemap::MAP_HEIGHT)
-			return RaycastResult();
-
 		glm::ivec3 tilePosition = glm::ivec3();
 		for (int i = 0; i < 3; i++)
-			tilePosition[i] = direction[i] > 0.0f ? (int)glm::floor(tracePosition[i]) : (int)glm::ceil(tracePosition[i]) - 1;
+			tilePosition[i] = direction[i] > 0.0f ? glm::floor(tracePosition[i]) : glm::ceil(tracePosition[i]) - 1;
+
+		if (tilePosition.x < 0 || tilePosition.x >= MCTilemap::MAP_WIDTH ||
+			tilePosition.y < 0 || tilePosition.y >= MCTilemap::MAP_HEIGHT ||
+			tilePosition.z < 0 || tilePosition.z >= MCTilemap::MAP_WIDTH)
+			return result;
 
 		int tile = GetTile(tilePosition);
 		if (tile > 0)
-			return RaycastResult{ true, tracePosition, faceDirection, tilePosition };
+		{
+			result = { true, tracePosition, faceDirection, tilePosition };
+			return result;
+		}
 	}
+	return result;
 }

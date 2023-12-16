@@ -12,7 +12,7 @@ struct RaycastResult
 	bool hit;
 	glm::fvec3 hitPosition;
 	glm::fvec3 hitNormal;
-	glm::ivec3 hiyTilePosition;
+	glm::ivec3 hitTilePosition;
 };
 
 class MCTileChunk

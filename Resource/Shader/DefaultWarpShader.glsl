@@ -162,7 +162,6 @@ uniform sampler2D uNormalTexture;
 in vec3 FragPos;
 in vec3 Normal;
 in vec4 ShapeColor;
-
 in vec2 TexCoords;
 
 out vec4 FragColor;
@@ -196,7 +195,7 @@ uniform Material material;
 void main()
 {
     vec3 result = vec3(0.0, 0.0, 0.0);
-    vec3 normal = Normal;
+    vec3 normal = normalize(Normal);
     vec3 fragPos = FragPos;
     vec4 texColor = texture(uTexture2D, TexCoords);
 
@@ -293,15 +292,12 @@ vec3 CalculateDirectionalLight(DirectionalLightData light, vec3 normal, vec3 fra
     vec3 lightDir = normalize(vec3(uObserverView * vec4(light.lData.lightDir,0)));
     vec3 viewDir = CalculateViewDirection(viewpos, fragPos);
     vec3 reflectDir = ReflectVector(lightDir, normal);
-
-  
     vec3 ambient = light.lData.ambient * material.ambient;
 
-    
-    float diff = max(dot(normal, lightDir), 0.0);
+    float diff = dot(normal, lightDir);
     if(diff <= 0.0)
     {
-    return ambient + defaultAmbient;
+        return ambient + defaultAmbient;
     }
     vec3 diffuse = light.lData.diffuse * diff * material.diffuse;
 

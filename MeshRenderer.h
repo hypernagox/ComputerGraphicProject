@@ -59,7 +59,6 @@ public:
     void SetMaterialSpecular(const glm::vec3& _specular);
     void SetMaterialShine(const float _f);
 
-
     void SetIsActivate(const bool bFlag)noexcept { m_bIsActivate = bFlag; }
 };
 

@@ -17,10 +17,10 @@ void Update();
 
 int main()
 {
-    Mgr(Core)->Init();
+    Mgr(Core)->Init(1440, 720);
     Mgr(Core)->SetClearColor(RGBA_WHITE);
 
-    //glfwSetInputMode(Mgr(Core)->GetWinInfo(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(Mgr(Core)->GetWinInfo(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     MCTilemap* tilemap = new MCTilemap();
     MCTerrainGenerator* terrainGenerator = new MCTerrainGenerator();
@@ -46,6 +46,7 @@ int main()
         pLight->GetComp<MeshRenderer>()->AddMaterial(mate);
         pLight->GetTransform()->SetLocalScale(0.1f);
         pLight->GetTransform()->SetLocalRotation(45.0f, X_AXIS);
+        pLight->GetTransform()->AddLocalRotation(1.0f, Y_AXIS);
         l->SetAmbient(glm::vec3{ 0.5f, 0.5f, 0.5f });
         l->SetDiffuse(glm::vec3{ 1.0f, 1.0f, 1.0f });
         curScene->AddObject(pLight, GROUP_TYPE::MONSTER);

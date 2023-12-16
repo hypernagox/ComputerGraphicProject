@@ -12,6 +12,7 @@ private:
 	shared_ptr<GameObj> m_rendererObj;
 	shared_ptr<GameObj> m_cameraAnchor;
 	shared_ptr<GameObj> m_cameraObj;
+	shared_ptr<GameObj> m_cursorBlockObj;
 
 	std::function<void(void)> m_fpChangeCamMode[3];
 
@@ -44,10 +45,12 @@ private:
 
 	ushort m_curCamMode = 0;
 private:
+	shared_ptr<GameObj> CreateCursorBlockObj() const;
 	void ChangeCamType()noexcept;
 	void UpdatePlayerCamFpsMode()noexcept;
 	void MoveByView(const glm::vec3& vDelta);
 	void UpdateRenderer();
+	void UpdateCameraTransform(shared_ptr<Transform> pCameraTransfrom);
 public:
 	Player(MCTilemap* tilemap);
 	~Player();
@@ -61,5 +64,6 @@ public:
 	void Fire()noexcept;
 
 	void InitCamDirection()noexcept;
+	void UpdateTileManipulation();
 };
 

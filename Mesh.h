@@ -16,6 +16,7 @@ private:
 	GLuint vao, vbo, ebo;
 	GLuint m_numOfVertices = 0;
 	GLuint m_numOfIndices = 0;
+	GLenum m_ePolygonMode = GL_TRIANGLES;
 public:
 	Mesh();
 	~Mesh();
@@ -50,5 +51,7 @@ public:
 	virtual void Render()const;
 
 	void SetBuffers();
+
+	void SetPolygonMode(GLenum mode) noexcept { m_ePolygonMode = mode; }
 };
 
