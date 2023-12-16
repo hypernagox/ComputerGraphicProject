@@ -78,14 +78,14 @@ std::tuple<int, int, int, int> Core::AdjustWinSize(HWND hwnd) const noexcept
 	const UINT dpi = GetDpiForWindow(hwnd);
 	m_fScaleFactor = dpi / 96.0f;
 
-	int adjustedWidth = static_cast<int>(monitorWidth * m_fScaleFactor);
+	int adjustedWidth = static_cast<int>(monitorWidth * 0.9f);
 	int adjustedHeight = adjustedWidth / 2;
 
 
-	if (adjustedHeight > monitorHeight * 0.8f)
+	//if (adjustedHeight > monitorHeight * 0.8f)
 	{
-		adjustedHeight = static_cast<int>(monitorHeight * 0.8f);
-		adjustedWidth = adjustedHeight * 2;
+		adjustedHeight = static_cast<int>(monitorHeight * 0.9f);
+		//adjustedWidth = adjustedHeight * 2;
 	}
 
 	const int posX = (monitorWidth - adjustedWidth) / 2;
@@ -124,7 +124,7 @@ void Core::Init(const GLuint _winWidth, const GLuint _winHeight)
 
 	wglMakeCurrent(m_hDC, m_hglrc);
 
-	m_fScaleFactorW = m_fScaleFactorH = m_fScaleFactor;
+	m_fScaleFactorW = m_fScaleFactorH = m_fScaleFactor = 1.f;
 
 	glewInit();
 
