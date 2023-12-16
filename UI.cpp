@@ -155,18 +155,19 @@ UI::UI(const glm::vec2 midPos, string_view strTexName, const float scaleFactor)
 	, m_originMid{midPos}
 {
 	const auto [w,h] = m_uiTex->GetTexWH();
+
 	const float fScaleFactor = Mgr(Core)->GetScaleFactor();
 	const glm::vec2 half_size{ (w * fScaleFactor) / 2.f,(h * fScaleFactor) / 2.f };
 
 	m_uiSize = half_size;
 	m_uiMid = m_originMid * fScaleFactor;
 
-	m_arrLTRB[LT] = m_originMid * fScaleFactor - half_size * scaleFactor;
-	m_arrLTRB[RB] = m_originMid * fScaleFactor + half_size * scaleFactor;
-
+	m_arrLTRB[LT] = m_originMid * fScaleFactor - half_size * fScaleFactor;
+	m_arrLTRB[RB] = m_originMid * fScaleFactor + half_size * fScaleFactor;
 
 	GetTransform()->SetLocalPosition(glm::vec3{ m_originMid * fScaleFactor,0.f });
-	GetTransform()->SetLocalScale(scaleFactor);
+	m_fOriginScale = scaleFactor;
+	GetTransform()->SetLocalScale(scaleFactor / fScaleFactor);
 	
 	const vector<glm::vec3> temp_vertex = 
 	{
@@ -212,7 +213,7 @@ void UI::Update()
 		const auto [w, h] = Mgr(Core)->GetScaleFactorWH();
 		const auto newLocal = glm::vec3{ m_originMid.x * w,m_originMid.y * h ,0.f };
 		pTrans->SetLocalPosition(newLocal);
-		pTrans->SetLocalScale(glm::vec3{ w, h, 0.f });
+		pTrans->SetLocalScale(m_fOriginScale * glm::vec3{ w, h, 0.f } / Mgr(Core)->GetScaleFactor());
 	}
 
 	m_eCurUIState = UpdateCurUIState();

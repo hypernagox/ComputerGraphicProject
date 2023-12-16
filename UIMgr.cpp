@@ -31,7 +31,7 @@ void UIMgr::Init()
 	const float w = width / fScaleFactor;
 	const float h = height / fScaleFactor;
 
-	auto quick_bar = make_shared<PannelUI>(glm::vec2{w/2.f,h - 10.f * fScaleFactor}, "gui.png",4.f);
+	auto quick_bar = make_shared<PannelUI>(glm::vec2{w/2.f,h - 35.f}, "gui.png",3.f);
 	m_vecUI.emplace_back(quick_bar);
 
 	auto cross_line = make_shared<PannelUI>(glm::vec2{ w,h } /2.f, "cross.png", 2.f);

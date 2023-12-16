@@ -41,7 +41,7 @@ protected:
 	float m_fCurZDepth = 0.f;
 	bool m_bIsActivate = true;
 	glm::vec2 m_originMid = {};
-
+	float m_fOriginScale = 1.f;
 	glm::vec2 m_uiSize = {};
 	glm::vec2 m_uiMid = {};
 
