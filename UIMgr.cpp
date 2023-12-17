@@ -12,8 +12,9 @@
 #include "Shader.h"
 #include "PannelUI.h"
 #include "EventMgr.h"
+#include "SoundMgr.h"
 
-const std::function<bool(const UI*, const UI*)> UIMgr::cmpZDepth = [](const UI* a, const UI* b){ return *a  < *b; };
+const std::function<bool(const UI*, const UI*)> UIMgr::cmpZDepth = [](const UI* a, const UI* b){ return *a > *b; };
 
 extern bool g_bCanResume;
 
@@ -35,56 +36,58 @@ void UIMgr::Init()
 	{
 		const int gridCount = 16; 
 		const float gridSizeW = w / gridCount; 
-		const float gridSizeH = h / gridCount;
 
 		for (int y = 0; y < gridCount; ++y)
 		{
 			for (int x = 0; x < gridCount; ++x)
 			{
-				const glm::vec2 pos(gridSizeW * x, gridSizeH * y); 
-				auto background = make_shared<PannelUI>(pos, "introBackGround.png", 13.f);
+				const glm::vec2 pos(gridSizeW * (x + 0.5f), gridSizeW * (y + 0.5f));
+				auto background = make_shared<PannelUI>(pos, "introBackGround.png", 6.0f);
 				m_vecUI[etoi(SCENE_TYPE::INTRO)].emplace_back(background);
 			}
 		}
 
-		auto back_logo = make_shared<PannelUI>(glm::vec2{ w/2.f,(h/2.f) - 100.f}, "Picture1.png", 1.f);
+		auto back_logo = make_shared<PannelUI>(glm::vec2{ w/2.f,(h/2.f) - 160.f}, "title.png", 1.f);
 		m_vecUI[etoi(SCENE_TYPE::INTRO)].emplace_back(back_logo);
 
-		auto gui1 = make_shared<PannelUI>(glm::vec2{ w / 2.f,(h / 2.f) + 100.f }, "introGUI_NewGame.png", 3.f, glm::vec2{ 0,1 / 3.f }, glm::vec2{ 1,2 / 3.f });
+		auto gui1 = make_shared<PannelUI>(glm::vec2{ w / 2.f,(h / 2.f) + 50.f }, "introGUI_NewGame.png", 3.f, glm::vec2{ 0,1 / 3.f }, glm::vec2{ 1,2 / 3.f });
 		m_vecUI[etoi(SCENE_TYPE::INTRO)].emplace_back(gui1);
 
 		gui1->AddClickedEvent([]() {
+			Mgr(SoundMgr)->PlayEffect("click.ogg", 0.25f);
 			ChangeScene(SCENE_TYPE::STAGE, true);
 			});
 		
-		auto gui2 = make_shared<PannelUI>(glm::vec2{ w / 2.f,(h / 2.f) + 100.f }, "introGUI_NewGame.png", 3.f, glm::vec2{ 0,0 }, glm::vec2{ 1,1 / 3.f });
+		auto gui2 = make_shared<PannelUI>(glm::vec2{ w / 2.f,(h / 2.f) + 50.f }, "introGUI_NewGame.png", 3.f, glm::vec2{ 0,0 }, glm::vec2{ 1,1 / 3.f });
 		
 		gui1->AddUIStateTex(UI_STATE::ON_MOUSE, gui2);
 		
 		{
-			auto gui3 = make_shared<PannelUI>(glm::vec2{ w / 2.f,(h / 2.f) + 200.f }, "introGUI_Resume.png", 3.f, glm::vec2{ 0,1 / 3.f }, glm::vec2{ 1,2 / 3.f });
+			auto gui3 = make_shared<PannelUI>(glm::vec2{ w / 2.f,(h / 2.f) + 150.f }, "introGUI_Resume.png", 3.f, glm::vec2{ 0,1 / 3.f }, glm::vec2{ 1,2 / 3.f });
 			m_vecUI[etoi(SCENE_TYPE::INTRO)].emplace_back(gui3);
 
 			gui3->AddClickedEvent([]() {
 				if (g_bCanResume)
 				{
+					Mgr(SoundMgr)->PlayEffect("click.ogg", 0.25f);
 					ChangeScene(SCENE_TYPE::STAGE, false);
 				}
 				});
 
-			auto gui4 = make_shared<PannelUI>(glm::vec2{ w / 2.f,(h / 2.f) + 200.f }, "introGUI_Resume.png", 3.f, glm::vec2{ 0,0 }, glm::vec2{ 1,1 / 3.f });
+			auto gui4 = make_shared<PannelUI>(glm::vec2{ w / 2.f,(h / 2.f) + 150.f }, "introGUI_Resume.png", 3.f, glm::vec2{ 0,0 }, glm::vec2{ 1,1 / 3.f });
 
 			gui3->AddUIStateTex(UI_STATE::ON_MOUSE, gui4);
 		}
 
-		auto gui3 = make_shared<PannelUI>(glm::vec2{ w / 2.f,(h / 2.f) + 300.f }, "introGUI_Quit.png", 3.f, glm::vec2{ 0,1 / 3.f }, glm::vec2{ 1,2 / 3.f });
+		auto gui3 = make_shared<PannelUI>(glm::vec2{ w / 2.f,(h / 2.f) + 250.f }, "introGUI_Quit.png", 3.f, glm::vec2{ 0,1 / 3.f }, glm::vec2{ 1,2 / 3.f });
 		m_vecUI[etoi(SCENE_TYPE::INTRO)].emplace_back(gui3);
 
 		gui3->AddClickedEvent([]() {
+			Mgr(SoundMgr)->PlayEffect("click.ogg", 0.25f);
 			UnLoadScene();
 			});
 
-		auto gui4 = make_shared<PannelUI>(glm::vec2{ w / 2.f,(h / 2.f) + 300.f }, "introGUI_Quit.png", 3.f, glm::vec2{ 0,0 }, glm::vec2{ 1,1 / 3.f });
+		auto gui4 = make_shared<PannelUI>(glm::vec2{ w / 2.f,(h / 2.f) + 250.f }, "introGUI_Quit.png", 3.f, glm::vec2{ 0,0 }, glm::vec2{ 1,1 / 3.f });
 
 		gui3->AddUIStateTex(UI_STATE::ON_MOUSE, gui4);
 	}
@@ -170,6 +173,9 @@ void UIMgr::Start()
 void UIMgr::Render()
 {
 	glClear(GL_DEPTH_BUFFER_BIT);
+	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	static UBOData& sceneData = Mgr(Core)->GetUBOData();
 	sceneData.viewMat = glm::mat4{ 1.f };
@@ -179,19 +185,15 @@ void UIMgr::Render()
 	sceneData.viewMat = glm::mat4{ 1.f };
 	
 	Mgr(Core)->BindUBOData();
-
 	Mgr(ResMgr)->GetRes<Shader>("UIShader.glsl")->Use();
 
-
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	for (auto& ui : m_setUI)
+	for (auto ui = m_setUI.rbegin(); ui != m_setUI.rend(); ++ui)
 	{
 		//ui->ClearComponentWaitFlag();
-		ui->Render();
+		(*ui)->Render();
 	}
 
+	glEnable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
 
 	//insertionSort(m_vecUI, [](const shared_ptr<PannelUI>& a, const shared_ptr<PannelUI>& b) {return *a < *b; });

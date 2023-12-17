@@ -66,6 +66,9 @@
     <ClCompile Include="PlayerShadow.cpp">
       <Filter>CaveObject\PlayerShadow</Filter>
     </ClCompile>
+    <ClCompile Include="PanelUIBackground.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Vector3D.hpp">
@@ -106,6 +109,9 @@
     </ClInclude>
     <ClInclude Include="PlayerShadow.h">
       <Filter>CaveObject\PlayerShadow</Filter>
+    </ClInclude>
+    <ClInclude Include="PanelUIBackground.h">
+      <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -6,18 +6,22 @@
 
 void MCTerrainGenerator::Generate(MCTilemap* tilemap)
 {
-	std::default_random_engine dre;
+	std::default_random_engine dre{ (unsigned int)time(NULL) };
 	std::uniform_int_distribution uid{ 0, MCTilemap::MAP_WIDTH };
+
+	int x0 = uid(dre) % 1000;
+	int y0 = uid(dre) % 1000;
+	int z0 = uid(dre) % 1000;
 
 	for (int x = 0; x < MCTilemap::MAP_WIDTH; ++x)
 	{
 		for (int z = 0; z < MCTilemap::MAP_WIDTH; ++z)
 		{
-			float yLevel = Perlin::Noise(x * 0.02f, z * 0.02f) * 16.0f + 12.0f;
+			float yLevel = Perlin::Noise((x0 + x) * 0.02f, (z0 + z) * 0.02f) * 16.0f + 12.0f;
 			tilemap->SetTile(x, 0, z, 1);
 			for (int y = 1; y < MCTilemap::MAP_HEIGHT; ++y)
 			{
-				float perlinValue = Perlin::Noise(x * 0.1f, y * 0.1f, z * 0.1f);
+				float perlinValue = Perlin::Noise((x0 + x) * 0.1f, (y0 + y) * 0.1f, (z0 + z) * 0.1f);
 				int tile = perlinValue * 6.0f + yLevel - y > 0.0f;
 				tilemap->SetTile(x, y, z, tile);
 			}

@@ -125,7 +125,7 @@ void UI::Load(string_view _dirName, const rapidjson::Value& doc, const fs::path&
 	//makeRect(m_arrLTRB[LT], m_arrLTRB[RB], glCenter);
 	GetTransform()->SetLocalPosition(glCenter);
 	
-	UI::g_curMaxZDepth -= 0.01f;
+	UI::g_curMaxZDepth += 0.01f;
 	m_fCurZDepth = UI::g_curMaxZDepth;
 
 	MyPolygon::Load(_dirName, doc,_loadPath);
@@ -144,12 +144,12 @@ void UI::SetUIScale(const float _fRatio)
 
 void UI::SetZDepthUI()
 {
-	g_curMaxZDepth -= 0.01f;
+	g_curMaxZDepth += 0.01f;
 	m_fCurZDepth = g_curMaxZDepth;
 }
 
 UI::UI(const glm::vec2 midPos, string_view strTexName, const float scaleFactor ,glm::vec2 startUV, glm::vec2 endUV)
-	: m_fCurZDepth {UI::g_curMaxZDepth -= 0.01f}
+	: m_fCurZDepth {UI::g_curMaxZDepth += 0.01f}
 	, m_originMid{midPos}
 {
 	for (auto& tex : m_uiTex)

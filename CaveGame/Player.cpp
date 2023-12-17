@@ -80,6 +80,18 @@ void Player::UpdateTileManipulation()
 	glm::vec3 wv = m_cameraAnchor->GetTransform()->GetWorldPosition() * 10.0f;
 	const RaycastResult result = m_refTilemap->RaycastTile(wv, this->GetPlayerLook(), 10.0f);
 	m_cursorBlockObj->GetTransform()->SetLocalPosition((glm::vec3(result.hitTilePosition) + glm::one<glm::vec3>() * 0.5f) / 10.0f - GetTransform()->GetLocalPosition());
+
+	if (!result.hit)
+		return;
+
+	if (KEY_TAP(GLFW_MOUSE_BUTTON_LEFT))
+	{
+		m_refTilemap->SetTile(result.hitTilePosition, 0, true);
+	}
+	if (KEY_TAP(GLFW_MOUSE_BUTTON_RIGHT))
+	{
+		m_refTilemap->SetTile(result.hitTilePosition + glm::ivec3(result.hitNormal), 1, true);
+	}
 }
 
 void Player::MoveByView(const glm::vec3& vDelta)
@@ -189,7 +201,7 @@ Player::Player(MCTilemap* tilemap) : m_refTilemap(tilemap)
 	m_fpChangeCamMode[m_curCamMode]();
 
 	m_pCamera = m_cameraObj->AddComponent<Camera>();
-	m_pCamera->SetNear(0.01f);
+	m_pCamera->SetNear(1e-3f);
 	m_pCamera->SetMainCam();
 
 	m_cursorBlockObj = CreateCursorBlockObj();
@@ -273,10 +285,6 @@ void Player::Update()
 	{
 		m_curCamMode = wrapAround(m_curCamMode + 1, 0, 3);
 		m_fpChangeCamMode[m_curCamMode]();
-	}
-	if (KEY_TAP(GLFW_MOUSE_BUTTON_LEFT))
-	{
-		//Fire();
 	}
 
 	m_vVelocity = m_vVelocity + m_vAccelation * DT;

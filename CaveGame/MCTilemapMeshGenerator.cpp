@@ -32,6 +32,7 @@ void MCTilemapMeshGenerator::CreateMeshAll(MCTilemap* tilemap)
         material[i]->AddTexture2D(std::format("tile_{}.png", i + 1));
         pChunkDatas[i] = make_shared<ChunkMesh>();
         pChunkDatas[i]->SetChunkMaterial(material[i]);
+        tilemap->AddNotifyCallback([pChunkDatas, i](MCTileChunk* pChunk) { pChunkDatas[i]->OnChunkMeshChanged(pChunk); });
     }
    
     for (int chunkX = 0; chunkX < MCTilemap::CHUNK_SIZE; ++chunkX)
@@ -41,6 +42,7 @@ void MCTilemapMeshGenerator::CreateMeshAll(MCTilemap* tilemap)
             for (int textureID = 0; textureID < MAX_TEXTURE; ++textureID)
             {
                 shared_ptr<Mesh> mesh = this->CreateMeshFromChunk(tilemap, chunkX, chunkZ, textureID + 1);
+                MCTileChunk* pChunk = tilemap->GetChunk(chunkX, chunkZ);
                 if (mesh == nullptr)
                     continue;
                 shared_ptr<GameObj> terrainObj = GameObj::make_obj();

@@ -109,3 +109,10 @@ void ChunkMesh::Render()
     }
     glBindVertexArray(0);
 }
+
+void ChunkMesh::OnChunkMeshChanged(const MCTileChunk* pChunk)
+{
+    std::cout << "Notify Chunk(" << pChunk << ") to ChunkMesh(" << this << ")\n";
+
+    // Todo: Reconstruct mesh for designated chunk
+}

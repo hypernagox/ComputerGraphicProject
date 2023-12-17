@@ -3,6 +3,7 @@
 
 class Material;
 class Shader;
+class MCTileChunk;
 
 class ChunkMesh
 	:public GameObj
@@ -32,5 +33,7 @@ public:
 	void InitChunkMesh(string_view strShaderName)noexcept;
 
 	void Render()override;
+
+	void OnChunkMeshChanged(const MCTileChunk* pChunk);
 };
 

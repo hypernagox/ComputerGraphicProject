@@ -69,6 +69,7 @@ uniform mat4 uBoneTransforms[100];
 void main()
 {
     gl_Position = uProj * uView  * uModel * vec4(aPos, 1.f);
+	FragPos = vec3(gl_Position);
     TexCoords = aUV;
 }
 
@@ -158,8 +159,5 @@ out vec4 FragColor;
 void main()
 {
 	vec4 color = texture(uTexture2D, TexCoords);
-	if(color.a < 0.5)
-	discard;
-	
    FragColor = color;
 }
