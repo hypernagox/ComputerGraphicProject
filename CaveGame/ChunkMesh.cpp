@@ -11,13 +11,6 @@
 
 void ChunkMesh::ReConstructMesh(shared_ptr<Mesh> pMesh,GLuint chunkIdx) noexcept
 {
-    auto& target_vertex = pMesh->GetVertices();
-    const glm::mat4& obj_mat = m_vecChunkInfo[chunkIdx].worldMat;
-    for (auto& vert : target_vertex)
-    {
-        //vert.position = obj_mat * glm::vec4{ vert.position,1.f };
-    }
-
     GLsizei currentOffset = 0;
     GLsizei currentOffsetI = 0;
    
@@ -30,11 +23,12 @@ void ChunkMesh::ReConstructMesh(shared_ptr<Mesh> pMesh,GLuint chunkIdx) noexcept
     {
         
         const shared_ptr<Mesh>& chunkMesh = chunk.refMesh;
-        const auto& v = chunkMesh->GetVertices();
+        auto& v = chunkMesh->GetVertices();
         const auto& i = chunkMesh->GetIndicies();
 
-        for (const auto& vert : v)
+        for (auto& vert : v)
         {
+            vert.position = chunk.worldMat * glm::vec4{ vert.position,1.f };
             m_vecChunkVertex.emplace_back(vert);
         }
 
