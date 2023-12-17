@@ -17,8 +17,12 @@
 
 static constexpr uint MAX_TEXTURE = 36;
 
+extern std::atomic_bool g_bTileFinish;
+
 void MCTilemapMeshGenerator::CreateMeshAll(MCTilemap* tilemap)
 {
+    g_bTileFinish.store(false);
+
     shared_ptr<Material> material[MAX_TEXTURE];
     shared_ptr<ChunkMesh> pChunkDatas[MAX_TEXTURE];
 
@@ -63,6 +67,7 @@ void MCTilemapMeshGenerator::CreateMeshAll(MCTilemap* tilemap)
                 curScene->AddChunkMesh(i, pChunkDatas[i]);
             }
             static_pointer_cast<Player>(curScene->GetPlayer())->InitCamDirection();
+            g_bTileFinish.store(true);
         });
 }
 

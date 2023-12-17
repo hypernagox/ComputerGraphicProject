@@ -18,6 +18,32 @@
 #include "Collider.h"
 #include "SkyBox.h"
 
+void Scene::EnterScene() noexcept
+{
+	m_fpEnterSceneCallBack();
+	Awake();
+	Start();
+}
+
+void Scene::ExitScene() noexcept
+{
+	for (auto& fp : m_arrAddedUpdateFp)
+	{
+		fp.clear();
+	}
+	for (auto& objs : m_vecObj)
+	{
+		objs.clear();
+	}
+	m_pCurPlayer = nullptr;
+	for (auto& chunk : m_arrChunkMesh)
+	{
+		chunk = nullptr;
+	}
+	m_skyBox = nullptr;
+	m_vecLights.clear();
+}
+
 Scene::Scene()
 {
 	auto pCam = GameObj::make_obj();

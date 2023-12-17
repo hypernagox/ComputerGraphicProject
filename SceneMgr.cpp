@@ -2,6 +2,8 @@
 #include "SceneMgr.h"
 #include "Scene.h"
 #include "GameObj.h"
+#include "Scene_Intro.h"
+#include "Core.h"
 
 SceneMgr::SceneMgr()
 {
@@ -13,11 +15,14 @@ SceneMgr::~SceneMgr()
 
 void SceneMgr::Init()
 {
-	m_arrScene[etoi(SCENE_TYPE::START)] = make_shared<Scene>();
+	m_arrScene[etoi(SCENE_TYPE::INTRO)] = make_shared<Scene_Intro>();
+	m_arrScene[etoi(SCENE_TYPE::STAGE)] = make_shared<Scene>();
 
-	m_pCurScene = m_arrScene[etoi(SCENE_TYPE::START)];
+	m_sceneStack.emplace_back(m_arrScene[etoi(SCENE_TYPE::INTRO)]);
 
-	Enter();
+	//m_sceneStack.emplace_back(m_arrScene[etoi(SCENE_TYPE::STAGE)]);
+
+	m_pCurScene = m_sceneStack.back();
 }
 
 void SceneMgr::Update()
@@ -47,10 +52,34 @@ void SceneMgr::Render() const noexcept
 	m_pCurScene->Render();
 }
 
-void SceneMgr::Enter()
+void SceneMgr::ChangeToNextScene(SCENE_TYPE toNextScene, const bool bIsResetNextScene) noexcept
 {
-	m_pCurScene->Awake();
-	m_pCurScene->Start();
+	m_sceneStack.emplace_back(m_arrScene[etoi(toNextScene)]);
+	m_pCurScene = m_sceneStack.back();
+
+	if (bIsResetNextScene)
+	{
+		m_pCurScene->ExitScene();
+		m_pCurScene->EnterScene();
+	}
+}
+
+void SceneMgr::UnLoadScene() noexcept
+{
+	m_sceneStack.pop_back();
+	if (m_sceneStack.empty())
+	{
+		Mgr(Core)->Quit();
+	}
+	else
+	{
+		m_pCurScene = m_sceneStack.back();
+	}
+}
+
+void SceneMgr::RegisterEnterSceneCallBack(SCENE_TYPE eType, function<void(void)>&& fpSceneEnterCallBack) noexcept
+{
+	m_arrScene[etoi(eType)]->RegisterEnterSceneCallBack(std::move(fpSceneEnterCallBack));
 }
 
 

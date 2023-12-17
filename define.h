@@ -90,11 +90,8 @@ enum class GROUP_TYPE
 
 enum class SCENE_TYPE
 {
-	START,
-	STAGE_01,
-	STAGE_02,
 	INTRO,
-
+	STAGE,
 
 	END,
 };

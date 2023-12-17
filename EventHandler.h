@@ -20,12 +20,7 @@ struct DestroyObjectEvent
 	shared_ptr<GameObj> TargetDelObj;
 };
 
-struct SceneChangeEvent
-{
-	// TODO
-};
-
-using GameEvent = std::variant<CreateObjEvent, CreateUIEvent, DestroyObjectEvent, SceneChangeEvent >;
+using GameEvent = std::variant<CreateObjEvent, CreateUIEvent, DestroyObjectEvent>;
 
 class EventHandler
 {
@@ -36,8 +31,10 @@ public:
 	void operator()(const CreateObjEvent& _eve);
 	void operator()(const CreateUIEvent& _eve);
 	void operator()(const DestroyObjectEvent& _eve);
-	void operator()(const SceneChangeEvent& _eve);
 };
 
 void CreateObj(shared_ptr<GameObj> pNewObj_, GROUP_TYPE eType_);
 void DestroyObj(shared_ptr<GameObj> pDelObj_);
+
+void ChangeScene(SCENE_TYPE eNextScene, const bool bIsResetNextScene = true);
+void UnLoadScene();

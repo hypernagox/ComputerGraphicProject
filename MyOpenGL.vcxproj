@@ -36,6 +36,7 @@
     <ClCompile Include="PointLight.cpp" />
     <ClCompile Include="RayCaster.cpp" />
     <ClCompile Include="RigidBody.cpp" />
+    <ClCompile Include="Scene_Intro.cpp" />
     <ClCompile Include="SkyBox.cpp" />
     <ClCompile Include="SoundMgr.cpp" />
     <ClCompile Include="SpotLight.cpp" />
@@ -97,6 +98,7 @@
     <ClInclude Include="RigidBody.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneMgr.h" />
+    <ClInclude Include="Scene_Intro.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Singleton.hpp" />

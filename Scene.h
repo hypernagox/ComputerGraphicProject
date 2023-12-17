@@ -28,7 +28,12 @@ private:
 	shared_ptr<SkyBox> m_skyBox;
 	array<Delegate, etoi(SCENE_ADDED_UPDATE::END)> m_arrAddedUpdateFp;
 	shared_ptr<GameObj> m_pCurPlayer;
+	Delegate m_fpEnterSceneCallBack;
 public:
+
+	virtual void EnterScene()noexcept;
+	virtual void ExitScene()noexcept;
+
 	vector<shared_ptr<GameObj>>& GetGroupObj(GROUP_TYPE _eType) { return m_vecObj[etoi(_eType)]; }
 	Scene();
 	virtual ~Scene();
@@ -73,5 +78,13 @@ public:
 	}
 	void RegisterPlayer(shared_ptr<GameObj> pPlayer)noexcept { m_pCurPlayer = pPlayer; }
 	const shared_ptr<GameObj>& GetPlayer()const noexcept { return m_pCurPlayer; }
+
+	template<typename Func, typename... Args> requires std::invocable<Func, Args...>
+	void RegisterEnterSceneCallBack(Func&& fp, Args&&... args)noexcept
+	{
+		m_fpEnterSceneCallBack += 
+			[fp = std::forward<Func>(fp), ...args = std::forward<Args>(args)]()mutable noexcept
+			{std::invoke(std::forward<Func>(fp), std::forward<Args>(args)...); };
+	}
 };
 

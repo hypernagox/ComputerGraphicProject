@@ -23,7 +23,10 @@ private:
 
 	SpinLock m_spinLockForDangerEvent;
 	vector<function<void(void)>> m_vecEventForNeedLock;
+
+	function<void(void)> m_sceneChangeFp;
 public:
+	void SetSceneChangeFp(function<void(void)>&& sceneChangeFp) { m_sceneChangeFp = std::move(sceneChangeFp); }
 	void Init();
 	void Update();
 	template<typename Func, typename... Args>

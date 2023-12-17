@@ -205,6 +205,9 @@
     <Filter Include="Engine\02. Manager\InstancingMgr">
       <UniqueIdentifier>{a45b1f83-aa97-4604-a08e-aa48628f6598}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Engine\05. Scene\Scene_Intro">
+      <UniqueIdentifier>{1d91a4e0-5885-4d02-8d54-bc4a0be6cd9d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -395,6 +398,9 @@
     </ClCompile>
     <ClCompile Include="InstancingMgr.cpp">
       <Filter>Engine\02. Manager\InstancingMgr</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene_Intro.cpp">
+      <Filter>Engine\05. Scene\Scene_Intro</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -629,6 +635,9 @@
     </ClInclude>
     <ClInclude Include="InstancingMgr.h">
       <Filter>Engine\02. Manager\InstancingMgr</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene_Intro.h">
+      <Filter>Engine\05. Scene\Scene_Intro</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -10,9 +10,11 @@ class SceneMgr
 	SceneMgr();
 	~SceneMgr();
 private:
+	using  SceneStack = vector<shared_ptr<Scene>>;
+
 	array<shared_ptr<Scene>, etoi(SCENE_TYPE::END)> m_arrScene;
 	shared_ptr<Scene> m_pCurScene;
-
+	SceneStack m_sceneStack;
 public:
 	void Init();
 	void Update();
@@ -22,9 +24,13 @@ public:
 
 	void PreRender()const noexcept;
 	void Render()const noexcept;
-	void Enter();
+	
+	void ChangeToNextScene(SCENE_TYPE toNextScene, const bool bIsResetNextScene = true)noexcept;
+	
+	void UnLoadScene()noexcept;
 
 	const shared_ptr<Scene>& GetCurScene()const { return m_pCurScene; }
 
+	void RegisterEnterSceneCallBack(SCENE_TYPE eType, function<void(void)>&& fpSceneEnterCallBack)noexcept;
 };
 

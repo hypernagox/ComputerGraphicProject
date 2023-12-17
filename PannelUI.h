@@ -28,7 +28,7 @@ public:
 	void ExecuteClickEvent();
 	void SetUIPosition(const glm::vec2& WCpos_);
 public:
-	PannelUI(const glm::vec2 midPos, string_view strTexName, const float scaleFactor = 1.f);
+	PannelUI(const glm::vec2 midPos, string_view strTexName, const float scaleFactor = 1.f, glm::vec2 startUV = { 0,0 }, glm::vec2 endUV = { 1,1 });
 	shared_ptr<const PannelUI> shared_from_this() const { return static_pointer_cast<const PannelUI>(GameObj::shared_from_this());}
 	shared_ptr<PannelUI> shared_from_this() { return static_pointer_cast<PannelUI>(GameObj::shared_from_this()); }
 	class iterator_UI

@@ -10,6 +10,7 @@
 #include "Collider.h"
 #include "SceneMgr.h"
 #include "Scene.h"
+#include "ResMgr.h"
 
 static char directoryBuffer[256]{};
 static char objNameBuffer[256]{};

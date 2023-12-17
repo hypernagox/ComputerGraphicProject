@@ -148,28 +148,41 @@ void UI::SetZDepthUI()
 	m_fCurZDepth = g_curMaxZDepth;
 }
 
-UI::UI(const glm::vec2 midPos, string_view strTexName, const float scaleFactor)
+UI::UI(const glm::vec2 midPos, string_view strTexName, const float scaleFactor ,glm::vec2 startUV, glm::vec2 endUV)
 	: m_fCurZDepth {UI::g_curMaxZDepth -= 0.01f}
-	, m_uiMesh{make_shared<Mesh>()}
-	, m_uiTex{ Mgr(ResMgr)->GetRes<Texture2D>(strTexName) }
 	, m_originMid{midPos}
 {
-	const auto [w,h] = m_uiTex->GetTexWH();
+	for (auto& tex : m_uiTex)
+	{
+		tex = Mgr(ResMgr)->GetRes<Texture2D>(strTexName);
+	}
+	for (auto& mesh : m_uiMesh)
+	{
+		mesh = make_shared<Mesh>();
+	}
 
+	const auto [w, h] = m_uiTex[0]->GetTexWH();
+
+	const float actualWidth = (endUV.x - startUV.x) * w;
+	const float actualHeight = (endUV.y - startUV.y) * h;
 	const float fScaleFactor = Mgr(Core)->GetScaleFactor();
-	const glm::vec2 half_size{ (w * fScaleFactor) / 2.f,(h * fScaleFactor) / 2.f };
+
+	const glm::vec2 half_size{ (actualWidth * fScaleFactor) / 2.f, (actualHeight * fScaleFactor) / 2.f };
+
+	m_originLTRB[LT] = m_originMid - half_size * scaleFactor/fScaleFactor;
+	m_originLTRB[RB] = m_originMid + half_size * scaleFactor/fScaleFactor;
 
 	m_uiSize = half_size;
 	m_uiMid = m_originMid * fScaleFactor;
 
-	m_arrLTRB[LT] = m_originMid * fScaleFactor - half_size * fScaleFactor;
-	m_arrLTRB[RB] = m_originMid * fScaleFactor + half_size * fScaleFactor;
+	m_arrLTRB[LT] = m_uiMid - half_size * scaleFactor;
+	m_arrLTRB[RB] = m_uiMid + half_size * scaleFactor;
 
-	GetTransform()->SetLocalPosition(glm::vec3{ m_originMid * fScaleFactor,0.f });
+	GetTransform()->SetLocalPosition(glm::vec3{ m_originMid * fScaleFactor, 0.f });
 	m_fOriginScale = scaleFactor;
 	GetTransform()->SetLocalScale(scaleFactor / fScaleFactor);
-	
-	const vector<glm::vec3> temp_vertex = 
+
+	const vector<glm::vec3> temp_vertex =
 	{
 		glm::vec3{-half_size.x,-half_size.y,0.f},
 		glm::vec3{ half_size.x,-half_size.y,0.f},
@@ -179,12 +192,12 @@ UI::UI(const glm::vec2 midPos, string_view strTexName, const float scaleFactor)
 
 	static const vector<GLuint> temp_index = { 0, 1, 2, 0, 2, 3 };
 
-	static const vector<glm::vec2> temp_uv = 
+	vector<glm::vec2> temp_uv =
 	{
-		glm::vec2(0.0f, 1.0f),
-		glm::vec2(1.0f, 1.0f),
-		glm::vec2(1.0f, 0.0f),
-		glm::vec2(0.0f, 0.0f)
+		glm::vec2(startUV.x, endUV.y),
+		glm::vec2(endUV.x, endUV.y),
+		glm::vec2(endUV.x, startUV.y),
+		glm::vec2(startUV.x, startUV.y)
 	};
 
 	vector<Vertex> vert;
@@ -198,7 +211,12 @@ UI::UI(const glm::vec2 midPos, string_view strTexName, const float scaleFactor)
 		vert.emplace_back(v);
 	}
 
-	m_uiMesh->Init(vert, temp_index);
+	for (auto& mesh : m_uiMesh)
+	{
+		auto temp1 = vert;
+		auto temp2 = temp_index;
+		mesh->Init(temp1, temp2);
+	}
 }
 
 UI::~UI()
@@ -212,8 +230,13 @@ void UI::Update()
 		const auto pTrans = GetTransform();
 		const auto [w, h] = Mgr(Core)->GetScaleFactorWH();
 		const auto newLocal = glm::vec3{ m_originMid.x * w,m_originMid.y * h ,0.f };
+		const float factor = Mgr(Core)->GetScaleFactor();
 		pTrans->SetLocalPosition(newLocal);
-		pTrans->SetLocalScale(m_fOriginScale * glm::vec3{ w, h, 0.f } / Mgr(Core)->GetScaleFactor());
+		pTrans->SetLocalScale(m_fOriginScale * glm::vec3{ w, h, 0.f } /factor);
+		m_arrLTRB[LT].x = (m_originLTRB[LT].x) * w;
+		m_arrLTRB[LT].y = (m_originLTRB[LT].y) * h;
+		m_arrLTRB[RB].x = (m_originLTRB[RB].x) * w;
+		m_arrLTRB[RB].y = (m_originLTRB[RB].y) * h;
 	}
 
 	m_eCurUIState = UpdateCurUIState();
@@ -233,8 +256,8 @@ void UI::Render()
 		childUI->Render();
 	}
 
-	m_uiTex->BindTexture();
+	m_uiTex[etoi(m_eCurUIState)]->BindTexture();
 	Mgr(ResMgr)->GetRes<Shader>("UIShader.glsl")->SetUniformMat4(GetObjectWorldTransform(), "uModel");
-	m_uiMesh->Render();
-	m_uiTex->UnBindTexture();
+	m_uiMesh[etoi(m_eCurUIState)]->Render();
+	m_uiTex[etoi(m_eCurUIState)]->UnBindTexture();
 }

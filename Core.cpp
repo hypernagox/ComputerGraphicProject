@@ -124,7 +124,7 @@ void Core::Init(const GLuint _winWidth, const GLuint _winHeight)
 
 	wglMakeCurrent(m_hDC, m_hglrc);
 
-	m_fScaleFactorW = m_fScaleFactorH = m_fScaleFactor = 1.f;
+	m_fScaleFactorW = m_fScaleFactorH = m_fScaleFactor;
 
 	glewInit();
 
@@ -234,10 +234,10 @@ void Core::Init(const GLuint _winWidth, const GLuint _winHeight)
 	Mgr(TimeMgr)->Init();
 }
 
-void Core::GameLoop() // << std::function<void(void)> Yups Update Loop Here
+void Core::GameLoop()
 {
-	Mgr(SceneMgr)->GetCurScene()->Awake();
-	Mgr(SceneMgr)->GetCurScene()->Start();
+	Mgr(SceneMgr)->GetCurScene()->EnterScene();
+	
 	Mgr(UIMgr)->Start();
 	Mgr(ThreadMgr)->ExecuteMainThreadTask();
 	
@@ -253,11 +253,6 @@ void Core::GameLoop() // << std::function<void(void)> Yups Update Loop Here
 		
 		Mgr(KeyMgr)->Update();
 		Mgr(TimeMgr)->Update();
-
-
-		// << std::function<void(void)> Yups Update Loop Here //
-
-
 
 
 		Mgr(SceneMgr)->Update();

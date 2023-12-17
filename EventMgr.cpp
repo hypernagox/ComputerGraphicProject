@@ -91,6 +91,12 @@ void EventMgr::Update()
 	m_vecEvent.clear();
 	m_vecGameEvent.clear();
 	m_vecDeadObj.clear();
+
+	if (m_sceneChangeFp)
+	{
+		m_sceneChangeFp();
+		m_sceneChangeFp = nullptr;
+	}
 }
 
 void EventMgr::Init()

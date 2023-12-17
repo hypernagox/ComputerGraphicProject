@@ -254,7 +254,7 @@ RaycastResult MCTilemap::RaycastTile(const glm::vec3& start_position, const glm:
 
 		glm::ivec3 tilePosition = glm::ivec3();
 		for (int i = 0; i < 3; i++)
-			tilePosition[i] = direction[i] > 0.0f ? glm::floor(tracePosition[i]) : glm::ceil(tracePosition[i]) - 1;
+			tilePosition[i] = direction[i] > 0.0f ? (int)glm::floor(tracePosition[i]) : (int)glm::ceil(tracePosition[i]) - 1;
 
 		if (tilePosition.x < 0 || tilePosition.x >= MCTilemap::MAP_WIDTH ||
 			tilePosition.y < 0 || tilePosition.y >= MCTilemap::MAP_HEIGHT ||

@@ -35,8 +35,9 @@ private:
 	Delegate m_ClickedEvent;
 protected:
 	array<glm::vec2, UI_RECT::END> m_arrLTRB;
-	shared_ptr<Texture2D> m_uiTex;
-	shared_ptr<Mesh> m_uiMesh;
+
+	array<shared_ptr<Texture2D>,etoi(UI_STATE::END)> m_uiTex;
+	array <shared_ptr<Mesh>, etoi(UI_STATE::END)> m_uiMesh;
 
 	float m_fCurZDepth = 0.f;
 	bool m_bIsActivate = true;
@@ -44,7 +45,7 @@ protected:
 	float m_fOriginScale = 1.f;
 	glm::vec2 m_uiSize = {};
 	glm::vec2 m_uiMid = {};
-
+	glm::vec2 m_originLTRB[2]{};
 	UI_STATE UpdateCurUIState();
 	Delegate m_uiCallback;
 protected:
@@ -53,6 +54,12 @@ protected:
 	void Load(string_view _dirName, const rapidjson::Value& doc, const fs::path& _loadPath) override;
 	
 public:
+	void AddUIStateTex(UI_STATE eState, shared_ptr<UI> pUI)
+	{
+		m_uiTex[etoi(eState)] = pUI->m_uiTex[0];
+		m_uiMesh[etoi(eState)] = pUI->m_uiMesh[0];
+	}
+
 	template<typename Func, typename... Args>
 		requires std::invocable<Func, Args...>
 	void AddUICallBack(Func&& fp, Args&&... args)noexcept
@@ -78,7 +85,7 @@ public:
 	void SetUIScale(const float _fRatio);
 	void SetZDepthUI();
 	virtual ~UI();
-	UI(const glm::vec2 midPos, string_view strTexName,const float scaleFactor = 1.f);
+	UI(const glm::vec2 midPos, string_view strTexName,const float scaleFactor = 1.f,glm::vec2 startUV = {0,0},glm::vec2 endUV = {1,1});
 	UI(const UI&) = delete;
 	UI& operator = (const UI&) = delete;
 

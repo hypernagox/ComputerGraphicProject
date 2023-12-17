@@ -43,7 +43,6 @@ class CollisionMgr
 private:
 	//unordered_map<ull, CollisionInfo> m_mapCollision;
 	ConcurrentHashMap<ull, CollisionInfo> m_mapCollision;
-	vector<Collider> m_vecCollider;
 	vector<CollisionInfo*> m_vecCollisionInfo;
 	std::bitset<etoi(GROUP_TYPE::END)> m_bitColTable[etoi(GROUP_TYPE::END)];
 	std::array<glm::vec3, 8> m_arrCollisionBox;
@@ -61,6 +60,7 @@ public:
 	void Reset()
 	{
 		m_mapCollision.clear();
+		m_vecCollisionInfo.clear();
 		for (auto& bit : m_bitColTable)
 		{
 			bit.reset();
