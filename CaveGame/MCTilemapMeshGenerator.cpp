@@ -15,7 +15,7 @@
 #include "ChunkMesh.h"
 #include "Player.h"
 
-static constexpr uint MAX_TEXTURE = 36;
+static constexpr uint MAX_TEXTURE = 12;
 
 extern std::atomic_bool g_bTileFinish;
 
@@ -43,8 +43,6 @@ void MCTilemapMeshGenerator::CreateMeshAll(MCTilemap* tilemap)
             {
                 shared_ptr<Mesh> mesh = this->CreateMeshFromChunk(tilemap, chunkX, chunkZ, textureID + 1);
                 MCTileChunk* pChunk = tilemap->GetChunk(chunkX, chunkZ);
-                if (mesh == nullptr)
-                    continue;
                 shared_ptr<GameObj> terrainObj = GameObj::make_obj();
                 terrainObj->GetTransform()->SetLocalScale(0.1f);
                 terrainObj->GetTransform()->SetLocalPosition({ chunkX * MCTileChunk::CHUNK_WIDTH * 0.1f, 0.0f, chunkZ * MCTileChunk::CHUNK_WIDTH * 0.1f });
@@ -193,9 +191,6 @@ shared_ptr<Mesh> MCTilemapMeshGenerator::CreateMeshFromChunk(MCTilemap* tilemap,
                 vertices.push_back(glm::vec3(xmax, ymax, z));
             }, glm::vec3(0.0f, 0.0f, -1.0f), vertices, triangles, normals, uvs);
     }
-
-    if (vertices.empty())
-        return nullptr;
 
     vector<Vertex> sVertices;
     sVertices.reserve(500000);

@@ -19,6 +19,7 @@
 #include "MCTilemap.h"
 #include "SoundMgr.h"
 #include <ResMgr.h>
+#include <MyOpenGL.hpp>
 
 extern std::atomic_bool g_bTileFinish;
 
@@ -93,10 +94,14 @@ void Player::UpdateTileManipulation()
 	if (KEY_TAP(GLFW_MOUSE_BUTTON_LEFT))
 	{
 		m_refTilemap->SetTile(result.hitTilePosition, 0, true);
+		Mgr(ParticleMgr)->SetParticles(m_particlePrefab, 0.01f, result.hitPosition * 0.1f);
+		Mgr(SoundMgr)->PlayEffect("stone4.ogg", 0.5f);
 	}
 	if (KEY_TAP(GLFW_MOUSE_BUTTON_RIGHT))
 	{
-		m_refTilemap->SetTile(result.hitTilePosition + glm::ivec3(result.hitNormal), 1, true);
+		int tileID = Mgr(UIMgr)->GetSelectIndex() + 1;
+		m_refTilemap->SetTile(result.hitTilePosition + glm::ivec3(result.hitNormal), tileID, true);
+		Mgr(SoundMgr)->PlayEffect("stone4.ogg", 0.5f);
 	}
 }
 
@@ -212,6 +217,12 @@ Player::Player(MCTilemap* tilemap) : m_refTilemap(tilemap)
 
 	m_cursorBlockObj = CreateCursorBlockObj();
 	m_cursorBlockObj->GetTransform()->SetLocalScale(glm::one<glm::vec3>() * 0.105f);
+
+	m_particlePrefab = Mgr(AssimpMgr)->Load("EnvironmentShader.glsl", "MyCube.fbx");
+	auto mate = make_shared<Material>();
+	mate->AddTexture2D("tile_2.png");
+	m_particlePrefab->GetComp<MeshRenderer>()->AddMaterial(mate);
+	m_particlePrefab->GetTransform()->SetLocalScale(0.1f);
 }
 
 Player::~Player()
@@ -226,6 +237,7 @@ void Player::Start()
 	AddChild(m_rendererObj);
 	AddChild(m_cameraAnchor);
 	AddChild(m_cursorBlockObj);
+	AddChild(make_shared<PlayerShadow>(m_refTilemap));
 	m_cameraAnchor->AddChild(m_cameraObj);
 
 	for (auto& child : *m_rendererObj)
@@ -237,8 +249,6 @@ void Player::Start()
 			mate->SetMaterialSpecular({ 10,10,10 });
 		}
 	}
-	AddChild(make_shared<PlayerShadow>(m_refTilemap));
-
 	GameObj::Start();
 }
 
@@ -247,11 +257,6 @@ void Player::Update()
 	const auto pPlayerTrans = GetTransform();
 
 	m_vAccelation = glm::vec3(0.0f, -4.0f, 0.0f);
-
-	if (KEY_TAP(GLFW_KEY_T))
-	{
-		m_pCamera->StartChangeCamProjType();
-	}
 
 	if (KEY_HOLD(GLFW_KEY_A))
 	{

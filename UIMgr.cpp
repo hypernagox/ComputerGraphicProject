@@ -96,10 +96,20 @@ void UIMgr::Init()
 		auto quick_bar = make_shared<PannelUI>(glm::vec2{ w / 2.f,h - 35.f }, "gui.png", 3.f);
 		m_vecUI[etoi(SCENE_TYPE::STAGE)].emplace_back(quick_bar);
 
+		for (int i = 0; i < 9; ++i)
+		{
+			auto item_icon = make_shared<PannelUI>(glm::vec2(w * 0.5f + (i - 4) * 60.0f, h - 35.0f), std::format("tile_preview_{:02d}.png", i + 1), 0.15f);
+			m_vecUI[etoi(SCENE_TYPE::STAGE)].emplace_back(item_icon);
+		}
+
+		m_pTargetUI = make_shared<PannelUI>(glm::vec2(), "gui_target.png", 3.0f);
+		m_vecUI[etoi(SCENE_TYPE::STAGE)].emplace_back(m_pTargetUI);
+
 		auto cross_line = make_shared<PannelUI>(glm::vec2{ w,h } / 2.f, "cross.png", 2.f);
 		m_vecUI[etoi(SCENE_TYPE::STAGE)].emplace_back(cross_line);
 	}
 
+	SetSelectIndex(0);
 
 	//auto temp = make_shared<PannelUI>(glm::vec2{ 10,10 }, "cross.png", 1.f);
 	//quick_bar->AddChild(temp);
@@ -107,6 +117,8 @@ void UIMgr::Init()
 
 void UIMgr::Update()
 {
+	InputUpdate();
+
 	for (auto& ui : m_vecUI[etoi(m_eCurUIScene)])
 	{
 		std::ranges::for_each(*ui, std::mem_fn(&UI::Update));
@@ -233,4 +245,37 @@ void UIMgr::LoadForPractice(string_view _strPracticeName)
 		pObj->GameObj::Load(std::to_string(cnt++), practicePath);
 		//m_vecUI.emplace_back(std::move(pObj));
 	}
+}
+
+void UIMgr::InputUpdate()
+{
+	if (KEY_TAP(GLFW_KEY_1))
+		SetSelectIndex(0);
+	if (KEY_TAP(GLFW_KEY_2))
+		SetSelectIndex(1);
+	if (KEY_TAP(GLFW_KEY_3))
+		SetSelectIndex(2);
+	if (KEY_TAP(GLFW_KEY_4))
+		SetSelectIndex(3);
+	if (KEY_TAP(GLFW_KEY_5))
+		SetSelectIndex(4);
+	if (KEY_TAP(GLFW_KEY_6))
+		SetSelectIndex(5);
+	if (KEY_TAP(GLFW_KEY_7))
+		SetSelectIndex(6);
+	if (KEY_TAP(GLFW_KEY_8))
+		SetSelectIndex(7);
+	if (KEY_TAP(GLFW_KEY_9))
+		SetSelectIndex(8);
+}
+
+void UIMgr::SetSelectIndex(int index)
+{
+	const auto [width, height] = Mgr(Core)->GetWidthHeight();
+	const float fScaleFactor = Mgr(Core)->GetScaleFactor();
+	const float w = width / fScaleFactor;
+	const float h = height / fScaleFactor;
+
+	m_iSelectedIndex = index;
+	m_pTargetUI->SetUIPosition(glm::vec2(w * 0.5f + (index - 4) * 60.0f, h - 35.0f));
 }

@@ -13,6 +13,7 @@ private:
 	shared_ptr<GameObj> m_cameraAnchor;
 	shared_ptr<GameObj> m_cameraObj;
 	shared_ptr<GameObj> m_cursorBlockObj;
+	shared_ptr<GameObj> m_particlePrefab;
 
 	std::function<void(void)> m_fpChangeCamMode[3];
 

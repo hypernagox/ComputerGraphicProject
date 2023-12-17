@@ -15,6 +15,11 @@ private:
 	SCENE_TYPE m_ePrevUIScene = SCENE_TYPE::INTRO;
 	SCENE_TYPE m_eCurUIScene = SCENE_TYPE::INTRO;
 	std::set<PannelUI*, decltype(cmpZDepth)> m_setUI{cmpZDepth};
+
+private:
+	int m_iSelectedIndex = 0;
+	shared_ptr<PannelUI> m_pTargetUI;
+
 public:
 	void Init();
 	void Start();
@@ -25,6 +30,8 @@ public:
 
 	void SaveForPractice(string_view _strPracticeName);
 	void LoadForPractice(string_view _strPracticeName);
+	
+	void InputUpdate();
 
 	void Reset()noexcept
 	{
@@ -42,5 +49,9 @@ public:
 		m_ePrevUIScene = m_eCurUIScene;
 		m_eCurUIScene = eUIScene;
 	}
+
+public:
+	int GetSelectIndex() const { return m_iSelectedIndex; };
+	void SetSelectIndex(int index);
 };
 

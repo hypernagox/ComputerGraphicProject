@@ -9,11 +9,12 @@
 #include "PlayerCam.h"
 
 shared_ptr<GameObj> pObserver;
+shared_ptr<GameObj> pClouds;
 shared_ptr<Camera>  observerCam;
 
 bool g_bWireFrame = false;
-
 bool g_bCanResume = false;
+bool g_bCamMode = false;
 
 std::atomic_bool g_bTileFinish = true;
 
@@ -82,10 +83,10 @@ int main()
         }
         {
             auto pLight = Mgr(AssimpMgr)->Load("EnvironmentShader.glsl", "MySphereRed.fbx");
-            auto l = pLight->AddComponent<Light>();
-            l->SetCurLightType(LIGHT_TYPE::POINT);
-            l->SetDiffuse({ 5.1f,.1f,.1f });
-            l->SetSpecular({ 5.1f,.1f,.1f });
+            //auto l = pLight->AddComponent<Light>();
+            //l->SetCurLightType(LIGHT_TYPE::POINT);
+            //l->SetDiffuse({ 5.1f,.1f,.1f });
+            //l->SetSpecular({ 5.1f,.1f,.1f });
             auto m = pLight->GetComp<MeshRenderer>();
             auto mate = make_shared<Material>();
             mate->AddTexture2D("skybox.png");
@@ -102,21 +103,21 @@ int main()
         {
             auto player = make_shared<Player>(tilemap);
             player->SetObjName("player");
-            player->GetTransform()->SetLocalPosition(glm::vec3(25.6f, 1.6f, 25.6f));
+            player->GetTransform()->SetLocalPosition(glm::vec3(25.6f, 3.2f, 25.6f));
             curScene->AddObject(player, GROUP_TYPE::PLAYER);
             /*player->AddChild(make_shared<PlayerCam>());*/
             curScene->RegisterPlayer(player);
         }
 
-        auto clouds = Mgr(AssimpMgr)->Load("CloudShader.glsl", "MyCube.fbx");
-        clouds->GetTransform()->SetLocalPosition(glm::vec3(25.6f, 12.8f, 25.6f));
-        clouds->GetTransform()->SetLocalScale(glm::vec3(32.0f, 1.0f, 32.0f));
-        curScene->AddObject(clouds, GROUP_TYPE::DEFAULT);
+        pClouds = Mgr(AssimpMgr)->Load("CloudShader.glsl", "MyCube.fbx");
+        pClouds->GetTransform()->SetLocalPosition(glm::vec3(25.6f, 12.8f, 25.6f));
+        pClouds->GetTransform()->SetLocalScale(glm::vec3(32.0f, 1.0f, 32.0f));
+        curScene->AddObject(pClouds, GROUP_TYPE::DEFAULT);
 
         shared_ptr<Material> material = make_shared<Material>();
         material->AddTexture2D("clouds.png");
 
-        auto renderer = clouds->GetComp<MeshRenderer>();
+        auto renderer = pClouds->GetComp<MeshRenderer>();
         renderer->AddMaterial(material);
 
         curScene->SetSkyBox(SKYBOX_TYPE::SPHERE, "basic_skybox_3d_flip.fbx", "skybox.png");
@@ -139,5 +140,15 @@ void Update()
             glfwSetInputMode(Mgr(Core)->GetWinInfo(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
             UnLoadScene();
         }
+    }
+    if (KEY_TAP(GLFW_KEY_T))
+    {
+        g_bCamMode = !g_bCamMode;
+        Camera::GetCurCam()->StartChangeCamProjType();
+        const auto curScene = Mgr(SceneMgr)->GetCurScene();
+        if (g_bCamMode)
+            DestroyObj(pClouds);
+        else
+            curScene->AddObject(pClouds, GROUP_TYPE::DEFAULT);
     }
 }

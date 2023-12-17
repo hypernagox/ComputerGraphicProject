@@ -22,7 +22,6 @@ void ChunkMesh::ReConstructMesh() noexcept
 
     for (const auto& chunk : m_vecChunkInfo)
     {
-        
         const shared_ptr<Mesh>& chunkMesh = chunk.refMesh;
         const auto& v = chunkMesh->GetVertices();
         const auto& i = chunkMesh->GetIndicies();
@@ -195,14 +194,11 @@ void ChunkMesh::Render()
 
 void ChunkMesh::OnChunkMeshChanged(MCTileChunk* const pChunk, int chunkX, int chunkZ)noexcept
 {
-    //std::cout << "Notify Chunk(" << pChunk << ") to ChunkMesh(" << this << ")\n";
     if (m_vecChunkInfo.empty())
         return;
+
     const auto idx = m_mapChunkToIndex[pChunk];
     shared_ptr<Mesh> mesh = MCTilemapMeshGenerator::CreateMeshFromChunk(m_pTileMapForReDrawMesh, chunkX, chunkZ, m_iChunkTexID);
-  
-    if (mesh == nullptr)
-        return;
 
     const auto& v1 = m_vecChunkInfo[idx].refMesh->GetVertices();
     const auto& i1 = m_vecChunkInfo[idx].refMesh->GetIndicies();
@@ -210,9 +206,7 @@ void ChunkMesh::OnChunkMeshChanged(MCTileChunk* const pChunk, int chunkX, int ch
     const auto& i2 = mesh->GetIndicies();
     
     if (v1 == v2 && i1 == i2)
-    {
         return;
-    }
     
     m_vecChunkInfo[idx].refMesh->GetVertices() = std::move(v2);
     m_vecChunkInfo[idx].refMesh->GetIndicies() = std::move(i2);

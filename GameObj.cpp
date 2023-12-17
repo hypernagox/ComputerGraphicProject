@@ -579,6 +579,7 @@ void GameObj::Load(string_view _dirName, const rapidjson::Value& doc,const fs::p
 
 void GameObj::InitGameObj()
 {
+    m_bIsAlive = true;
     static constexpr const auto view_non_owner = std::views::filter([](const shared_ptr<Component>& _pComp)noexcept {
         return _pComp->GetGameObjWeak().expired(); });
    

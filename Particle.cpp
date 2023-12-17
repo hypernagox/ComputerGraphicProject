@@ -46,7 +46,7 @@ void Particle::ActivateParticle(shared_ptr<MeshRenderer> pMeshRenderer,string_vi
 	SetResName(strResName_);
 	pTrans->SetLocalPosition(worldPos_);
 	pTrans->SetLocalScale(scale_);
-	const glm::vec3 yVel = glm::sphericalRand(g_particleSpeed);
+	const glm::vec3 yVel = glm::sphericalRand(g_particleSpeed) * 0.1f;
 	m_fLife = 2.f + yVel.y * 0.1f;
 	GetComp<RigidBody>()->SetVelocity(yVel);
 	Mgr(InstancingMgr)->AddInstancingList(shared_this);

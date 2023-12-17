@@ -115,8 +115,9 @@ void PannelUI::ExecuteClickEvent()
 
 void PannelUI::SetUIPosition(const glm::vec2& WCpos_)
 {
+	m_originMid = WCpos_;
 	const auto pTrans = GetTransform();
-	
+
 	for (auto& childs : *GetRootUI())
 	{
 		for (auto& b : childs->m_vecButton)

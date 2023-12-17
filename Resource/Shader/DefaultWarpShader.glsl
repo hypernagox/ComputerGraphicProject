@@ -72,10 +72,11 @@ void main()
     float radius = 64.0;
     vec3 worldPos = vec3(uModel * vec4(aPos, 1.0));
     vec3 deltaPos = uViewPos - worldPos;
-    worldPos.y = worldPos.y - sqrt(max(0.0, radius * radius - abs(deltaPos.x * deltaPos.x + deltaPos.z * deltaPos.z))) + radius;
+    float dist = max(0.0, deltaPos.x * deltaPos.x + deltaPos.z * deltaPos.z - 100.0);
+    worldPos.y = worldPos.y - sqrt(max(0.0, radius * radius - dist)) + radius;
     gl_Position = uProj * uView * vec4(worldPos, 1.0f);
 
-    FragPos = vec3(uObserverView * uModel * vec4(aPos, 1.0));
+    FragPos = vec3(uModel * vec4(aPos, 1.0));
     TexCoords = aUV;
     Normal = -normalize(vec3(transpose(inverse(uObserverView * uModel)) * vec4(aNormal, 0.0)));
 }
@@ -219,7 +220,7 @@ void main()
         result += CalculateDirectionalLight(dirLight, normal, fragPos,vec3(0,0,0));
     }
    
-    float fogFactor = clamp((distance(uViewPos, fragPos) - 2000.0) / 500.0, 0.0, 1.0);
+    float fogFactor = clamp((distance(uViewPos, fragPos) - 20.0) / 5.0, 0.0, 1.0);
     result = min(result, vec3(1.0));
     FragColor = mix(vec4(result, 1.0) * texColor, vec4(0.76, 0.85, 1.0, 1.0), fogFactor);
 }

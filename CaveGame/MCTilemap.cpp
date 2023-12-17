@@ -8,16 +8,16 @@ const int Tile::TEXTURES[][6] = {
 	   2, 2, 2, 2, 2, 2,
 	   3, 3, 3, 3, 3, 3,
 	   1, 3, 4, 4, 4, 4,
-	   10, 10, 10, 10, 10, 10,
-	   12, 12, 12, 12, 12, 12,
+	   7, 7, 7, 7, 7, 7,
 	   5, 5, 5, 5, 5, 5,
-	   7, 7, 6, 6, 6, 6,
-	   15, 15, 14, 14, 14, 14,
-	   32, 32, 32, 32, 32, 32,
+	   6, 6, 6, 6, 6, 6,
+	   10, 10, 9, 9, 9, 9,
+	   12, 12, 12, 12, 12, 12,
+	   11, 11, 11, 11, 11, 11,
 };
 
 const int Tile::TILE_OPAQUE[] = {
-	0, 1, 1, 1, 1, 1, 1, 1, 1, 0
+	0, 1, 1, 1, 1, 1, 1, 1, 0, 0
 };
 
 MCTileChunk::MCTileChunk()
@@ -45,14 +45,24 @@ void MCTilemap::SetTile(int x, int y, int z, int tile, bool notify)
 	constexpr int modulo = MCTileChunk::CHUNK_WIDTH;
 	int chunkX = x / modulo;
 	int chunkZ = z / modulo;
+	int localX = x % modulo;
+	int localZ = z % modulo;
 	MCTileChunk* pChunk = &tileChunk[chunkX][chunkZ];
-	pChunk->SetTile(x % modulo, y, z % modulo, tile);
+	pChunk->SetTile(localX, y, localZ, tile);
 
 	if (notify)
 	{
 		for (auto& callback : notifyCallback)
 		{
 			callback(pChunk, chunkX, chunkZ);
+			if (localX <= 0 && chunkX > 0)
+				callback(&tileChunk[chunkX - 1][chunkZ], chunkX - 1, chunkZ);
+			if (localX >= MCTileChunk::CHUNK_WIDTH - 1 && chunkX < MCTilemap::CHUNK_SIZE - 1)
+				callback(&tileChunk[chunkX + 1][chunkZ], chunkX + 1, chunkZ);
+			if (localZ <= 0 && chunkZ > 0)
+				callback(&tileChunk[chunkX][chunkZ - 1], chunkX, chunkZ - 1);
+			if (localZ >= MCTileChunk::CHUNK_WIDTH - 1 && chunkZ < MCTilemap::CHUNK_SIZE - 1)
+				callback(&tileChunk[chunkX][chunkZ + 1], chunkX, chunkZ + 1);
 		}
 	}
 }
@@ -200,7 +210,7 @@ bool MCTilemap::HandleCollision(const glm::vec3& pre_position, glm::vec3& positi
 			{
 				if (world_vel.z < 0.0f && GetTile(x, y, z_min) > 0)
 				{
-					post_pos.z = z_min + 1.0f + w * 0.5f;
+ 					post_pos.z = z_min + 1.0f + w * 0.5f;
 					post_vel.z = 0.0f;
 
 					collided = true;
