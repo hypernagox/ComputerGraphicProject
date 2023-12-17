@@ -15,7 +15,7 @@ bool g_bWireFrame = false;
 
 bool g_bCanResume = false;
 
-std::atomic_bool g_bTileFinish = false;
+std::atomic_bool g_bTileFinish = true;
 
 void Update();
 
