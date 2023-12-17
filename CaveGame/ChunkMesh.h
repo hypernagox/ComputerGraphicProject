@@ -4,11 +4,22 @@
 class Material;
 class Shader;
 class MCTileChunk;
+class MCTilemap;
+
+struct ChunkInfo
+{
+	shared_ptr<Mesh> refMesh = nullptr;
+	glm::mat4 worldMat = glm::mat4{ 1.f };
+};
 
 class ChunkMesh
 	:public GameObj
 {
 private:
+	vector<ChunkInfo> m_vecChunkInfo;
+	MCTilemap* const m_pTileMapForReDrawMesh = nullptr;
+	GLuint m_iChunkTexID = 0;
+
 	vector<Vertex> m_vecChunkVertex;
 	vector<GLsizei> m_vecChunkIndex;
 
@@ -22,8 +33,13 @@ private:
 	shared_ptr<Material> m_pChunckMeshMaterial;
 	shared_ptr<Shader> m_pChunckMeshShader;
 	
+	unordered_map<MCTileChunk*, GLuint> m_mapChunkToIndex;
+	bool m_bDirty = false;
+private:
+	void ReConstructMesh(shared_ptr<Mesh> pMesh,GLuint chunkIdx)noexcept;
+	void ReBindMesh()noexcept;
 public:
-	ChunkMesh();
+	ChunkMesh(MCTilemap* const pTileMap);
 	~ChunkMesh();
 
 	void MergeMeshData()noexcept;
@@ -34,6 +50,12 @@ public:
 
 	void Render()override;
 
-	void OnChunkMeshChanged(const MCTileChunk* pChunk, int chunkX, int chunkZ);
+	void OnChunkMeshChanged(MCTileChunk* const pChunk, int chunkX, int chunkZ);
+
+	void SetChunkMeshTexID(const GLuint iTexID)noexcept { m_iChunkTexID = iTexID; }
+
+	void AddChunk(shared_ptr<GameObj> pChild, MCTileChunk* pChunk)noexcept;
+
+	void LastUpdate()override;
 };
 

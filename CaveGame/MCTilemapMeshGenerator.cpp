@@ -30,7 +30,7 @@ void MCTilemapMeshGenerator::CreateMeshAll(MCTilemap* tilemap)
     {
         material[i] = make_shared<Material>();
         material[i]->AddTexture2D(std::format("tile_{}.png", i + 1));
-        pChunkDatas[i] = make_shared<ChunkMesh>();
+        pChunkDatas[i] = make_shared<ChunkMesh>(tilemap);
         pChunkDatas[i]->SetChunkMaterial(material[i]);
         tilemap->AddNotifyCallback([pChunkDatas, i](MCTileChunk* pChunk, int chunkX, int chunkZ) { pChunkDatas[i]->OnChunkMeshChanged(pChunk, chunkX, chunkZ); });
     }
@@ -50,7 +50,8 @@ void MCTilemapMeshGenerator::CreateMeshAll(MCTilemap* tilemap)
                 terrainObj->GetTransform()->SetLocalPosition({ chunkX * MCTileChunk::CHUNK_WIDTH * 0.1f, 0.0f, chunkZ * MCTileChunk::CHUNK_WIDTH * 0.1f });
                 auto renderer = terrainObj->AddComponent<MeshRenderer>();
                 renderer->AddMesh(mesh);
-                pChunkDatas[textureID]->AddChild(terrainObj);
+                pChunkDatas[textureID]->AddChunk(terrainObj,pChunk);
+                pChunkDatas[textureID]->SetChunkMeshTexID(textureID + 1);
             }
         }
     }
