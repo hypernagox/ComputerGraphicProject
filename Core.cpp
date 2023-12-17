@@ -221,8 +221,6 @@ void Core::Init(const GLuint _winWidth, const GLuint _winHeight)
 	Mgr(ResMgr)->Init();
 	Mgr(SceneMgr)->Init();
 	Mgr(KeyMgr)->Init();
-	Mgr(ImGuiMgr)->Init();
-	Mgr(UIMgr)->Init();
 	Mgr(EventMgr)->Init();
 	Mgr(ParticleMgr)->Init();
 	Mgr(AssimpMgr)->Init();
@@ -230,6 +228,9 @@ void Core::Init(const GLuint _winWidth, const GLuint _winHeight)
 	Mgr(RayCaster)->Init();
 	Mgr(SoundMgr)->Init();
 	Mgr(InstancingMgr)->Init();
+	Mgr(ImGuiMgr)->Init();
+	Mgr(UIMgr)->Init();
+
 
 	Mgr(TimeMgr)->Init();
 }

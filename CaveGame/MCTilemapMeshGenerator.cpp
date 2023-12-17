@@ -85,6 +85,11 @@ shared_ptr<Mesh> MCTilemapMeshGenerator::CreateMeshFromChunk(MCTilemap* tilemap,
     vector<glm::vec3> normals;
     vector<glm::vec2> uvs;
 
+    vertices.reserve(500000);
+    triangles.reserve(500000);
+    normals.reserve(500000);
+    uvs.reserve(500000);
+
     static int planeMap[MCTileChunk::CHUNK_WIDTH][MCTileChunk::CHUNK_WIDTH];
 
     for (int y = 0; y < MCTileChunk::CHUNK_HEIGHT; y++)
@@ -193,13 +198,16 @@ shared_ptr<Mesh> MCTilemapMeshGenerator::CreateMeshFromChunk(MCTilemap* tilemap,
         return nullptr;
 
     vector<Vertex> sVertices;
-    for (int index = 0; index < vertices.size(); ++index)
+    sVertices.reserve(500000);
+    const GLint num = (const GLint)vertices.size();
+    for (int index = 0; index < num; ++index)
     {
-        Vertex v(vertices[index]);
+        Vertex v;
+        v.position = vertices[index];
         v.normal = normals[index];
         v.color = glm::vec4{ glm::abs(v.normal),1.f };
         v.uv = uvs[index];
-        sVertices.push_back(v);
+        sVertices.emplace_back(v);
     }
 
     shared_ptr<Mesh> mesh = make_shared<Mesh>(sVertices, triangles);

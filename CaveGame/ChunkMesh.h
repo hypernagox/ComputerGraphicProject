@@ -36,7 +36,7 @@ private:
 	unordered_map<MCTileChunk*, GLuint> m_mapChunkToIndex;
 	bool m_bDirty = false;
 private:
-	void ReConstructMesh(shared_ptr<Mesh> pMesh,GLuint chunkIdx)noexcept;
+	void ReConstructMesh()noexcept;
 	void ReBindMesh()noexcept;
 public:
 	ChunkMesh(MCTilemap* const pTileMap);
@@ -50,7 +50,7 @@ public:
 
 	void Render()override;
 
-	void OnChunkMeshChanged(MCTileChunk* const pChunk, int chunkX, int chunkZ);
+	void OnChunkMeshChanged(MCTileChunk* const pChunk, int chunkX, int chunkZ)noexcept;
 
 	void SetChunkMeshTexID(const GLuint iTexID)noexcept { m_iChunkTexID = iTexID; }
 

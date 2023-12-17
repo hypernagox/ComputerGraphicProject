@@ -38,7 +38,7 @@ void Scene::ExitScene() noexcept
 	m_pCurPlayer = nullptr;
 	for (auto& chunk : m_arrChunkMesh)
 	{
-		chunk = nullptr;
+		chunk.reset();
 	}
 	m_skyBox = nullptr;
 	m_vecLights.clear();

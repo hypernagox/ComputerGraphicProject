@@ -20,6 +20,8 @@
 #include "SoundMgr.h"
 #include <ResMgr.h>
 
+extern std::atomic_bool g_bTileFinish;
+
 shared_ptr<GameObj> Player::CreateCursorBlockObj() const
 {
 	shared_ptr<GameObj> obj = make_obj<GameObj>();
@@ -77,6 +79,10 @@ void Player::InitCamDirection() noexcept
 
 void Player::UpdateTileManipulation()
 {
+	if (!g_bTileFinish)
+	{
+		return;
+	}
 	glm::vec3 wv = m_cameraAnchor->GetTransform()->GetWorldPosition() * 10.0f;
 	const RaycastResult result = m_refTilemap->RaycastTile(wv, this->GetPlayerLook(), 10.0f);
 	m_cursorBlockObj->GetTransform()->SetLocalPosition((glm::vec3(result.hitTilePosition) + glm::one<glm::vec3>() * 0.5f) / 10.0f - GetTransform()->GetLocalPosition());

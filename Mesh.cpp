@@ -9,9 +9,9 @@ Mesh::Mesh()
 
 Mesh::~Mesh()
 {
-    glDeleteBuffers(1, &vbo);
-    glDeleteBuffers(1, &ebo);
-    glDeleteVertexArrays(1, &vao);
+   //glDeleteBuffers(1, &vbo);
+   //glDeleteBuffers(1, &ebo);
+   //glDeleteVertexArrays(1, &vao);
 }
 
 void Mesh::InitForLoad(vector<Vertex>&& _vertices, vector<GLuint>&& _indices)

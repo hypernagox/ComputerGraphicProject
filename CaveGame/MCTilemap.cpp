@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "MCTilemap.h"
 #include "CustomMath.hpp"
+#include "ThreadMgr.h"
 
 const int Tile::TEXTURES[][6] = {
 	   0, 0, 0, 0, 0, 0,
@@ -50,7 +51,9 @@ void MCTilemap::SetTile(int x, int y, int z, int tile, bool notify)
 	if (notify)
 	{
 		for (auto& callback : notifyCallback)
+		{
 			callback(pChunk, chunkX, chunkZ);
+		}
 	}
 }
 

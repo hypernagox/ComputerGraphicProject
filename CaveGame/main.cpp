@@ -15,7 +15,7 @@ bool g_bWireFrame = false;
 
 bool g_bCanResume = false;
 
-std::atomic_bool g_bTileFinish = true;
+std::atomic_bool g_bTileFinish = false;
 
 void Update();
 
@@ -25,11 +25,6 @@ int main()
     Mgr(Core)->SetClearColor(RGBA_WHITE);
 
    
-    Mgr(SceneMgr)->RegisterEnterSceneCallBack(SCENE_TYPE::STAGE, []() {
-        
-        }); 
-
-
     Mgr(SceneMgr)->RegisterEnterSceneCallBack(SCENE_TYPE::STAGE, []() {
         g_bCanResume = true;
         MCTilemap* tilemap = new MCTilemap();

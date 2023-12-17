@@ -8,8 +8,9 @@
 #include "Transform.h"
 #include "MCTilemapMeshGenerator.h"
 #include "MCTilemap.h"
+#include "ThreadMgr.h"
 
-void ChunkMesh::ReConstructMesh(shared_ptr<Mesh> pMesh,GLuint chunkIdx) noexcept
+void ChunkMesh::ReConstructMesh() noexcept
 {
     GLsizei currentOffset = 0;
     GLsizei currentOffsetI = 0;
@@ -23,10 +24,10 @@ void ChunkMesh::ReConstructMesh(shared_ptr<Mesh> pMesh,GLuint chunkIdx) noexcept
     {
         
         const shared_ptr<Mesh>& chunkMesh = chunk.refMesh;
-        auto& v = chunkMesh->GetVertices();
+        const auto& v = chunkMesh->GetVertices();
         const auto& i = chunkMesh->GetIndicies();
 
-        for (auto& vert : v)
+        for (const auto& vert : v)
         {
             Vertex temp = vert;
             temp.position = chunk.worldMat * glm::vec4{ vert.position,1.f };
@@ -37,7 +38,7 @@ void ChunkMesh::ReConstructMesh(shared_ptr<Mesh> pMesh,GLuint chunkIdx) noexcept
         {
             m_vecChunkIndex.emplace_back(index + currentOffset);
         }
-
+       
         m_indexOffsets.emplace_back(reinterpret_cast<void*>(static_cast<GLsizei>(currentOffsetI) * sizeof(GLsizei)));
         m_indexCounts.emplace_back(static_cast<GLsizei>(i.size()));
 
@@ -51,13 +52,11 @@ void ChunkMesh::ReBindMesh() noexcept
     glDeleteBuffers(1, &vbo);
     glDeleteBuffers(1, &ebo);
 
-    m_pChunckMeshShader->Use();
-
     glBindVertexArray(vao);
 
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, m_vecChunkVertex.size() * sizeof(Vertex), m_vecChunkVertex.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, m_vecChunkVertex.size() * sizeof(Vertex), m_vecChunkVertex.data(), GL_DYNAMIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
     glEnableVertexAttribArray(0);
@@ -77,7 +76,7 @@ void ChunkMesh::ReBindMesh() noexcept
 
     glGenBuffers(1, &ebo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecChunkIndex.size() * sizeof(GLsizei), m_vecChunkIndex.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecChunkIndex.size() * sizeof(GLsizei), m_vecChunkIndex.data(), GL_DYNAMIC_DRAW);
 
     glBindVertexArray(0);
 
@@ -110,12 +109,12 @@ void ChunkMesh::MergeMeshData() noexcept
 	for (const auto& child : children)
 	{
         child->GetTransform()->MakeFinalMat();
-        auto& childMesh = child->GetComp<MeshRenderer>()->GetMesh().front();
-		auto& v = childMesh->GetVertices();
-        auto& i = childMesh->GetIndicies();
+        const auto& childMesh = child->GetComp<MeshRenderer>()->GetMesh().front();
+		const auto& v = childMesh->GetVertices();
+        const auto& i = childMesh->GetIndicies();
         const auto obj_mat = child->GetObjectWorldTransform();
 
-        for (auto& vert : v)
+        for (const auto& vert : v)
         {
             Vertex temp = vert;
             temp.position = obj_mat * glm::vec4{ vert.position,1.f };
@@ -148,7 +147,7 @@ void ChunkMesh::InitChunkMesh(string_view strShaderName) noexcept
 
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, m_vecChunkVertex.size() * sizeof(Vertex), m_vecChunkVertex.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, m_vecChunkVertex.size() * sizeof(Vertex), m_vecChunkVertex.data(), GL_DYNAMIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
     glEnableVertexAttribArray(0);
@@ -168,7 +167,7 @@ void ChunkMesh::InitChunkMesh(string_view strShaderName) noexcept
 
     glGenBuffers(1, &ebo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecChunkIndex.size() * sizeof(GLsizei), m_vecChunkIndex.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecChunkIndex.size() * sizeof(GLsizei), m_vecChunkIndex.data(), GL_DYNAMIC_DRAW);
 
     glBindVertexArray(0);
 
@@ -194,20 +193,32 @@ void ChunkMesh::Render()
     glBindVertexArray(0);
 }
 
-void ChunkMesh::OnChunkMeshChanged(MCTileChunk* const pChunk, int chunkX, int chunkZ)
+void ChunkMesh::OnChunkMeshChanged(MCTileChunk* const pChunk, int chunkX, int chunkZ)noexcept
 {
-    std::cout << "Notify Chunk(" << pChunk << ") to ChunkMesh(" << this << ")\n";
-    const auto idx = m_mapChunkToIndex[pChunk];
+    //std::cout << "Notify Chunk(" << pChunk << ") to ChunkMesh(" << this << ")\n";
     if (m_vecChunkInfo.empty())
         return;
+    const auto idx = m_mapChunkToIndex[pChunk];
     shared_ptr<Mesh> mesh = MCTilemapMeshGenerator::CreateMeshFromChunk(m_pTileMapForReDrawMesh, chunkX, chunkZ, m_iChunkTexID);
+  
     if (mesh == nullptr)
         return;
-    m_vecChunkInfo[idx].refMesh->GetVertices() = std::move(mesh->GetVertices());
-    m_vecChunkInfo[idx].refMesh->GetIndicies() = std::move(mesh->GetIndicies());
+
+    const auto& v1 = m_vecChunkInfo[idx].refMesh->GetVertices();
+    const auto& i1 = m_vecChunkInfo[idx].refMesh->GetIndicies();
+    const auto& v2 = mesh->GetVertices();
+    const auto& i2 = mesh->GetIndicies();
+    
+    if (v1 == v2 && i1 == i2)
+    {
+        return;
+    }
+    
+    m_vecChunkInfo[idx].refMesh->GetVertices() = std::move(v2);
+    m_vecChunkInfo[idx].refMesh->GetIndicies() = std::move(i2);
 
     m_bDirty = true;
-    ReConstructMesh(mesh, idx);
+    ReConstructMesh();
 }
 
 void ChunkMesh::AddChunk(shared_ptr<GameObj> pChild, MCTileChunk* pChunk) noexcept
