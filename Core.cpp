@@ -228,6 +228,9 @@ void Core::Init(const GLuint _winWidth, const GLuint _winHeight)
 	Mgr(RayCaster)->Init();
 	Mgr(SoundMgr)->Init();
 	Mgr(InstancingMgr)->Init();
+
+	std::atomic_thread_fence(std::memory_order_seq_cst);
+
 	Mgr(ImGuiMgr)->Init();
 	Mgr(UIMgr)->Init();
 
