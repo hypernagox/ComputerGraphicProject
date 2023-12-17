@@ -28,8 +28,9 @@ void ChunkMesh::ReConstructMesh(shared_ptr<Mesh> pMesh,GLuint chunkIdx) noexcept
 
         for (auto& vert : v)
         {
-            vert.position = chunk.worldMat * glm::vec4{ vert.position,1.f };
-            m_vecChunkVertex.emplace_back(vert);
+            Vertex temp = vert;
+            temp.position = chunk.worldMat * glm::vec4{ vert.position,1.f };
+            m_vecChunkVertex.emplace_back(temp);
         }
 
         for (const auto index : i)
@@ -116,8 +117,9 @@ void ChunkMesh::MergeMeshData() noexcept
 
         for (auto& vert : v)
         {
-            vert.position = obj_mat * glm::vec4{ vert.position,1.f };
-            m_vecChunkVertex.emplace_back(vert);
+            Vertex temp = vert;
+            temp.position = obj_mat * glm::vec4{ vert.position,1.f };
+            m_vecChunkVertex.emplace_back(temp);
         }
 
         for (const auto index : i) 
