@@ -34,6 +34,6 @@ public:
 
 	void Render()override;
 
-	void OnChunkMeshChanged(const MCTileChunk* pChunk);
+	void OnChunkMeshChanged(const MCTileChunk* pChunk, int chunkX, int chunkZ);
 };
 

@@ -32,7 +32,7 @@ void MCTilemapMeshGenerator::CreateMeshAll(MCTilemap* tilemap)
         material[i]->AddTexture2D(std::format("tile_{}.png", i + 1));
         pChunkDatas[i] = make_shared<ChunkMesh>();
         pChunkDatas[i]->SetChunkMaterial(material[i]);
-        tilemap->AddNotifyCallback([pChunkDatas, i](MCTileChunk* pChunk) { pChunkDatas[i]->OnChunkMeshChanged(pChunk); });
+        tilemap->AddNotifyCallback([pChunkDatas, i](MCTileChunk* pChunk, int chunkX, int chunkZ) { pChunkDatas[i]->OnChunkMeshChanged(pChunk, chunkX, chunkZ); });
     }
    
     for (int chunkX = 0; chunkX < MCTilemap::CHUNK_SIZE; ++chunkX)

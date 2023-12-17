@@ -110,7 +110,7 @@ void ChunkMesh::Render()
     glBindVertexArray(0);
 }
 
-void ChunkMesh::OnChunkMeshChanged(const MCTileChunk* pChunk)
+void ChunkMesh::OnChunkMeshChanged(const MCTileChunk* pChunk, int chunkX, int chunkZ)
 {
     std::cout << "Notify Chunk(" << pChunk << ") to ChunkMesh(" << this << ")\n";
 

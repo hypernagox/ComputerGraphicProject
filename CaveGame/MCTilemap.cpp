@@ -42,13 +42,15 @@ MCTilemap::MCTilemap()
 void MCTilemap::SetTile(int x, int y, int z, int tile, bool notify)
 {
 	constexpr int modulo = MCTileChunk::CHUNK_WIDTH;
-	MCTileChunk* pChunk = &tileChunk[x / modulo][z / modulo];
+	int chunkX = x / modulo;
+	int chunkZ = z / modulo;
+	MCTileChunk* pChunk = &tileChunk[chunkX][chunkZ];
 	pChunk->SetTile(x % modulo, y, z % modulo, tile);
 
 	if (notify)
 	{
 		for (auto& callback : notifyCallback)
-			callback(pChunk);
+			callback(pChunk, chunkX, chunkZ);
 	}
 }
 
@@ -278,7 +280,7 @@ RaycastResult MCTilemap::RaycastTile(const glm::vec3& start_position, const glm:
 	return result;
 }
 
-void MCTilemap::AddNotifyCallback(const std::function<void(MCTileChunk*)>& callback)
+void MCTilemap::AddNotifyCallback(const std::function<void(MCTileChunk*, int, int)>& callback)
 {
 	notifyCallback.push_back(callback);
 }

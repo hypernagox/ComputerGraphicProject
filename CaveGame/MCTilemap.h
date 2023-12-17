@@ -41,7 +41,7 @@ public:
 
 private:
 	MCTileChunk tileChunk[CHUNK_SIZE][CHUNK_SIZE];
-	std::vector<std::function<void(MCTileChunk*)>> notifyCallback;
+	std::vector<std::function<void(MCTileChunk*, int, int)>> notifyCallback;
 
 public:
 	MCTilemap();
@@ -53,5 +53,5 @@ public:
 	MCTileChunk* GetChunk(int x, int z);
 	bool HandleCollision(const glm::vec3& pre_position, glm::vec3& position, glm::vec3& velocity);
 	RaycastResult RaycastTile(const glm::vec3& start_position, const glm::vec3& direction, float distance) const;
-	void AddNotifyCallback(const std::function<void(MCTileChunk*)>& callback);
+	void AddNotifyCallback(const std::function<void(MCTileChunk*, int, int)>& callback);
 };
