@@ -200,16 +200,16 @@ void ChunkMesh::OnChunkMeshChanged(MCTileChunk* const pChunk, int chunkX, int ch
     const auto idx = m_mapChunkToIndex[pChunk];
     shared_ptr<Mesh> mesh = MCTilemapMeshGenerator::CreateMeshFromChunk(m_pTileMapForReDrawMesh, chunkX, chunkZ, m_iChunkTexID);
 
-    const auto& v1 = m_vecChunkInfo[idx].refMesh->GetVertices();
-    const auto& i1 = m_vecChunkInfo[idx].refMesh->GetIndicies();
-    const auto& v2 = mesh->GetVertices();
-    const auto& i2 = mesh->GetIndicies();
+    auto& v1 = m_vecChunkInfo[idx].refMesh->GetVertices();
+    auto& i1 = m_vecChunkInfo[idx].refMesh->GetIndicies();
+    auto& v2 = mesh->GetVertices();
+    auto& i2 = mesh->GetIndicies();
     
     if (v1 == v2 && i1 == i2)
         return;
     
-    m_vecChunkInfo[idx].refMesh->GetVertices() = std::move(v2);
-    m_vecChunkInfo[idx].refMesh->GetIndicies() = std::move(i2);
+    v1 = std::move(v2);
+    i1 = std::move(i2);
 
     m_bDirty = true;
     ReConstructMesh();
