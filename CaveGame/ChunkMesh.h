@@ -16,6 +16,8 @@ class ChunkMesh
 	:public GameObj
 {
 private:
+	vector<std::future<void>> m_vecFutureForReConstruct;
+	vector<size_t> m_vecVertexSize;
 	vector<ChunkInfo> m_vecChunkInfo;
 	MCTilemap* const m_pTileMapForReDrawMesh = nullptr;
 	GLuint m_iChunkTexID = 0;
@@ -55,7 +57,5 @@ public:
 	void SetChunkMeshTexID(const GLuint iTexID)noexcept { m_iChunkTexID = iTexID; }
 
 	void AddChunk(shared_ptr<GameObj> pChild, MCTileChunk* pChunk)noexcept;
-
-	void LastUpdate()override;
 };
 

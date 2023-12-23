@@ -22,6 +22,7 @@
 #include <MyOpenGL.hpp>
 
 extern std::atomic_bool g_bTileFinish;
+static std::uniform_int_distribution tile_num{ 1,12 };
 
 shared_ptr<GameObj> Player::CreateCursorBlockObj() const
 {
@@ -93,8 +94,28 @@ void Player::UpdateTileManipulation()
 
 	if (KEY_TAP(GLFW_MOUSE_BUTTON_LEFT))
 	{
+		// 쓰고있는 텍스쳐의 이름 또는 인덱스, 아니면 텍스쳐포인터를 알면됌
+		const string tex_name = std::format("tile_{}.png", tile_num(g_rng));
+		auto iter = g_mapParticleUniqueObject.find(tex_name);
+		shared_ptr<Material>mate;
+		if (g_mapParticleUniqueObject.end() == iter)
+		{
+			mate = make_shared<Material>();
+			mate->AddTexture2D(tex_name);
+			auto particle = make_shared<GameObj>(*m_particlePrefab);
+			particle->GetComp<MeshRenderer>()->AddMaterial(mate);
+			particle->SetResName(tex_name);
+			iter = g_mapParticleUniqueObject.emplace(tex_name, particle).first;
+		}
+		
+		Mgr(InstancingMgr)->AddInstancingList(iter->second);
+		if (mate)
+		{
+			Mgr(InstancingMgr)->SetAllObjMaterials(tex_name, mate);
+		}
 		m_refTilemap->SetTile(result.hitTilePosition, 0, true);
-		Mgr(ParticleMgr)->SetParticles(m_particlePrefab, 0.01f, result.hitPosition * 0.1f);
+		Mgr(ParticleMgr)->SetParticles(iter->second, 0.01f, result.hitPosition * 0.1f);
+		DestroyObj(iter->second);
 		Mgr(SoundMgr)->PlayEffect("stone4.ogg", 0.5f);
 	}
 	if (KEY_TAP(GLFW_MOUSE_BUTTON_RIGHT))
@@ -218,10 +239,7 @@ Player::Player(MCTilemap* tilemap) : m_refTilemap(tilemap)
 	m_cursorBlockObj = CreateCursorBlockObj();
 	m_cursorBlockObj->GetTransform()->SetLocalScale(glm::one<glm::vec3>() * 0.105f);
 
-	m_particlePrefab = Mgr(AssimpMgr)->Load("EnvironmentShader.glsl", "MyCube.fbx");
-	auto mate = make_shared<Material>();
-	mate->AddTexture2D("tile_2.png");
-	m_particlePrefab->GetComp<MeshRenderer>()->AddMaterial(mate);
+	m_particlePrefab = Mgr(AssimpMgr)->Load("DefaultShader.glsl", "MyCube.fbx");
 	m_particlePrefab->GetTransform()->SetLocalScale(0.1f);
 }
 

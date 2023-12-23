@@ -43,10 +43,10 @@ MCTilemap::MCTilemap()
 void MCTilemap::SetTile(int x, int y, int z, int tile, bool notify)
 {
 	constexpr int modulo = MCTileChunk::CHUNK_WIDTH;
-	int chunkX = x / modulo;
-	int chunkZ = z / modulo;
-	int localX = x % modulo;
-	int localZ = z % modulo;
+	const int chunkX = x / modulo;
+	const int chunkZ = z / modulo;
+	const int localX = x % modulo;
+	const int localZ = z % modulo;
 	MCTileChunk* pChunk = &tileChunk[chunkX][chunkZ];
 	pChunk->SetTile(localX, y, localZ, tile);
 

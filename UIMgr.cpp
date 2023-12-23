@@ -69,6 +69,7 @@ void UIMgr::Init()
 			gui3->AddClickedEvent([]() {
 				if (g_bCanResume)
 				{
+					glfwSetInputMode(Mgr(Core)->GetWinInfo(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 					Mgr(SoundMgr)->PlayEffect("click.ogg", 0.25f);
 					ChangeScene(SCENE_TYPE::STAGE, false);
 				}

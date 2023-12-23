@@ -6,6 +6,7 @@ class MCTilemap;
 class Player
 	:public GameObj
 {
+	std::unordered_map<string, shared_ptr<GameObj>> g_mapParticleUniqueObject;
 private:
 	MCTilemap* m_refTilemap;
 

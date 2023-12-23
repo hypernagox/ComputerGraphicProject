@@ -51,6 +51,4 @@ void Particle::ActivateParticle(shared_ptr<MeshRenderer> pMeshRenderer,string_vi
 	GetComp<RigidBody>()->SetVelocity(yVel);
 	Mgr(InstancingMgr)->AddInstancingList(shared_this);
 	Mgr(SceneMgr)->GetCurScene()->AddObject(std::move(shared_this), GROUP_TYPE::PARTICLE);
-
-	
 }
