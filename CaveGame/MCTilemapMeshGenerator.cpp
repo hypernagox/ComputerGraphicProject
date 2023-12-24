@@ -192,9 +192,9 @@ shared_ptr<Mesh> MCTilemapMeshGenerator::CreateMeshFromChunk(MCTilemap* tilemap,
             }, glm::vec3(0.0f, 0.0f, -1.0f), vertices, triangles, normals, uvs);
     }
 
-    vector<Vertex> sVertices;
-    sVertices.reserve(500000);
     const GLint num = (const GLint)vertices.size();
+    vector<Vertex> sVertices;
+    sVertices.reserve(num);
     for (int index = 0; index < num; ++index)
     {
         sVertices.emplace_back(Vertex{

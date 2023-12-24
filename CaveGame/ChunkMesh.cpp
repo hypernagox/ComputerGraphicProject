@@ -25,6 +25,7 @@ void ChunkMesh::ReConstructMesh() noexcept
                 m_vecChunkVertex[vert_cnt++].position = chunk.worldMat * glm::vec4{ vert.position,1.f };
             }
         }
+        m_numOfVertices = (GLuint)vert_cnt;
         }));
 
     m_vecFutureForReConstruct.emplace_back(Mgr(ThreadMgr)->EnqueueTaskFuture([this]()noexcept {
@@ -51,6 +52,7 @@ void ChunkMesh::ReConstructMesh() noexcept
 
             ++cnt;
         }
+        m_numOfIndices = (GLuint)idx_cnt;
         }));
 }
 
@@ -81,10 +83,14 @@ void ChunkMesh::MergeMeshData() noexcept
 {
     GLsizei currentOffset = 0;
     GLsizei currentOffsetI= 0;
-    const auto& children = GetChildObj();
+    auto& children = GetChildObj();
     const size_t num_of_child = children.size();
+    children.shrink_to_fit();
     m_indexOffsets.reserve(num_of_child);
     m_indexCounts.reserve(num_of_child);
+    m_vecChunkInfo.reserve(num_of_child);
+    m_vecVertexSize.reserve(num_of_child);
+    m_mapChunkToIndex.rehash(num_of_child);
 	for (const auto& child : children)
 	{
         child->GetTransform()->MakeFinalMat();
@@ -93,11 +99,9 @@ void ChunkMesh::MergeMeshData() noexcept
         const auto& i = childMesh->GetIndicies();
         const auto obj_mat = child->GetObjectWorldTransform();
 
-        for (const auto& vert : v)
+        for (auto& vert : v)
         {
-            Vertex temp = vert;
-            temp.position = obj_mat * glm::vec4{ vert.position,1.f };
-            m_vecChunkVertex.emplace_back(temp);
+            m_vecChunkVertex.emplace_back(vert).position = obj_mat * glm::vec4{ vert.position,1.f };
         }
 
         for (const auto index : i) 
@@ -113,7 +117,11 @@ void ChunkMesh::MergeMeshData() noexcept
 
         currentOffset += (GLsizei)v.size();
         currentOffsetI += (GLsizei)i.size();
-	}    
+	}
+    m_vecChunkVertex.resize(m_vecChunkVertex.size() + 1024);
+    m_vecChunkIndex.resize(m_vecChunkIndex.size() + 1024);
+    m_vecChunkVertex.shrink_to_fit();
+    m_vecChunkIndex.shrink_to_fit();
 }
 
 void ChunkMesh::InitChunkMesh(string_view strShaderName) noexcept
@@ -202,7 +210,8 @@ void ChunkMesh::OnChunkMeshChanged(MCTileChunk* const pChunk, int chunkX, int ch
 
     v1.swap(v2);
     i1.swap(i2);
-
+    v1.shrink_to_fit();
+    i1.shrink_to_fit();
     m_bDirty = true;
     ReConstructMesh();
 }

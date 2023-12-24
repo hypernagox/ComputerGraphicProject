@@ -23,6 +23,13 @@ void Mesh::InitForLoad(vector<Vertex>&& _vertices, vector<GLuint>&& _indices)
 
 void Mesh::SetBuffers()
 {
+    m_numOfVertices = (GLuint)m_vecVertex.size();
+    m_numOfIndices = (GLuint)m_vecIdx.size();
+    m_vecVertex.shrink_to_fit();
+    m_vecIdx.shrink_to_fit();
+
+    std::atomic_thread_fence(std::memory_order_seq_cst);
+
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
