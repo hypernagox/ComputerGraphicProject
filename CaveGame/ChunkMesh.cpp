@@ -65,7 +65,7 @@ void ChunkMesh::ReBindMesh() noexcept
     glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, m_numOfIndices * sizeof(GLsizei), m_vecChunkIndex.data());
 }
 
-ChunkMesh::ChunkMesh(MCTilemap* const pTileMap)
+ChunkMesh::ChunkMesh(const shared_ptr<MCTilemap>& pTileMap)
     :m_pTileMapForReDrawMesh{pTileMap}
 {
     m_vecChunkVertex.reserve(1000000);
@@ -195,7 +195,7 @@ void ChunkMesh::OnChunkMeshChanged(MCTileChunk* const pChunk, int chunkX, int ch
         return;
 
     const auto idx = m_mapChunkToIndex[pChunk];
-    shared_ptr<Mesh> mesh = MCTilemapMeshGenerator::CreateMeshFromChunk(m_pTileMapForReDrawMesh, chunkX, chunkZ, m_iChunkTexID);
+    const shared_ptr<Mesh> mesh = MCTilemapMeshGenerator::CreateMeshFromChunk(m_pTileMapForReDrawMesh, chunkX, chunkZ, m_iChunkTexID);
 
     auto& v1 = m_vecChunkInfo[idx].refMesh->GetVertices();
     auto& i1 = m_vecChunkInfo[idx].refMesh->GetIndicies();

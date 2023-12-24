@@ -7,9 +7,9 @@
 #include "Shader.h"
 #include "MCTilemap.h"
 
-PlayerShadow::PlayerShadow(const MCTilemap* tilemap)
+PlayerShadow::PlayerShadow(const shared_ptr<const MCTilemap>& tilemap)
+    :m_pTilemap{ tilemap }
 {
-    m_pTilemap = tilemap;
 }
 
 PlayerShadow::~PlayerShadow()
@@ -60,7 +60,7 @@ void PlayerShadow::Update()
     const auto pParentTrans = GetParentGameObj().lock()->GetTransform();
     const auto pTrans = GetTransform();
 
-    glm::vec3 worldPosition = pParentTrans->GetLocalPosition() * 10.0f;
+    const glm::vec3 worldPosition = pParentTrans->GetLocalPosition() * 10.0f;
     glm::ivec3 tilePosition = glm::floor(worldPosition);
 
     tilePosition.x = glm::clamp(tilePosition.x, 0, MCTilemap::MAP_WIDTH - 1);
@@ -75,7 +75,7 @@ void PlayerShadow::Update()
         --y;
     }
 
-    float distance = worldPosition.y - y - 1;
+    const float distance = worldPosition.y - y - 1;
     pTrans->SetLocalPosition(glm::vec3(0.0f, -distance / 10.0f + 0.005f, 0.0f));
 
     const float fDelta = 0.1f * (pParentTrans->GetWorldPosition().y - m_fPlayerOriginY);

@@ -21,7 +21,7 @@ extern std::atomic_bool g_bTileFinish;
 
 thread_local int planeMap[MCTileChunk::CHUNK_WIDTH][MCTileChunk::CHUNK_WIDTH];
 
-void MCTilemapMeshGenerator::CreateMeshAll(MCTilemap* tilemap)
+void MCTilemapMeshGenerator::CreateMeshAll(shared_ptr<MCTilemap> tilemap)noexcept
 {
     g_bTileFinish.store(false);
 
@@ -34,7 +34,7 @@ void MCTilemapMeshGenerator::CreateMeshAll(MCTilemap* tilemap)
         material[i]->AddTexture2D(std::format("tile_{}.png", i + 1));
         pChunkDatas[i] = make_shared<ChunkMesh>(tilemap);
         pChunkDatas[i]->SetChunkMaterial(material[i]);
-        tilemap->AddNotifyCallback([pChunkDatas, i](MCTileChunk* pChunk, int chunkX, int chunkZ) { pChunkDatas[i]->OnChunkMeshChanged(pChunk, chunkX, chunkZ); });
+        tilemap->AddNotifyCallback([pChunkDatas, i](MCTileChunk* pChunk, int chunkX, int chunkZ) noexcept{ pChunkDatas[i]->OnChunkMeshChanged(pChunk, chunkX, chunkZ); });
     }
    
     for (int chunkX = 0; chunkX < MCTilemap::CHUNK_SIZE; ++chunkX)
@@ -74,7 +74,7 @@ void MCTilemapMeshGenerator::CreateMeshAll(MCTilemap* tilemap)
         });
 }
 
-shared_ptr<Mesh> MCTilemapMeshGenerator::CreateMeshFromChunk(MCTilemap* tilemap, int chunkX, int chunkZ, int textureID) noexcept
+shared_ptr<Mesh> MCTilemapMeshGenerator::CreateMeshFromChunk(const shared_ptr<MCTilemap>& tilemap, int chunkX, int chunkZ, int textureID) noexcept
 {
     MCTileChunk* chunk = tilemap->GetChunk(chunkX, chunkZ);
     const int offsetX = chunkX * MCTileChunk::CHUNK_WIDTH;
@@ -98,12 +98,12 @@ shared_ptr<Mesh> MCTilemapMeshGenerator::CreateMeshFromChunk(MCTilemap* tilemap,
                 planeMap[x][z] = Tile::TEXTURES[tilemap->GetTile(x + offsetX, y, z + offsetZ)][0] == textureID ? (y < MCTilemap::MAP_HEIGHT - 1 ? (Tile::TILE_OPAQUE[tilemap->GetTile(x + offsetX, y + 1, z + offsetZ)] ? 0 : 1) : 1) : 0;
         }
 
-        AddPlaneGreedyMesh(planeMap, MCTileChunk::CHUNK_WIDTH, MCTileChunk::CHUNK_WIDTH, [&vertices, y](int xmin, int ymin, int xmax, int ymax)
+        AddPlaneGreedyMesh(planeMap, MCTileChunk::CHUNK_WIDTH, MCTileChunk::CHUNK_WIDTH, [&vertices, y](int xmin, int ymin, int xmax, int ymax)noexcept
             {
-                vertices.push_back(glm::vec3(xmin, y + 1, ymin));
-                vertices.push_back(glm::vec3(xmax, y + 1, ymin));
-                vertices.push_back(glm::vec3(xmin, y + 1, ymax));
-                vertices.push_back(glm::vec3(xmax, y + 1, ymax));
+                vertices.emplace_back(glm::vec3(xmin, y + 1, ymin));
+                vertices.emplace_back(glm::vec3(xmax, y + 1, ymin));
+                vertices.emplace_back(glm::vec3(xmin, y + 1, ymax));
+                vertices.emplace_back(glm::vec3(xmax, y + 1, ymax));
             }, glm::vec3(0.0f, 1.0f, 0.0f), vertices, triangles, normals, uvs);
     }
 
@@ -115,12 +115,12 @@ shared_ptr<Mesh> MCTilemapMeshGenerator::CreateMeshFromChunk(MCTilemap* tilemap,
                 planeMap[x][z] = Tile::TEXTURES[tilemap->GetTile(x + offsetX, y, z + offsetZ)][1] == textureID ? (y > 0 ? (Tile::TILE_OPAQUE[tilemap->GetTile(x + offsetX, y - 1, z + offsetZ)] ? 0 : 1) : 1) : 0;
         }
 
-        AddPlaneGreedyMesh(planeMap, MCTileChunk::CHUNK_WIDTH, MCTileChunk::CHUNK_WIDTH, [&vertices, y](int xmin, int ymin, int xmax, int ymax)
+        AddPlaneGreedyMesh(planeMap, MCTileChunk::CHUNK_WIDTH, MCTileChunk::CHUNK_WIDTH, [&vertices, y](int xmin, int ymin, int xmax, int ymax)noexcept
             {
-                vertices.push_back(glm::vec3(xmax, y, ymin));
-                vertices.push_back(glm::vec3(xmin, y, ymin));
-                vertices.push_back(glm::vec3(xmax, y, ymax));
-                vertices.push_back(glm::vec3(xmin, y, ymax));
+                vertices.emplace_back(glm::vec3(xmax, y, ymin));
+                vertices.emplace_back(glm::vec3(xmin, y, ymin));
+                vertices.emplace_back(glm::vec3(xmax, y, ymax));
+                vertices.emplace_back(glm::vec3(xmin, y, ymax));
             }, glm::vec3(0.0f, -1.0f, 0.0f), vertices, triangles, normals, uvs);
     }
 
@@ -132,12 +132,12 @@ shared_ptr<Mesh> MCTilemapMeshGenerator::CreateMeshFromChunk(MCTilemap* tilemap,
                 planeMap[z][y] = Tile::TEXTURES[tilemap->GetTile(x + offsetX, y, z + offsetZ)][2] == textureID ? (x + offsetX < MCTilemap::MAP_WIDTH - 1 ? (Tile::TILE_OPAQUE[tilemap->GetTile(x + offsetX + 1, y, z + offsetZ)] ? 0 : 1) : 1) : 0;
         }
 
-        AddPlaneGreedyMesh(planeMap, MCTileChunk::CHUNK_WIDTH, MCTileChunk::CHUNK_HEIGHT, [&vertices, x](int xmin, int ymin, int xmax, int ymax)
+        AddPlaneGreedyMesh(planeMap, MCTileChunk::CHUNK_WIDTH, MCTileChunk::CHUNK_HEIGHT, [&vertices, x](int xmin, int ymin, int xmax, int ymax)noexcept
             {
-                vertices.push_back(glm::vec3(x + 1, ymin, xmin));
-                vertices.push_back(glm::vec3(x + 1, ymin, xmax));
-                vertices.push_back(glm::vec3(x + 1, ymax, xmin));
-                vertices.push_back(glm::vec3(x + 1, ymax, xmax));
+                vertices.emplace_back(glm::vec3(x + 1, ymin, xmin));
+                vertices.emplace_back(glm::vec3(x + 1, ymin, xmax));
+                vertices.emplace_back(glm::vec3(x + 1, ymax, xmin));
+                vertices.emplace_back(glm::vec3(x + 1, ymax, xmax));
             }, glm::vec3(1.0f, 0.0f, 0.0f), vertices, triangles, normals, uvs);
     }
 
@@ -149,12 +149,12 @@ shared_ptr<Mesh> MCTilemapMeshGenerator::CreateMeshFromChunk(MCTilemap* tilemap,
                 planeMap[z][y] = Tile::TEXTURES[tilemap->GetTile(x + offsetX, y, z + offsetZ)][3] == textureID ? (x + offsetX > 0 ? (Tile::TILE_OPAQUE[tilemap->GetTile(x + offsetX - 1, y, z + offsetZ)] ? 0 : 1) : 1) : 0;
         }
 
-        AddPlaneGreedyMesh(planeMap, MCTileChunk::CHUNK_WIDTH, MCTileChunk::CHUNK_HEIGHT, [&vertices, x](int xmin, int ymin, int xmax, int ymax)
+        AddPlaneGreedyMesh(planeMap, MCTileChunk::CHUNK_WIDTH, MCTileChunk::CHUNK_HEIGHT, [&vertices, x](int xmin, int ymin, int xmax, int ymax)noexcept
             {
-                vertices.push_back(glm::vec3(x, ymin, xmax));
-                vertices.push_back(glm::vec3(x, ymin, xmin));
-                vertices.push_back(glm::vec3(x, ymax, xmax));
-                vertices.push_back(glm::vec3(x, ymax, xmin));
+                vertices.emplace_back(glm::vec3(x, ymin, xmax));
+                vertices.emplace_back(glm::vec3(x, ymin, xmin));
+                vertices.emplace_back(glm::vec3(x, ymax, xmax));
+                vertices.emplace_back(glm::vec3(x, ymax, xmin));
             }, glm::vec3(-1.0f, 0.0f, 0.0f), vertices, triangles, normals, uvs);
     }
 
@@ -166,12 +166,12 @@ shared_ptr<Mesh> MCTilemapMeshGenerator::CreateMeshFromChunk(MCTilemap* tilemap,
                 planeMap[x][y] = Tile::TEXTURES[tilemap->GetTile(x + offsetX, y, z + offsetZ)][4] == textureID ? (z + offsetZ < MCTilemap::MAP_WIDTH - 1 ? (Tile::TILE_OPAQUE[tilemap->GetTile(x + offsetX, y, z + offsetZ + 1)] ? 0 : 1) : 1) : 0;
         }
 
-        AddPlaneGreedyMesh(planeMap, MCTileChunk::CHUNK_WIDTH, MCTileChunk::CHUNK_HEIGHT, [&vertices, z](int xmin, int ymin, int xmax, int ymax)
+        AddPlaneGreedyMesh(planeMap, MCTileChunk::CHUNK_WIDTH, MCTileChunk::CHUNK_HEIGHT, [&vertices, z](int xmin, int ymin, int xmax, int ymax)noexcept
             {
-                vertices.push_back(glm::vec3(xmax, ymin, z + 1));
-                vertices.push_back(glm::vec3(xmin, ymin, z + 1));
-                vertices.push_back(glm::vec3(xmax, ymax, z + 1));
-                vertices.push_back(glm::vec3(xmin, ymax, z + 1));
+                vertices.emplace_back(glm::vec3(xmax, ymin, z + 1));
+                vertices.emplace_back(glm::vec3(xmin, ymin, z + 1));
+                vertices.emplace_back(glm::vec3(xmax, ymax, z + 1));
+                vertices.emplace_back(glm::vec3(xmin, ymax, z + 1));
             }, glm::vec3(0.0f, 0.0f, 1.0f), vertices, triangles, normals, uvs);
     }
 
@@ -183,12 +183,12 @@ shared_ptr<Mesh> MCTilemapMeshGenerator::CreateMeshFromChunk(MCTilemap* tilemap,
                 planeMap[x][y] = Tile::TEXTURES[tilemap->GetTile(x + offsetX, y, z + offsetZ)][5] == textureID ? (z + offsetZ > 0 ? (Tile::TILE_OPAQUE[tilemap->GetTile(x + offsetX, y, z + offsetZ - 1)] ? 0 : 1) : 1) : 0;
         }
 
-        AddPlaneGreedyMesh(planeMap, MCTileChunk::CHUNK_WIDTH, MCTileChunk::CHUNK_HEIGHT, [&vertices, z](int xmin, int ymin, int xmax, int ymax)
+        AddPlaneGreedyMesh(planeMap, MCTileChunk::CHUNK_WIDTH, MCTileChunk::CHUNK_HEIGHT, [&vertices, z](int xmin, int ymin, int xmax, int ymax)noexcept
             {
-                vertices.push_back(glm::vec3(xmin, ymin, z));
-                vertices.push_back(glm::vec3(xmax, ymin, z));
-                vertices.push_back(glm::vec3(xmin, ymax, z));
-                vertices.push_back(glm::vec3(xmax, ymax, z));
+                vertices.emplace_back(glm::vec3(xmin, ymin, z));
+                vertices.emplace_back(glm::vec3(xmax, ymin, z));
+                vertices.emplace_back(glm::vec3(xmin, ymax, z));
+                vertices.emplace_back(glm::vec3(xmax, ymax, z));
             }, glm::vec3(0.0f, 0.0f, -1.0f), vertices, triangles, normals, uvs);
     }
 
@@ -209,7 +209,7 @@ shared_ptr<Mesh> MCTilemapMeshGenerator::CreateMeshFromChunk(MCTilemap* tilemap,
     return  make_shared<Mesh>(std::move(sVertices), std::move(triangles));
 }
 
-void MCTilemapMeshGenerator::AddPlaneGreedyMesh(int map[][MCTileChunk::CHUNK_WIDTH], int mapWidth, int mapHeight, function<void(int, int, int, int)>&& vertexAddCallback, glm::vec3 normal, vector<glm::vec3>& vertices, vector<GLuint>& triangles, vector<glm::vec3>& normals, vector<glm::vec2>& uvs)
+void MCTilemapMeshGenerator::AddPlaneGreedyMesh(int map[][MCTileChunk::CHUNK_WIDTH], int mapWidth, int mapHeight, function<void(int, int, int, int)>&& vertexAddCallback, glm::vec3 normal, vector<glm::vec3>& vertices, vector<GLuint>& triangles, vector<glm::vec3>& normals, vector<glm::vec2>& uvs)noexcept
 {
     for (int y = 0; y < mapHeight; y++)
     {
@@ -254,22 +254,22 @@ void MCTilemapMeshGenerator::AddPlaneGreedyMesh(int map[][MCTileChunk::CHUNK_WID
                 int triangleIndex = static_cast<int>(vertices.size()) / 4 * 4;
                 vertexAddCallback(x, y, x + width, y + height);
 
-                triangles.push_back(triangleIndex);
-                triangles.push_back(triangleIndex + 2);
-                triangles.push_back(triangleIndex + 1);
-                triangles.push_back(triangleIndex + 3);
-                triangles.push_back(triangleIndex + 1);
-                triangles.push_back(triangleIndex + 2);
+                triangles.emplace_back(triangleIndex);
+                triangles.emplace_back(triangleIndex + 2);
+                triangles.emplace_back(triangleIndex + 1);
+                triangles.emplace_back(triangleIndex + 3);
+                triangles.emplace_back(triangleIndex + 1);
+                triangles.emplace_back(triangleIndex + 2);
 
-                normals.push_back(normal);
-                normals.push_back(normal);
-                normals.push_back(normal);
-                normals.push_back(normal);
+                normals.emplace_back(normal);
+                normals.emplace_back(normal);
+                normals.emplace_back(normal);
+                normals.emplace_back(normal);
 
-                uvs.push_back(glm::vec2(0.0f, 0.0f));
-                uvs.push_back(glm::vec2(width, 0.0f));
-                uvs.push_back(glm::vec2(0.0f, height));
-                uvs.push_back(glm::vec2(width, height));
+                uvs.emplace_back(glm::vec2(0.0f, 0.0f));
+                uvs.emplace_back(glm::vec2(width, 0.0f));
+                uvs.emplace_back(glm::vec2(0.0f, height));
+                uvs.emplace_back(glm::vec2(width, height));
             }
         }
     }

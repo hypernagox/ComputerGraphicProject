@@ -44,9 +44,9 @@ private:
 
 	std::unordered_map<string,shared_ptr<Texture>> m_mapEnvMappingObj;
 
-	using TempBlock = std::aligned_storage<sizeof(std::shared_ptr<GameObj>), alignof(std::shared_ptr<GameObj>)>::type;
+	//using TempBlock = std::aligned_storage<sizeof(std::shared_ptr<GameObj>), alignof(std::shared_ptr<GameObj>)>::type;
 	//vector<vector<shared_ptr<GameObj>>> m_vecTemporaryObject;
-	vector<vector<TempBlock>> m_vecTemporaryObject;
+	//vector<vector<TempBlock>> m_vecTemporaryObject;
 	shared_ptr<Shader> m_pShaderForInstancing;
 	shared_ptr<Shader> m_pShaderForInstancingAndEnv;
 	GLuint instanceVBO;
@@ -73,7 +73,7 @@ public:
 	void Render() noexcept;
 	void Reset()noexcept
 	{
-		m_vecTemporaryObject.clear();
+		//m_vecTemporaryObject.clear();
 		m_mapEnvMappingObj.clear();
 		m_InstanceList.clear();
 		m_mapResNameAndPartsModelMat.clear();

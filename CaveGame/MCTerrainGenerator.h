@@ -5,6 +5,6 @@ class MCTilemap;
 class MCTerrainGenerator
 {
 public:
-	void Generate(MCTilemap* tilemap);
+	void Generate(shared_ptr<MCTilemap> tilemap);
 };
 

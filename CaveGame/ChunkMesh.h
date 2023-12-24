@@ -19,7 +19,7 @@ private:
 	vector<std::future<void>> m_vecFutureForReConstruct;
 	vector<size_t> m_vecVertexSize;
 	vector<ChunkInfo> m_vecChunkInfo;
-	MCTilemap* const m_pTileMapForReDrawMesh = nullptr;
+	shared_ptr<MCTilemap> m_pTileMapForReDrawMesh = nullptr;
 	GLuint m_iChunkTexID = 0;
 
 	vector<Vertex> m_vecChunkVertex;
@@ -41,7 +41,7 @@ private:
 	void ReConstructMesh()noexcept;
 	void ReBindMesh()noexcept;
 public:
-	ChunkMesh(MCTilemap* const pTileMap);
+	ChunkMesh(const shared_ptr<MCTilemap>& pTileMap);
 	~ChunkMesh();
 
 	void MergeMeshData()noexcept;

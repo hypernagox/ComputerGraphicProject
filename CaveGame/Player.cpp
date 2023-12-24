@@ -79,13 +79,13 @@ void Player::InitCamDirection() noexcept
 	GetTransform()->SetLocalRotation(glm::identity<glm::quat>());
 }
 
-void Player::UpdateTileManipulation()
+void Player::UpdateTileManipulation()noexcept
 {
 	if (!g_bTileFinish)
 	{
 		return;
 	}
-	glm::vec3 wv = m_cameraAnchor->GetTransform()->GetWorldPosition() * 10.0f;
+	const glm::vec3 wv = m_cameraAnchor->GetTransform()->GetWorldPosition() * 10.0f;
 	const RaycastResult result = m_refTilemap->RaycastTile(wv, this->GetPlayerLook(), 10.0f);
 	m_cursorBlockObj->GetTransform()->SetLocalPosition((glm::vec3(result.hitTilePosition) + glm::one<glm::vec3>() * 0.5f) / 10.0f - GetTransform()->GetLocalPosition());
 
@@ -120,7 +120,7 @@ void Player::UpdateTileManipulation()
 	}
 	if (KEY_TAP(GLFW_MOUSE_BUTTON_RIGHT))
 	{
-		int tileID = Mgr(UIMgr)->GetSelectIndex() + 1;
+		const int tileID = Mgr(UIMgr)->GetSelectIndex() + 1;
 		m_refTilemap->SetTile(result.hitTilePosition + glm::ivec3(result.hitNormal), tileID, true);
 		Mgr(SoundMgr)->PlayEffect("stone4.ogg", 0.5f);
 	}
@@ -196,7 +196,7 @@ void Player::UpdateCameraTransform(shared_ptr<Transform> pCameraTransfrom)
 	pCameraTransfrom->SetLocalPosition(glm::vec3(glm::sin(tParam) * mParam, glm::sin(tParam * 2.0f) * mParam, pCameraTransfrom->GetLocalPosition().z));
 }
 
-Player::Player(MCTilemap* tilemap) : m_refTilemap(tilemap)
+Player::Player(shared_ptr<MCTilemap> tilemap) : m_refTilemap(tilemap)
 {
 	m_rendererObj = Mgr(AssimpMgr)->LoadAllPartsAsGameObj("DefaultWarpShader.glsl", "Player.fbx");
 	m_rendererObj->GetTransform()->SetLocalPosition(glm::vec3(0.0f, 0.11f, 0.0f));

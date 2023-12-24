@@ -69,7 +69,7 @@ private:
 	GLuint m_winWidth = {};
 	GLuint m_winHeight = {};
 	glm::vec4 m_ClearColor = RGBA_GRAY;
-	vector<std::future<void>> m_vecDrawCall;
+	//vector<std::future<void>> m_vecDrawCall;
 	UBOData m_uboMatLight;
 	GLuint m_ubo;
 	HWND m_hWnd;

@@ -8,7 +8,7 @@ class Player
 {
 	std::unordered_map<string, shared_ptr<GameObj>> g_mapParticleUniqueObject;
 private:
-	MCTilemap* m_refTilemap;
+	shared_ptr<MCTilemap> m_refTilemap;
 
 	shared_ptr<GameObj> m_rendererObj;
 	shared_ptr<GameObj> m_cameraAnchor;
@@ -54,7 +54,7 @@ private:
 	void UpdateRenderer();
 	void UpdateCameraTransform(shared_ptr<Transform> pCameraTransfrom);
 public:
-	Player(MCTilemap* tilemap);
+	Player(shared_ptr<MCTilemap> tilemap);
 	~Player();
 
 	void Start()override;
@@ -66,6 +66,6 @@ public:
 	void Fire()noexcept;
 
 	void InitCamDirection()noexcept;
-	void UpdateTileManipulation();
+	void UpdateTileManipulation()noexcept;
 };
 

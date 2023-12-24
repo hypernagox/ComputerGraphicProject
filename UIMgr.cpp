@@ -54,6 +54,10 @@ void UIMgr::Init()
 		m_vecUI[etoi(SCENE_TYPE::INTRO)].emplace_back(gui1);
 
 		gui1->AddClickedEvent([]() {
+			if (!g_bCanResume)
+			{
+				Mgr(SoundMgr)->PlayBGM("calm3.ogg");
+			}
 			Mgr(SoundMgr)->PlayEffect("click.ogg", 0.25f);
 			ChangeScene(SCENE_TYPE::STAGE, true);
 			});

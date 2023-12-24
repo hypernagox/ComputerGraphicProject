@@ -7,11 +7,11 @@ class PlayerShadow:
 	public GameObj
 {
 private:
-	const MCTilemap* m_pTilemap;
+	const shared_ptr<const MCTilemap> m_pTilemap;
 	float m_fPlayerOriginY = 0.f;
 	float m_fShadowAlpha = 1.f;
 public:
-	PlayerShadow(const MCTilemap* tilemap);
+	PlayerShadow(const shared_ptr<const MCTilemap>& tilemap);
 	~PlayerShadow();
 
 	void Start()override;

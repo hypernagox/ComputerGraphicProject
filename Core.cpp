@@ -38,7 +38,7 @@ void LowFragmentationHeap() noexcept
 
 Core::Core()
 {
-	m_vecDrawCall.reserve(1000);
+	//m_vecDrawCall.reserve(1000);
 }
 
 Core::~Core()
@@ -291,9 +291,8 @@ void Core::GameLoop()
 
 		Mgr(SceneMgr)->PreRender();
 
-		Mgr(InstancingMgr)->Render();
 		Mgr(SceneMgr)->Render();
-		
+		Mgr(InstancingMgr)->Render();
 
 		if (g_resetMemPool.valid())
 		{

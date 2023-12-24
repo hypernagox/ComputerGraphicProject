@@ -268,30 +268,17 @@ void InstancingMgr::Update() noexcept
 {
 	for (auto& [resName, objList] : m_InstanceList)
 	{ 
-		const size_t num = objList.size();
-		auto& tempVec = m_vecTemporaryObject.emplace_back(vector<TempBlock>(num));
-		::memcpy(tempVec.data(), objList.data(), sizeof(shared_ptr<GameObj>) * num);
-		//_FastMemcpy16((unsigned char*)tempVec.data(), (unsigned char*)objList.data(), unsigned long(sizeof(shared_ptr<GameObj>) * num));
-		//const auto& tempVec = m_vecTemporaryObject.emplace_back(objList);
+		const auto tempVec = make_shared<vector<shared_ptr<GameObj>>>(objList);
 		for (const auto& [partsName, modelMat] : m_mapResNameAndPartsModelMat[resName])
 		{
 			auto& updateMatrixVec = m_mapResNameAndPartsUpdateMat[resName][partsName];
 			updateMatrixVec.clear();
-			Mgr(ThreadMgr)->Enqueue([&updateMatrixVec,&tempVec,modelMat]()noexcept {
-				//std::ranges::move(
-				//	tempVec
-				//	| std::views::transform([](const auto& obj_block)noexcept {return reinterpret_cast<const shared_ptr<GameObj>&>(obj_block); })
-				//	| ::OnlyAliveObject
-				//	| ::ApplyObjWorldMatrix
-				//	| std::views::transform([&modelMat](const auto& mat)noexcept {return mat * modelMat; }),
-				//	std::back_inserter(updateMatrixVec)
-				//);
-				for (const auto& obj_block : tempVec)
+			Mgr(ThreadMgr)->Enqueue([&updateMatrixVec,tempVec,&modelMat]()noexcept {
+				for (const auto& obj : (*tempVec))
 				{
-					const shared_ptr<GameObj>& obj = reinterpret_cast<const shared_ptr<GameObj>&>(obj_block);
 					if (obj->IsAlive())
 					{
-						updateMatrixVec.emplace_back(obj->GetTransform()->GetLocalToWorldMatrix() * modelMat);
+						updateMatrixVec.emplace_back(obj->GetObjectWorldTransform() * modelMat);
 					}
 				}
 				});
@@ -308,8 +295,6 @@ void InstancingMgr::Render() noexcept
 	Mgr(ThreadMgr)->WaitAllJob();
 
 	Mgr(EventMgr)->CheckMemPool();
-
-	m_vecTemporaryObject.clear();
 
 	for (const auto& resName : m_InstanceList | std::views::keys)
 	{

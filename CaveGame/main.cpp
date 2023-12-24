@@ -28,14 +28,12 @@ int main()
    
     Mgr(SceneMgr)->RegisterEnterSceneCallBack(SCENE_TYPE::STAGE, []() {
         g_bCanResume = true;
-        MCTilemap* tilemap = new MCTilemap();
-        MCTerrainGenerator* terrainGenerator = new MCTerrainGenerator();
-        MCTilemapMeshGenerator* meshGenerator = new MCTilemapMeshGenerator();
+        shared_ptr<MCTilemap> tilemap = make_shared<MCTilemap>();
+        shared_ptr<MCTerrainGenerator> terrainGenerator = make_shared<MCTerrainGenerator>();
+        shared_ptr<MCTilemapMeshGenerator> meshGenerator = make_shared<MCTilemapMeshGenerator>();
         terrainGenerator->Generate(tilemap);
         glfwSetInputMode(Mgr(Core)->GetWinInfo(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         std::thread([meshGenerator, tilemap]()noexcept { meshGenerator->CreateMeshAll(tilemap); }).detach();
-
-        Mgr(SoundMgr)->PlayBGM("calm3.ogg");
 
         const auto curScene = Mgr(SceneMgr)->GetCurScene();
         curScene->AddUpdateFp(SCENE_ADDED_UPDATE::PRERENDER, &Update);
