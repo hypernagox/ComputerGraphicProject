@@ -9,7 +9,9 @@ struct Vertex
 	glm::vec2 uv = glm::vec2{ 0.f,0.f };
 	glm::vec4 color = glm::vec4{ 0.f,0.f,0.f,0.f };
 
-	auto operator<=>(const Vertex& other) const noexcept = default;
+	const bool operator==(const Vertex& other) const noexcept {
+		return position == other.position && normal == other.normal && uv == other.uv;
+	}
 
 	//glm::ivec4 boneIds = {};
 	//glm::vec4 boneWeights = {};
