@@ -54,6 +54,8 @@ struct alignas(16) UBOData
 	glm::ivec4 lightCounts = glm::ivec4{ 0 };
 };
 
+void LowFragmentationHeap()noexcept;
+
 class Core
 	:public Singleton<Core>
 {

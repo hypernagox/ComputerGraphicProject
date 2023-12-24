@@ -20,6 +20,22 @@
 
 extern std::future<void> g_resetMemPool;
 
+void LowFragmentationHeap() noexcept
+{
+	ULONG HeapFragValue = 2;
+	HANDLE hHeaps[100];
+	const DWORD dwHeapCount = GetProcessHeaps(100, hHeaps);
+	for (DWORD i = 0; i < dwHeapCount; ++i)
+	{
+		HeapSetInformation(
+			hHeaps[i],
+			HeapCompatibilityInformation,
+			&HeapFragValue,
+			sizeof(HeapFragValue)
+		);
+	}
+}
+
 Core::Core()
 {
 	m_vecDrawCall.reserve(1000);
@@ -104,6 +120,8 @@ void Core::PrepareStart() const noexcept
 
 void Core::Init(const GLuint _winWidth, const GLuint _winHeight)
 {
+	LowFragmentationHeap();
+
 	glfwInit();
 	glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
 	glfwWindowHint(GLFW_SAMPLES, 4);
