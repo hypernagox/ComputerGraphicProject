@@ -22,6 +22,10 @@ public:
 	~Mesh();
 	vector<Vertex>& GetVertices() noexcept { return m_vecVertex; }
 	vector<GLuint>& GetIndicies() noexcept { return m_vecIdx; }
+
+	const vector<Vertex>& GetVertices() const noexcept { return m_vecVertex; }
+	const vector<GLuint>& GetIndicies() const noexcept { return m_vecIdx; }
+
 	template <typename V, typename I>
 	Mesh(V&& _vertices, I&& _indices) : Resource{RESOURCE_TYPE::MESH}
 		,m_vecVertex{ std::forward<V>(_vertices) }, m_vecIdx{ std::forward<I>(_indices) } { }

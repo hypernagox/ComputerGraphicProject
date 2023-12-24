@@ -10,52 +10,55 @@
 #include "MCTilemap.h"
 #include "ThreadMgr.h"
 
+
 void ChunkMesh::ReConstructMesh(vector<Vertex>& vert_shrink, vector<GLuint>& idx_shrink) noexcept
 {
-    m_vecFutureForReConstruct.emplace_back(Mgr(ThreadMgr)->EnqueueTaskFuture([this,&vert_shrink]()noexcept {
+    m_arrFutureForReConstruct[0] = Mgr(ThreadMgr)->EnqueueTaskFuture([this, &vert_shrink]()noexcept {
+        std::lock_guard<std::mutex> lock{ m_mt[0]};
+        m_vecChunkVertex.clear();
         vert_shrink.shrink_to_fit();
-        GLsizei vert_cnt = 0;
         for (const auto& chunk : m_vecChunkInfo)
         {
-            const shared_ptr<Mesh>& chunkMesh = chunk.refMesh;
+            const shared_ptr<const Mesh>& chunkMesh = chunk.refMesh;
             const auto& v = chunkMesh->GetVertices();
 
             for (const auto& vert : v)
             {
-                m_vecChunkVertex[vert_cnt] = vert;
-                m_vecChunkVertex[vert_cnt++].position = chunk.worldMat * glm::vec4{ vert.position,1.f };
+                m_vecChunkVertex.emplace_back(vert).position = chunk.worldMat * glm::vec4{ vert.position,1.f };
             }
         }
-        m_numOfVertices = (GLuint)vert_cnt;
-        }));
+        m_numOfVertices = (GLuint)m_vecChunkVertex.size();
+        });
 
-    m_vecFutureForReConstruct.emplace_back(Mgr(ThreadMgr)->EnqueueTaskFuture([this,&idx_shrink]()noexcept {
+    m_arrFutureForReConstruct[1] = Mgr(ThreadMgr)->EnqueueTaskFuture([this, &idx_shrink]()noexcept {
+        std::lock_guard<std::mutex> lock{ m_mt[1]};
+        m_vecChunkIndex.clear();
         idx_shrink.shrink_to_fit();
         GLsizei currentOffset = 0;
         GLsizei currentOffsetI = 0;
-        GLsizei idx_cnt = 0;
         GLsizei cnt = 0;
+        const auto cache_offset = m_indexOffsets.data();
+        const auto cache_cnt = m_indexCounts.data();
         for (const auto& chunk : m_vecChunkInfo)
         {
-            const shared_ptr<Mesh>& chunkMesh = chunk.refMesh;
-
+            const shared_ptr<const Mesh>& chunkMesh = chunk.refMesh;
             const auto& i = chunkMesh->GetIndicies();
 
             for (const auto index : i)
             {
-                m_vecChunkIndex[idx_cnt++] = index + currentOffset;
+                m_vecChunkIndex.emplace_back(index + currentOffset);
             }
 
-            m_indexOffsets[cnt] = (reinterpret_cast<void*>(static_cast<GLsizei>(currentOffsetI) * sizeof(GLsizei)));
-            m_indexCounts[cnt] = (static_cast<GLsizei>(i.size()));
+            cache_offset[cnt] = (reinterpret_cast<void*>(static_cast<GLsizei>(currentOffsetI) * sizeof(GLsizei)));
+            cache_cnt[cnt] = (static_cast<GLsizei>(i.size()));
 
             currentOffset += (GLsizei)m_vecVertexSize[cnt];
             currentOffsetI += (GLsizei)i.size();
 
             ++cnt;
         }
-        m_numOfIndices = (GLuint)idx_cnt;
-        }));
+        m_numOfIndices = (GLuint)m_vecChunkIndex.size();
+        });
 }
 
 void ChunkMesh::ReBindMesh() noexcept
@@ -97,11 +100,11 @@ void ChunkMesh::MergeMeshData() noexcept
 	{
         child->GetTransform()->MakeFinalMat();
         const auto& childMesh = child->GetComp<MeshRenderer>()->GetMesh().front();
-		const auto& v = childMesh->GetVertices();
-        const auto& i = childMesh->GetIndicies();
+		auto& v = childMesh->GetVertices();
+        auto& i = childMesh->GetIndicies();
         const auto obj_mat = child->GetObjectWorldTransform();
 
-        for (auto& vert : v)
+        for (const auto& vert : v)
         {
             m_vecChunkVertex.emplace_back(vert).position = obj_mat * glm::vec4{ vert.position,1.f };
         }
@@ -119,11 +122,18 @@ void ChunkMesh::MergeMeshData() noexcept
 
         currentOffset += (GLsizei)v.size();
         currentOffsetI += (GLsizei)i.size();
+
+        Mgr(ThreadMgr)->Enqueue([&v, &i]()noexcept { v.shrink_to_fit(); i.shrink_to_fit(); });
 	}
-    m_vecChunkVertex.resize(m_vecChunkVertex.size() * 2);
-    m_vecChunkIndex.resize(m_vecChunkIndex.size() * 2);
+
     m_vecChunkVertex.shrink_to_fit();
     m_vecChunkIndex.shrink_to_fit();
+
+    m_numOfVertices = (GLuint)m_vecChunkVertex.size();
+    m_numOfIndices = (GLuint)m_vecChunkIndex.size();
+
+    m_vecChunkVertex.reserve(m_numOfVertices * 2);
+    m_vecChunkIndex.reserve(m_numOfIndices * 2);
 }
 
 void ChunkMesh::InitChunkMesh(string_view strShaderName) noexcept
@@ -137,7 +147,8 @@ void ChunkMesh::InitChunkMesh(string_view strShaderName) noexcept
 
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, m_vecChunkVertex.size() * sizeof(Vertex), m_vecChunkVertex.data(), GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, (m_numOfVertices * 2 + 1024) * sizeof(Vertex), NULL, GL_DYNAMIC_DRAW);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, m_numOfVertices * sizeof(Vertex), m_vecChunkVertex.data());
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
     glEnableVertexAttribArray(0);
@@ -157,12 +168,10 @@ void ChunkMesh::InitChunkMesh(string_view strShaderName) noexcept
 
     glGenBuffers(1, &ebo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecChunkIndex.size() * sizeof(GLsizei), m_vecChunkIndex.data(), GL_DYNAMIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, (m_numOfIndices * 2 + 1024) * sizeof(GLsizei), NULL, GL_DYNAMIC_DRAW);
+    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, m_numOfIndices * sizeof(GLsizei), m_vecChunkIndex.data());
 
     glBindVertexArray(0);
-
-    m_numOfVertices = (GLuint)m_vecChunkVertex.size();
-    m_numOfIndices = (GLuint)m_vecChunkIndex.size();
 }
 
 void ChunkMesh::Render()
@@ -179,8 +188,7 @@ void ChunkMesh::Render()
     if (m_bDirty)
     {
         m_bDirty = false;
-        m_vecFutureForReConstruct[1].get(); m_vecFutureForReConstruct[0].get();
-        m_vecFutureForReConstruct.clear();
+        m_arrFutureForReConstruct[1].get(); m_arrFutureForReConstruct[0].get();
         ReBindMesh();
     }
     glMultiDrawElements(GL_TRIANGLES, m_indexCounts.data(), GL_UNSIGNED_INT, m_indexOffsets.data(), (GLsizei)m_indexCounts.size());
