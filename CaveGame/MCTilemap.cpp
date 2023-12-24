@@ -52,18 +52,21 @@ void MCTilemap::SetTile(int x, int y, int z, int tile, bool notify)
 
 	if (notify)
 	{
-		for (auto& callback : notifyCallback)
+		for (const auto& callback : notifyCallback)
 		{
-			callback(pChunk, chunkX, chunkZ);
-			if (localX <= 0 && chunkX > 0)
-				callback(&tileChunk[chunkX - 1][chunkZ], chunkX - 1, chunkZ);
-			if (localX >= MCTileChunk::CHUNK_WIDTH - 1 && chunkX < MCTilemap::CHUNK_SIZE - 1)
-				callback(&tileChunk[chunkX + 1][chunkZ], chunkX + 1, chunkZ);
-			if (localZ <= 0 && chunkZ > 0)
-				callback(&tileChunk[chunkX][chunkZ - 1], chunkX, chunkZ - 1);
-			if (localZ >= MCTileChunk::CHUNK_WIDTH - 1 && chunkZ < MCTilemap::CHUNK_SIZE - 1)
-				callback(&tileChunk[chunkX][chunkZ + 1], chunkX, chunkZ + 1);
+			Mgr(ThreadMgr)->Enqueue([&]()noexcept {
+				callback(pChunk, chunkX, chunkZ);
+				if (localX <= 0 && chunkX > 0)
+					callback(&tileChunk[chunkX - 1][chunkZ], chunkX - 1, chunkZ);
+				if (localX >= MCTileChunk::CHUNK_WIDTH - 1 && chunkX < MCTilemap::CHUNK_SIZE - 1)
+					callback(&tileChunk[chunkX + 1][chunkZ], chunkX + 1, chunkZ);
+				if (localZ <= 0 && chunkZ > 0)
+					callback(&tileChunk[chunkX][chunkZ - 1], chunkX, chunkZ - 1);
+				if (localZ >= MCTileChunk::CHUNK_WIDTH - 1 && chunkZ < MCTilemap::CHUNK_SIZE - 1)
+					callback(&tileChunk[chunkX][chunkZ + 1], chunkX, chunkZ + 1);
+				});
 		}
+		Mgr(ThreadMgr)->WaitAllJob();
 	}
 }
 

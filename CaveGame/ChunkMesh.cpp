@@ -57,13 +57,10 @@ void ChunkMesh::ReConstructMesh() noexcept
 void ChunkMesh::ReBindMesh() noexcept
 {
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, m_vecChunkVertex.size() * sizeof(Vertex), m_vecChunkVertex.data(), GL_DYNAMIC_DRAW);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, m_numOfVertices * sizeof(Vertex), m_vecChunkVertex.data());
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecChunkIndex.size() * sizeof(GLsizei), m_vecChunkIndex.data(), GL_DYNAMIC_DRAW);
-
-    m_numOfVertices = (GLuint)m_vecChunkVertex.size();
-    m_numOfIndices = (GLuint)m_vecChunkIndex.size();
+    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, m_numOfIndices * sizeof(GLsizei), m_vecChunkIndex.data());
 }
 
 ChunkMesh::ChunkMesh(MCTilemap* const pTileMap)
@@ -194,6 +191,7 @@ void ChunkMesh::OnChunkMeshChanged(MCTileChunk* const pChunk, int chunkX, int ch
 
     auto& v1 = m_vecChunkInfo[idx].refMesh->GetVertices();
     auto& i1 = m_vecChunkInfo[idx].refMesh->GetIndicies();
+
     auto& v2 = mesh->GetVertices();
     auto& i2 = mesh->GetIndicies();
     

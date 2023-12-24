@@ -19,6 +19,8 @@ static constexpr uint MAX_TEXTURE = 12;
 
 extern std::atomic_bool g_bTileFinish;
 
+thread_local int planeMap[MCTileChunk::CHUNK_WIDTH][MCTileChunk::CHUNK_WIDTH];
+
 void MCTilemapMeshGenerator::CreateMeshAll(MCTilemap* tilemap)
 {
     g_bTileFinish.store(false);
@@ -75,8 +77,8 @@ void MCTilemapMeshGenerator::CreateMeshAll(MCTilemap* tilemap)
 shared_ptr<Mesh> MCTilemapMeshGenerator::CreateMeshFromChunk(MCTilemap* tilemap, int chunkX, int chunkZ, int textureID) noexcept
 {
     MCTileChunk* chunk = tilemap->GetChunk(chunkX, chunkZ);
-    int offsetX = chunkX * MCTileChunk::CHUNK_WIDTH;
-    int offsetZ = chunkZ * MCTileChunk::CHUNK_WIDTH;
+    const int offsetX = chunkX * MCTileChunk::CHUNK_WIDTH;
+    const int offsetZ = chunkZ * MCTileChunk::CHUNK_WIDTH;
 
     vector<glm::vec3> vertices;
     vector<GLuint> triangles;
@@ -87,8 +89,6 @@ shared_ptr<Mesh> MCTilemapMeshGenerator::CreateMeshFromChunk(MCTilemap* tilemap,
     triangles.reserve(500000);
     normals.reserve(500000);
     uvs.reserve(500000);
-
-    static int planeMap[MCTileChunk::CHUNK_WIDTH][MCTileChunk::CHUNK_WIDTH];
 
     for (int y = 0; y < MCTileChunk::CHUNK_HEIGHT; y++)
     {
@@ -197,16 +197,16 @@ shared_ptr<Mesh> MCTilemapMeshGenerator::CreateMeshFromChunk(MCTilemap* tilemap,
     const GLint num = (const GLint)vertices.size();
     for (int index = 0; index < num; ++index)
     {
-        Vertex v;
-        v.position = vertices[index];
-        v.normal = normals[index];
-        v.color = glm::vec4{ glm::abs(v.normal),1.f };
-        v.uv = uvs[index];
-        sVertices.emplace_back(v);
+        sVertices.emplace_back(Vertex{
+            vertices[index],
+            normals[index],
+            {},
+             uvs[index],
+              glm::vec4{ glm::abs(normals[index]),1.f },
+            }
+        );
     }
-
-    shared_ptr<Mesh> mesh = make_shared<Mesh>(sVertices, triangles);
-    return mesh;
+    return  make_shared<Mesh>(std::move(sVertices), std::move(triangles));
 }
 
 void MCTilemapMeshGenerator::AddPlaneGreedyMesh(int map[][MCTileChunk::CHUNK_WIDTH], int mapWidth, int mapHeight, function<void(int, int, int, int)>&& vertexAddCallback, glm::vec3 normal, vector<glm::vec3>& vertices, vector<GLuint>& triangles, vector<glm::vec3>& normals, vector<glm::vec2>& uvs)
