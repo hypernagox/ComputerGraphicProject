@@ -10,9 +10,10 @@
 #include "MCTilemap.h"
 #include "ThreadMgr.h"
 
-void ChunkMesh::ReConstructMesh() noexcept
+void ChunkMesh::ReConstructMesh(vector<Vertex>& vert_shrink, vector<GLuint>& idx_shrink) noexcept
 {
-    m_vecFutureForReConstruct.emplace_back(Mgr(ThreadMgr)->EnqueueTaskFuture([this]()noexcept {
+    m_vecFutureForReConstruct.emplace_back(Mgr(ThreadMgr)->EnqueueTaskFuture([this,&vert_shrink]()noexcept {
+        vert_shrink.shrink_to_fit();
         GLsizei vert_cnt = 0;
         for (const auto& chunk : m_vecChunkInfo)
         {
@@ -28,7 +29,8 @@ void ChunkMesh::ReConstructMesh() noexcept
         m_numOfVertices = (GLuint)vert_cnt;
         }));
 
-    m_vecFutureForReConstruct.emplace_back(Mgr(ThreadMgr)->EnqueueTaskFuture([this]()noexcept {
+    m_vecFutureForReConstruct.emplace_back(Mgr(ThreadMgr)->EnqueueTaskFuture([this,&idx_shrink]()noexcept {
+        idx_shrink.shrink_to_fit();
         GLsizei currentOffset = 0;
         GLsizei currentOffsetI = 0;
         GLsizei idx_cnt = 0;
@@ -118,8 +120,8 @@ void ChunkMesh::MergeMeshData() noexcept
         currentOffset += (GLsizei)v.size();
         currentOffsetI += (GLsizei)i.size();
 	}
-    m_vecChunkVertex.resize(m_vecChunkVertex.size() + 1024);
-    m_vecChunkIndex.resize(m_vecChunkIndex.size() + 1024);
+    m_vecChunkVertex.resize(m_vecChunkVertex.size() * 2);
+    m_vecChunkIndex.resize(m_vecChunkIndex.size() * 2);
     m_vecChunkVertex.shrink_to_fit();
     m_vecChunkIndex.shrink_to_fit();
 }
@@ -210,10 +212,9 @@ void ChunkMesh::OnChunkMeshChanged(MCTileChunk* const pChunk, int chunkX, int ch
 
     v1.swap(v2);
     i1.swap(i2);
-    v1.shrink_to_fit();
-    i1.shrink_to_fit();
+
     m_bDirty = true;
-    ReConstructMesh();
+    ReConstructMesh(v1,i1);
 }
 
 void ChunkMesh::AddChunk(shared_ptr<GameObj> pChild, MCTileChunk* pChunk) noexcept

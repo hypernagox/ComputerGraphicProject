@@ -38,7 +38,7 @@ private:
 	unordered_map<MCTileChunk*, GLuint> m_mapChunkToIndex;
 	bool m_bDirty = false;
 private:
-	void ReConstructMesh()noexcept;
+	void ReConstructMesh(vector<Vertex>& vert_shrink,vector<GLuint>& idx_shrink)noexcept;
 	void ReBindMesh()noexcept;
 public:
 	ChunkMesh(const shared_ptr<MCTilemap>& pTileMap);
