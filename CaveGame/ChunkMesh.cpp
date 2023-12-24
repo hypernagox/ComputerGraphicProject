@@ -13,7 +13,9 @@
 
 void ChunkMesh::ReConstructMesh(vector<Vertex>& vert_shrink, vector<GLuint>& idx_shrink) noexcept
 {
-    m_arrFutureForReConstruct[0] = Mgr(ThreadMgr)->EnqueueTaskFuture([this, &vert_shrink]()noexcept {
+    std::lock_guard<SpinLock> lock{ m_spinLock };
+
+    m_vecFutureForReConstruct.emplace_back(Mgr(ThreadMgr)->EnqueueTaskFuture([this, &vert_shrink]()noexcept {
         std::lock_guard<std::mutex> lock{ m_mt[0]};
         m_vecChunkVertex.clear();
         vert_shrink.shrink_to_fit();
@@ -28,9 +30,9 @@ void ChunkMesh::ReConstructMesh(vector<Vertex>& vert_shrink, vector<GLuint>& idx
             }
         }
         m_numOfVertices = (GLuint)m_vecChunkVertex.size();
-        });
+        }));
 
-    m_arrFutureForReConstruct[1] = Mgr(ThreadMgr)->EnqueueTaskFuture([this, &idx_shrink]()noexcept {
+    m_vecFutureForReConstruct.emplace_back(Mgr(ThreadMgr)->EnqueueTaskFuture([this, &idx_shrink]()noexcept {
         std::lock_guard<std::mutex> lock{ m_mt[1]};
         m_vecChunkIndex.clear();
         idx_shrink.shrink_to_fit();
@@ -58,7 +60,7 @@ void ChunkMesh::ReConstructMesh(vector<Vertex>& vert_shrink, vector<GLuint>& idx
             ++cnt;
         }
         m_numOfIndices = (GLuint)m_vecChunkIndex.size();
-        });
+        }));
 }
 
 void ChunkMesh::ReBindMesh() noexcept
@@ -188,7 +190,8 @@ void ChunkMesh::Render()
     if (m_bDirty)
     {
         m_bDirty = false;
-        m_arrFutureForReConstruct[1].get(); m_arrFutureForReConstruct[0].get();
+        for (auto& future : m_vecFutureForReConstruct | std::views::reverse)future.get();
+        m_vecFutureForReConstruct.clear();
         ReBindMesh();
     }
     glMultiDrawElements(GL_TRIANGLES, m_indexCounts.data(), GL_UNSIGNED_INT, m_indexOffsets.data(), (GLsizei)m_indexCounts.size());

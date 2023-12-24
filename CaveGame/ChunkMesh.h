@@ -17,7 +17,8 @@ class ChunkMesh
 {
 private:
 	std::mutex m_mt[2];
-	std::future<void> m_arrFutureForReConstruct[2];
+	SpinLock m_spinLock;
+	vector<std::future<void>> m_vecFutureForReConstruct;
 	
 	vector<size_t> m_vecVertexSize;
 	vector<ChunkInfo> m_vecChunkInfo;
