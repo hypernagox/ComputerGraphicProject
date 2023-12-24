@@ -73,6 +73,8 @@ public:
 	void Render() noexcept;
 	void Reset()noexcept
 	{
+		m_vecTemporaryObject.clear();
+		m_mapEnvMappingObj.clear();
 		m_InstanceList.clear();
 		m_mapResNameAndPartsModelMat.clear();
 		m_mapResNameAndPartsUpdateMat.clear();
