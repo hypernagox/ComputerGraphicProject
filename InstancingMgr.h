@@ -71,5 +71,13 @@ public:
 
 	void Update() noexcept;
 	void Render() noexcept;
+	void Reset()noexcept
+	{
+		m_InstanceList.clear();
+		m_mapResNameAndPartsModelMat.clear();
+		m_mapResNameAndPartsUpdateMat.clear();
+		m_mapResNameAndPartsRenderInfo.clear();
+		m_setResNameForUnique.clear();
+	}
 };
 

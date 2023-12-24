@@ -4,6 +4,7 @@
 #include "GameObj.h"
 #include "Scene_Intro.h"
 #include "Core.h"
+#include "InstancingMgr.h"
 
 SceneMgr::SceneMgr()
 {
@@ -59,6 +60,7 @@ void SceneMgr::ChangeToNextScene(SCENE_TYPE toNextScene, const bool bIsResetNext
 
 	if (bIsResetNextScene)
 	{
+		Mgr(InstancingMgr)->Reset();
 		m_pCurScene->ExitScene();
 		m_pCurScene->EnterScene();
 	}

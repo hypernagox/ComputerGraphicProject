@@ -132,4 +132,5 @@ public:
     const_iterator end() const noexcept { return data.end(); }
     size_t size() const noexcept { return data.size(); }
     void reserve(const size_t expandNum)noexcept { data.reserve(expandNum); }
+    void clear()noexcept { data.clear(); }
 };
