@@ -80,7 +80,8 @@ void MCTilemapMeshGenerator::CreateMeshAll(shared_ptr<MCTilemap> tilemap)noexcep
 }
 
 thread_local vector<Vertex> sVertices;
-thread_local int vert_cnt = 0;
+thread_local GLuint vert_cnt = 0;
+thread_local GLuint idx_cnt = 1024 * 128 * 2;
 
 shared_ptr<Mesh> MCTilemapMeshGenerator::CreateMeshFromChunk(const shared_ptr<MCTilemap>& tilemap, int chunkX, int chunkZ, int textureID) noexcept
 {
@@ -91,9 +92,7 @@ shared_ptr<Mesh> MCTilemapMeshGenerator::CreateMeshFromChunk(const shared_ptr<MC
     vector<glm::vec3> vertices; vertices.reserve(4);
     vector<glm::vec3> normals; normals.reserve(4);
     vector<glm::vec2> uvs; uvs.reserve(4);
-
-    vector<GLuint> triangles;
-    triangles.reserve(500000);
+    vector<GLuint> triangles;triangles.reserve(idx_cnt + 1024);
    
     for (int y = 0; y < MCTileChunk::CHUNK_HEIGHT; y++)
     {
@@ -197,6 +196,7 @@ shared_ptr<Mesh> MCTilemapMeshGenerator::CreateMeshFromChunk(const shared_ptr<MC
             }, glm::vec3(0.0f, 0.0f, -1.0f), vertices, triangles, normals, uvs);
     }
     vert_cnt = 0;
+    idx_cnt = (GLuint)triangles.size();
     return  make_shared<Mesh>(std::move(sVertices), std::move(triangles));
 }
 
@@ -242,7 +242,7 @@ void MCTilemapMeshGenerator::AddPlaneGreedyMesh(int map[][MCTileChunk::CHUNK_WID
                         map[x + j][y + i] = 0;
                 }
 
-                const int triangleIndex = static_cast<int>(vert_cnt) / 4 * 4;
+                const GLuint triangleIndex = static_cast<GLuint>(vert_cnt) / 4 * 4;
                 vertexAddCallback(x, y, x + width, y + height);
 
                 triangles.emplace_back(triangleIndex);
