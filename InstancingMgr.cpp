@@ -271,7 +271,7 @@ void InstancingMgr::Update() noexcept
 		const GLuint num = (const GLuint)objList.size();
 		auto tempVec = std::make_shared_for_overwrite<TempBlock[]>(num);
 		::memcpy(tempVec.get(), objList.data(), sizeof(shared_ptr<GameObj>) * num);
-		Mgr(ThreadMgr)->Enqueue([this,tempVec = std::move(tempVec), &resName, num]() {
+		Mgr(ThreadMgr)->Enqueue([this,tempVec = std::move(tempVec), &resName, num]()noexcept {
 			for (const auto& [partsName, modelMat] : m_mapResNameAndPartsModelMat[resName])
 			{
 				auto& updateMatrixVec = m_mapResNameAndPartsUpdateMat[resName][partsName];
