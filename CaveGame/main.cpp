@@ -25,7 +25,13 @@ int main()
     Mgr(Core)->Init(1440, 720);
     Mgr(Core)->SetClearColor(RGBA_WHITE);
 
-   
+    Mgr(SceneMgr)->GetScene(SCENE_TYPE::INTRO)->AddUpdateFp(SCENE_ADDED_UPDATE::UPDATE,[]() {
+        if (g_bCanResume && KEY_TAP(GLFW_KEY_ESCAPE))
+        {
+            glfwSetInputMode(Mgr(Core)->GetWinInfo(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            ChangeScene(SCENE_TYPE::STAGE, false);
+        }
+        });
     Mgr(SceneMgr)->RegisterEnterSceneCallBack(SCENE_TYPE::STAGE, []() {
         g_bCanResume = true;
         shared_ptr<MCTilemap> tilemap = make_shared<MCTilemap>();

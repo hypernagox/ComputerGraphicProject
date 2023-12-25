@@ -32,5 +32,7 @@ public:
 	const shared_ptr<Scene>& GetCurScene()const { return m_pCurScene; }
 
 	void RegisterEnterSceneCallBack(SCENE_TYPE eType, function<void(void)>&& fpSceneEnterCallBack)noexcept;
+
+	const shared_ptr<Scene>& GetScene(SCENE_TYPE eType)const noexcept { return m_arrScene[etoi(eType)]; }
 };
 
