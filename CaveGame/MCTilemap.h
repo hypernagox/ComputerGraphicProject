@@ -48,9 +48,9 @@ public:
 
 	void SetTile(int x, int y, int z, int tile, bool notify = false);
 	void SetTile(const glm::ivec3& v, int tile, bool notify = false);
-	int GetTile(int x, int y, int z) const;
-	int GetTile(const glm::ivec3& v) const;
-	MCTileChunk* GetChunk(int x, int z);
+	int GetTile(int x, int y, int z) const noexcept;
+	int GetTile(const glm::ivec3& v) const noexcept;
+	MCTileChunk* GetChunk(int x, int z)noexcept;
 	bool HandleCollision(const glm::vec3& pre_position, glm::vec3& position, glm::vec3& velocity);
 	RaycastResult RaycastTile(const glm::vec3& start_position, const glm::vec3& direction, float distance) const;
 	void AddNotifyCallback(const std::function<void(MCTileChunk*, int, int)>& callback);

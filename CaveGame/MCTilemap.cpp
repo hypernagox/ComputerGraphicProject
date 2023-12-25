@@ -75,18 +75,18 @@ void MCTilemap::SetTile(const glm::ivec3& v, int tile, bool notify)
 	SetTile(v.x, v.y, v.z, tile, notify);
 }
 
-int MCTilemap::GetTile(int x, int y, int z) const
+int MCTilemap::GetTile(int x, int y, int z) const noexcept
 {
 	constexpr int modulo = MCTileChunk::CHUNK_WIDTH;
 	return tileChunk[x / modulo][z / modulo].GetTile(x % modulo, y, z % modulo);
 }
 
-int MCTilemap::GetTile(const glm::ivec3& v) const
+int MCTilemap::GetTile(const glm::ivec3& v) const noexcept
 {
 	return GetTile(v.x, v.y, v.z);
 }
 
-MCTileChunk* MCTilemap::GetChunk(int x, int z)
+MCTileChunk* MCTilemap::GetChunk(int x, int z)noexcept
 {
 	return &(tileChunk[x][z]);
 }

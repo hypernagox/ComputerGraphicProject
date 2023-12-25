@@ -39,3 +39,10 @@ inline constexpr const float Deg2Rad(const float _degree)noexcept { return glm::
 constexpr const glm::vec3 GetRightByQuat(const glm::quat& _quat) noexcept { return (glm::mat4_cast(glm::normalize(_quat)))[0]; }
 constexpr const glm::vec3 GetUpByQuat(const glm::quat& _quat) noexcept { return (glm::mat4_cast(glm::normalize(_quat)))[1]; }
 constexpr const glm::vec3 GetLookByQuat(const glm::quat& _quat) noexcept { return (glm::mat4_cast(glm::normalize(_quat)))[2]; }
+
+constexpr const glm::vec3 bitwise_absv(const glm::vec3& _v)noexcept {
+	return glm::vec3{
+		bitwise_absf(_v.x),
+		bitwise_absf(_v.y),
+		bitwise_absf(_v.z)
+	}; }
