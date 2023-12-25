@@ -268,15 +268,19 @@ void InstancingMgr::Update() noexcept
 {
 	for (auto& [resName, objList] : m_InstanceList)
 	{ 
-		const auto tempVec = make_shared<vector<shared_ptr<GameObj>>>(objList);
+		const GLuint num = (const GLuint)objList.size();
+		const auto tempVec = std::make_shared_for_overwrite<TempBlock[]>(num);
+		::memcpy(tempVec.get(), objList.data(), sizeof(shared_ptr<GameObj>) * num);
 		for (const auto& [partsName, modelMat] : m_mapResNameAndPartsModelMat[resName])
 		{
 			auto& updateMatrixVec = m_mapResNameAndPartsUpdateMat[resName][partsName];
 			updateMatrixVec.clear();
-			Mgr(ThreadMgr)->Enqueue([&updateMatrixVec,tempVec,&modelMat]()noexcept {
-				for (const auto& obj : (*tempVec))
+			Mgr(ThreadMgr)->Enqueue([&updateMatrixVec,tempVec,&modelMat,num]()noexcept {
+				const auto obj_block = tempVec.get();
+				for (GLuint i = 0; i < num; ++i)
 				{
-					if (obj->IsAlive())
+					if (const shared_ptr<const GameObj>& obj = reinterpret_cast<const shared_ptr<const GameObj>&>(obj_block[i]);
+						obj->IsAlive())
 					{
 						updateMatrixVec.emplace_back(obj->GetObjectWorldTransform() * modelMat);
 					}
