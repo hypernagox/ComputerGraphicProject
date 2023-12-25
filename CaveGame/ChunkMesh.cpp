@@ -17,40 +17,48 @@ void ChunkMesh::ReConstructMesh(vector<Vertex>& vert_shrink, vector<GLuint>& idx
 
     m_vecFutureForReConstruct.emplace_back(Mgr(ThreadMgr)->EnqueueTaskFuture([this, &vert_shrink]()noexcept {
         std::lock_guard<std::mutex> lock{ m_mt[0]};
-        m_vecChunkVertex.clear();
         vert_shrink.shrink_to_fit();
+        GLsizei vert_cnt = 0;
+        const auto cache_vert = m_vecChunkVertex.data();
         for (const auto& chunk : m_vecChunkInfo)
         {
             const shared_ptr<const Mesh>& chunkMesh = chunk.refMesh;
             const auto& v = chunkMesh->GetVertices();
-
-            for (const auto& vert : v)
+            const auto& mesh_mat = chunk.worldMat;
+            const auto vSize = v.size();
+            //std::copy(v.begin(), v.end(), cache_vert + vert_cnt);
+            ::memcpy(cache_vert + vert_cnt, v.data(), sizeof(Vertex) * vSize);
+            for (int i = vert_cnt; i < vert_cnt + vSize; ++i)
             {
-                m_vecChunkVertex.emplace_back(vert).position = chunk.worldMat * glm::vec4{ vert.position,1.f };
+                cache_vert[i].position = mesh_mat * glm::vec4{ cache_vert[i].position,1.f };
             }
+            vert_cnt += (GLuint)v.size();
         }
-        m_numOfVertices = (GLuint)m_vecChunkVertex.size();
+        m_numOfVertices = (GLuint)vert_cnt;
         }));
 
     m_vecFutureForReConstruct.emplace_back(Mgr(ThreadMgr)->EnqueueTaskFuture([this, &idx_shrink]()noexcept {
         std::lock_guard<std::mutex> lock{ m_mt[1]};
-        m_vecChunkIndex.clear();
         idx_shrink.shrink_to_fit();
         GLsizei currentOffset = 0;
         GLsizei currentOffsetI = 0;
+        GLsizei idx_cnt = 0;
         GLsizei cnt = 0;
+        const auto cache_idx = m_vecChunkIndex.data();
         const auto cache_offset = m_indexOffsets.data();
         const auto cache_cnt = m_indexCounts.data();
         for (const auto& chunk : m_vecChunkInfo)
         {
             const shared_ptr<const Mesh>& chunkMesh = chunk.refMesh;
             const auto& i = chunkMesh->GetIndicies();
-
-            for (const auto index : i)
+            const auto iSize = i.size();
+            //std::copy(i.begin(), i.end(), cache_idx + idx_cnt);
+            ::memcpy(cache_idx + idx_cnt, i.data(), sizeof(GLuint) * iSize);
+            for (int i = idx_cnt; i < idx_cnt + iSize; ++i)
             {
-                m_vecChunkIndex.emplace_back(index + currentOffset);
+                cache_idx[i] += currentOffset;
             }
-
+            idx_cnt += (GLuint)i.size();
             cache_offset[cnt] = (reinterpret_cast<void*>(static_cast<GLsizei>(currentOffsetI) * sizeof(GLsizei)));
             cache_cnt[cnt] = (static_cast<GLsizei>(i.size()));
 
@@ -59,7 +67,7 @@ void ChunkMesh::ReConstructMesh(vector<Vertex>& vert_shrink, vector<GLuint>& idx
 
             ++cnt;
         }
-        m_numOfIndices = (GLuint)m_vecChunkIndex.size();
+        m_numOfIndices = (GLuint)idx_cnt;
         }));
 }
 
@@ -128,14 +136,14 @@ void ChunkMesh::MergeMeshData() noexcept
         Mgr(ThreadMgr)->Enqueue([&v, &i]()noexcept { v.shrink_to_fit(); i.shrink_to_fit(); });
 	}
 
-    m_vecChunkVertex.shrink_to_fit();
-    m_vecChunkIndex.shrink_to_fit();
-
     m_numOfVertices = (GLuint)m_vecChunkVertex.size();
     m_numOfIndices = (GLuint)m_vecChunkIndex.size();
 
-    m_vecChunkVertex.reserve(m_numOfVertices * 2);
-    m_vecChunkIndex.reserve(m_numOfIndices * 2);
+    m_vecChunkVertex.resize(m_numOfVertices * 2);
+    m_vecChunkIndex.resize(m_numOfIndices * 2);
+
+    m_vecChunkVertex.shrink_to_fit();
+    m_vecChunkIndex.shrink_to_fit();
 }
 
 void ChunkMesh::InitChunkMesh(string_view strShaderName) noexcept
