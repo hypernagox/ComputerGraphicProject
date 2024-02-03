@@ -4,35 +4,40 @@
 template<typename T>
 class AtomicMemoryPool
 {
+    static const inline HANDLE g_handle = GetProcessHeap();
 private:
-    struct alignas(std::hardware_constructive_interference_size) Block
+    struct alignas(8) Block
     {
-        std::atomic<uint64_t> combined;
+        std::atomic<uint64_t> combined = 0;
     };
 
-    std::vector<std::byte> memoryBlock;
+    struct BlockChaser
+    {
+        Block* const target = nullptr;
+        BlockChaser* next = nullptr;
+    };
+    std::byte* blockStart;
+    std::atomic<BlockChaser*> poolTop;
     std::atomic<uint64_t> head;
     const size_t blockSize;
     const size_t maxBlockCount;
-    static constexpr uint16_t maxTagValue = (1 << 16) - 1;
+    static constexpr uint32_t maxTagValue = (1 << 19) - 1;
 private:
-    const uint64_t packPointerAndTag(const Block* const ptr, const uint16_t tag) const noexcept {
+    static constexpr const uint64_t packPointerAndTag(const Block* const ptr, const uint32_t tag) noexcept {
         const uintptr_t ptrVal = reinterpret_cast<uintptr_t>(ptr);
-        return (static_cast<const uint64_t>(ptrVal) & 0x0000FFFFFFFFFFFF) | (static_cast<const uint64_t>(tag) << 48);
+        return (static_cast<const uint64_t>(ptrVal) & 0x7FFFFFFFFFF) | (static_cast<const uint64_t>(tag) << 45);
     }
 
-    Block* const unpackPointer(const uint64_t combined) const noexcept {
-        return reinterpret_cast<Block* const>(combined & 0x0000FFFFFFFFFFFF);
+    static constexpr Block* const unpackPointer(const uint64_t combined) noexcept {
+        return reinterpret_cast<Block* const>(combined & 0x7FFFFFFFFFF);
     }
 
-    const uint16_t unpackTag(const uint64_t combined) const noexcept {
-        return static_cast<const uint16_t>(combined >> 48);
+    static constexpr const uint32_t unpackTag(const uint64_t combined) noexcept {
+        return static_cast<const uint32_t>(combined >> 45);
     }
 
     void initialize() noexcept
     {
-        std::byte* const blockStart = memoryBlock.data();
-
         for (size_t i = 0; i < maxBlockCount - 1; ++i)
         {
             Block* const block = new (blockStart + i * blockSize) Block();
@@ -45,16 +50,43 @@ private:
 
         head.store(packPointerAndTag(reinterpret_cast<Block* const>(blockStart), 0), std::memory_order_relaxed);
     }
+
+    __forceinline T* const allocateNewBlock()noexcept
+    {
+        Block* const newBlock = new(::_aligned_malloc(blockSize, 8))Block();
+        BlockChaser* const newTop = new(::HeapAlloc(g_handle, NULL, sizeof(BlockChaser)))BlockChaser{ newBlock };
+        BlockChaser* oldTop = poolTop.load(std::memory_order_acquire);
+        while (!poolTop.compare_exchange_weak(oldTop, newTop,
+            std::memory_order_release, std::memory_order_relaxed))
+        {
+        }
+        oldTop->next = newTop;
+        return reinterpret_cast<T* const>(newBlock + 1);
+    }
+
+    template <typename T>
+    struct alignas(8) AlignedStorage { alignas(8) Block pad; alignas(8)std::byte data[sizeof(T)]; };
 public:
-    explicit AtomicMemoryPool(const size_t count)
-        : blockSize{ sizeof(Block) + sizeof(T) }
+    AtomicMemoryPool(const size_t count)
+        : blockSize{ sizeof(AlignedStorage<T>) }
         , maxBlockCount{ count }
+        , poolTop{ new(::HeapAlloc(g_handle, NULL, sizeof(BlockChaser)))BlockChaser()}
     {
         const size_t totalSize = blockSize * maxBlockCount;
-        std::byte* const rawMemory = static_cast<std::byte*>(operator new[](totalSize, std::align_val_t(std::hardware_constructive_interference_size)));
-        memoryBlock.assign(rawMemory, rawMemory + totalSize);
-        operator delete[](rawMemory, std::align_val_t(std::hardware_constructive_interference_size));
+        blockStart = static_cast<std::byte* const>(::_aligned_malloc(totalSize, std::hardware_constructive_interference_size));
         initialize();
+    }
+
+    ~AtomicMemoryPool()
+    {
+        BlockChaser* curBlock = poolTop.load(std::memory_order_relaxed);
+        while (BlockChaser* const delBlock = curBlock)
+        {
+            ::_aligned_free(curBlock->target);
+            curBlock = curBlock->next;
+            HeapFree(g_handle, NULL, delBlock);
+        }
+        ::_aligned_free(blockStart);
     }
 
     T* const allocate() noexcept
@@ -66,10 +98,9 @@ public:
             currentBlock = unpackPointer(oldCombined);
             if (!currentBlock)
             {
-                NAGOX_ASSERT(false, "Out of Memory");
-                return nullptr;
+                return allocateNewBlock();
             }
-            const uint16_t newTag = unpackTag(oldCombined) + 1;
+            const uint32_t newTag = unpackTag(oldCombined) + 1;
             Block* const nextBlock = unpackPointer(currentBlock->combined.load(std::memory_order_relaxed));
             newCombined = packPointerAndTag(nextBlock, newTag);
         } while (!head.compare_exchange_weak(oldCombined, newCombined,
@@ -89,7 +120,7 @@ public:
         uint64_t oldHead = head.load(std::memory_order_relaxed);
         uint64_t newCombined;
         do {
-            const uint16_t newTag = unpackTag(oldHead) + 1;
+            const uint32_t newTag = unpackTag(oldHead) + 1;
             newCombined = packPointerAndTag(blockPtr, newTag);
             blockPtr->combined.store(oldHead, std::memory_order_relaxed);
         } while (!head.compare_exchange_weak(oldHead, newCombined,
@@ -99,7 +130,7 @@ public:
 
     void checkAndResetIfNeeded()noexcept
     {
-        const uint16_t currentTag = unpackTag(head.load(std::memory_order_relaxed));
+        const uint32_t currentTag = unpackTag(head.load(std::memory_order_relaxed));
         if (currentTag >= maxTagValue)
         {
             initialize();
@@ -107,6 +138,34 @@ public:
     }
 
     const bool isNeedReset()const noexcept {
-        return 59000 <= unpackTag(head.load(std::memory_order_relaxed));
+        return maxTagValue - 10000 <= unpackTag(head.load(std::memory_order_relaxed));
     }
 };
+
+
+static constexpr const uint DEFAULT_SIZE = 256;
+
+template <typename T>
+class AtomicAllocater
+{
+public:
+    using value_type = T;
+
+    AtomicAllocater()noexcept {}
+
+    template<typename U>
+    AtomicAllocater(const AtomicAllocater<U>&)noexcept :memPool{ std::make_unique<AtomicMemoryPool<T>>(DEFAULT_SIZE) }
+    {}
+
+    T* const allocate(const size_t)const noexcept { return memPool->allocate(); }
+
+    void deallocate(void* const ptr, const size_t)const noexcept { memPool->deallocate(ptr); }
+private:
+    const std::unique_ptr<AtomicMemoryPool<T>> memPool = std::make_unique<AtomicMemoryPool<T>>(DEFAULT_SIZE);
+};
+
+template <typename T, typename... Args>
+std::shared_ptr<T> MakeShared(Args&&... args)noexcept
+{
+    return std::allocate_shared<T>(AtomicAllocater<T>{}, std::forward<Args>(args)...);
+}

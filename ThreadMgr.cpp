@@ -32,8 +32,8 @@ void ThreadMgr::Init()
 					//m_cvQ.wait(lock, [this] () noexcept {
 					//	return not m_jobQ.empty() || m_bStopRequest;
 					//	});
-					m_cvQ.wait(lock, [this,&task]() noexcept {
-						return m_jobQ.try_pop(task) || m_bStopRequest;
+					m_cvQ.wait(lock, [this,&task,&lock]() noexcept {
+						return m_jobQ.try_pop(task,lock) || m_bStopRequest;
 						});
 					//m_cvQ.wait(lock, [this,&task]() noexcept {
 					//	return m_jobQ.try_pop(task) || m_bStopRequest;

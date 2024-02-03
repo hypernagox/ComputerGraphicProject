@@ -145,3 +145,4 @@ using std::pair;
 #include "CircleQueue.hpp"
 #include "Animation.h"
 #include "BoneInfo.h"
+#include "SRWLock.hpp"

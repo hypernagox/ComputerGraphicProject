@@ -10,11 +10,11 @@ class DoubleLockQueue
 	static const inline HANDLE g_handle = GetProcessHeap();
 public:
 	struct Node;
-	static inline AtomicMemoryPool<Node> g_memPool{ 1024 * 1000 };
+	static inline AtomicMemoryPool<Node> g_memPool{ 1024 };
 private:
 	struct Node {
 		T data;
-		Node* next;
+		Node* next = nullptr;
 #ifdef USE_ATOMIC_ALLOCATER
 		void* const operator new(const size_t size) noexcept {
 			return g_memPool.allocate();
@@ -34,13 +34,12 @@ private:
 #endif
 	};
 	Node* head;
-	Node* tail;
 	SpinLock headLock;
-	SpinLock tailLock;
+	std::atomic<Node*> tail;
 public:
 	DoubleLockQueue()noexcept {
 		head = tail = new Node;
-		head->next = tail->next = nullptr;
+		head->next = tail.load(std::memory_order_relaxed)->next = nullptr;
 	}
 	~DoubleLockQueue()noexcept {
 		while (head != nullptr) {
@@ -54,28 +53,49 @@ public:
 	void emplace(Args&&... args) noexcept {
 		Node* const value = new Node;
 		std::construct_at(&value->data, std::forward<Args>(args)...);
-		value->next = nullptr;
+		Node* oldTail = tail.load(std::memory_order_acquire);
+		while (!tail.compare_exchange_weak(oldTail,value
+			,std::memory_order_release
+			,std::memory_order_relaxed))
 		{
-			std::lock_guard<SpinLock> lock{ tailLock };
-			tail->next = value;
-			tail = value;
 		}
+		oldTail->next = value;
+		std::atomic_thread_fence(std::memory_order_release);
 	}
 	const bool try_pop(T& _target)noexcept {
-		//std::lock_guard<SpinLock> lock{ headLock };
-		const Node* const oldHead = head;
+		headLock.lock();
 		Node* const newHead = head->next;
-		if (newHead)
+		if (!newHead)
 		{
-			_target = std::move(newHead->data);
-			head = newHead;
-			delete oldHead;
-			return true;
-		}
-		else
-		{
+			headLock.unlock();
 			return false;
 		}
+		Node* const oldHead = head;
+		head = newHead;
+		if constexpr (std::swappable<T>)
+			_target.swap(newHead->data);
+		else
+			_target = std::move(newHead->data);
+		headLock.unlock();
+		delete oldHead;
+		return true;
+	}
+	const bool try_pop(T& _target, std::unique_lock<SpinLock>& _lock)noexcept {
+		Node* const newHead = head->next;
+		if (!newHead)
+		{
+			headLock.unlock();
+			return false;
+		}
+		Node* const oldHead = head;
+		head = newHead;
+		if constexpr (std::swappable<T>)
+			_target.swap(newHead->data);
+		else
+			_target = std::move(newHead->data);
+		headLock.unlock();
+		delete oldHead;
+		return true;
 	}
 	void pop(T& _target, std::unique_lock<SpinLock>& _lock)noexcept {
 		Node* const oldHead = head;
@@ -88,7 +108,7 @@ public:
 	const bool empty() noexcept {
 		bool bIsEmpty;
 		{
-			std::lock_guard<SpinLock> lock{ tailLock };
+			std::lock_guard<SpinLock> lock{ headLock };
 			bIsEmpty = !head->next;
 		}
 		return bIsEmpty;

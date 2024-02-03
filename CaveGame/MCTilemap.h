@@ -46,12 +46,12 @@ private:
 public:
 	MCTilemap();
 
-	void SetTile(int x, int y, int z, int tile, bool notify = false);
-	void SetTile(const glm::ivec3& v, int tile, bool notify = false);
+	void SetTile(int x, int y, int z, int tile, bool notify = false) noexcept;
+	void SetTile(const glm::ivec3& v, int tile, bool notify = false) noexcept;
 	int GetTile(int x, int y, int z) const noexcept;
 	int GetTile(const glm::ivec3& v) const noexcept;
-	MCTileChunk* GetChunk(int x, int z)noexcept;
-	bool HandleCollision(const glm::vec3& pre_position, glm::vec3& position, glm::vec3& velocity);
-	RaycastResult RaycastTile(const glm::vec3& start_position, const glm::vec3& direction, float distance) const;
-	void AddNotifyCallback(const std::function<void(MCTileChunk*, int, int)>& callback);
+	MCTileChunk*const GetChunk(int x, int z)noexcept;
+	bool HandleCollision(const glm::vec3& pre_position, glm::vec3& position, glm::vec3& velocity)const noexcept;
+	RaycastResult RaycastTile(const glm::vec3& start_position, const glm::vec3& direction, float distance) const noexcept;
+	void AddNotifyCallback(const std::function<void(MCTileChunk*, int, int)>& callback)noexcept;
 };

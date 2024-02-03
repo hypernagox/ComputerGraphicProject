@@ -4,7 +4,7 @@
 #include "MCTilemap.h"
 #include "PerlinNoise.hpp"
 
-void MCTerrainGenerator::Generate(shared_ptr<MCTilemap> tilemap)
+void MCTerrainGenerator::Generate(shared_ptr<MCTilemap> tilemap)const noexcept
 {
 	std::default_random_engine dre{ (unsigned int)time(NULL) };
 	std::uniform_int_distribution uid{ 0, MCTilemap::MAP_WIDTH };
@@ -42,7 +42,7 @@ void MCTerrainGenerator::Generate(shared_ptr<MCTilemap> tilemap)
 		}
 	}
 
-	const char* tree_prefab[5][3] =
+	constexpr const char* tree_prefab[5][3] =
 	{
 		"000",
 		"070",

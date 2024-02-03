@@ -21,7 +21,7 @@ extern std::atomic_bool g_bTileFinish;
 
 thread_local int planeMap[MCTileChunk::CHUNK_WIDTH][MCTileChunk::CHUNK_WIDTH];
 
-void MCTilemapMeshGenerator::CreateMeshAll(shared_ptr<MCTilemap> tilemap)noexcept
+void MCTilemapMeshGenerator::CreateMeshAll(shared_ptr<MCTilemap> tilemap)const noexcept
 {
     g_bTileFinish.store(false);
 

@@ -9,10 +9,12 @@ public:
 	{
 		std::pair<Key, Value> data;
 		Node* next = nullptr;
+		template<typename... Args>
+		Node(Args&&... args)noexcept :data{ std::forward<Args>(args)... }, next{ nullptr } {}
 	};
 private:
 	Node head;
-	mutable std::shared_mutex m_sharedMutex;
+	mutable SRWLock m_sharedMutex;
 	const HANDLE m_handle = GetProcessHeap();
 public:
 	ConcurrentListForMap() noexcept = default;
@@ -22,7 +24,6 @@ public:
 	}
 	ConcurrentListForMap(ConcurrentListForMap&& other) noexcept
 		: head(std::move(other.head))
-		, m_handle{other.m_handle}
 	{
 	}
 	template<typename ...Args>
@@ -30,9 +31,8 @@ public:
 	{
 		Node* const newNode = static_cast<Node* const>(HeapAlloc(m_handle, NULL, sizeof(Node)));
 		std::construct_at(&newNode->data, key_, Value{ std::forward<Args>(args)... });
-		newNode->next = nullptr;
 		{
-			std::unique_lock<std::shared_mutex> s_lock{ m_sharedMutex };
+			std::lock_guard<SRWLock> s_lock{ m_sharedMutex };
 			newNode->next = head.next;
 			head.next = newNode;
 		}
@@ -43,7 +43,7 @@ public:
 		Node* curNode = &head;
 		std::pair<Key, Value>* targetData = nullptr;
 		{
-			std::shared_lock<std::shared_mutex> s_lock{ m_sharedMutex };
+			std::shared_lock<SRWLock> s_lock{ m_sharedMutex };
 			curNode = head.next;
 			while (curNode)
 			{
@@ -62,7 +62,7 @@ public:
 		const Node* curNode = &head;
 		const std::pair<Key, Value>* targetData = nullptr;
 		{
-			std::shared_lock<std::shared_mutex> s_lock{ m_sharedMutex };
+			std::shared_lock<SRWLock> s_lock{ m_sharedMutex };
 			curNode = head.next;
 			while (curNode)
 			{
@@ -79,21 +79,26 @@ public:
 	void erase(const Key& key_)noexcept
 	{
 		Node* prevNode = &head;
+		Node* curNode;
+		bool flag = false;
 		{
-			std::unique_lock<std::shared_mutex> s_lock{ m_sharedMutex };
-			Node* curNode = prevNode->next;
+			std::lock_guard<SRWLock> s_lock{ m_sharedMutex };
+			curNode = prevNode->next;
 			while (curNode)
 			{
 				if (key_ == curNode->data.first)
 				{
 					prevNode->next = curNode->next;
-					std::destroy_at(curNode);
-					HeapFree(m_handle, NULL, curNode);
+					flag = true;
 					break;
 				}
 				prevNode = curNode;
 				curNode = curNode->next;
 			}
+		}
+		if (flag)
+		{
+			::HeapFree(m_handle, NULL, curNode);
 		}
 	}
 	void clear()noexcept
@@ -103,8 +108,7 @@ public:
 		{
 			Node* const temp = current;
 			current = current->next;
-			std::destroy_at(temp);
-			HeapFree(m_handle, NULL, temp);
+			::HeapFree(m_handle, NULL, temp);
 		}
 	}
 };
@@ -116,7 +120,7 @@ private:
 	std::vector<ConcurrentListForMap<const Key, Value>> buckets;
 	std::hash<Key> hasher;
 public:
-	ConcurrentHashMap() noexcept : buckets(1024) { }
+	ConcurrentHashMap() noexcept :buckets(256) {}
 
 	template <typename ...Args>
 	std::pair<const Key, Value>* emplace(const Key& key, Args&&... args) noexcept
@@ -127,11 +131,11 @@ public:
 	}
 
 	template <typename ...Args>
-	std::pair<std::pair<const Key, Value>*,bool> try_emplace(const Key& key, Args&&... args) noexcept
+	std::pair<std::pair<const Key, Value>*, bool> try_emplace(const Key& key, Args&&... args) noexcept
 	{
 		const size_t index = hasher(key) % buckets.size();
 		const auto iter = buckets[index].find(key);
-		return iter ? std::make_pair(iter,false) : std::make_pair(buckets[index].emplace_front(key, std::forward<Args>(args)...),true);
+		return iter ? std::make_pair(iter, false) : std::make_pair(buckets[index].emplace_front(key, std::forward<Args>(args)...), true);
 	}
 
 	const std::pair<const Key, Value>* find(const Key& key)const noexcept
@@ -175,10 +179,12 @@ public:
 	{
 		Value data;
 		Node* next = nullptr;
+		template<typename... Args>
+		Node(Args&&... args)noexcept :data{ std::forward<Args>(args)... }, next{ nullptr } {}
 	};
 private:
 	Node head;
-	mutable std::shared_mutex m_sharedMutex;
+	mutable SRWLock m_sharedMutex;
 	const HANDLE m_handle = GetProcessHeap();
 public:
 	ConcurrentList() noexcept = default;
@@ -188,17 +194,15 @@ public:
 	}
 	ConcurrentList(ConcurrentList&& other) noexcept
 		: head(std::move(other.head))
-		, m_handle{ other.m_handle }
 	{
 	}
 	template<typename ...Args>
 	Value* emplace_front(Args&&... args)noexcept
 	{
 		Node* const newNode = static_cast<Node* const>(HeapAlloc(m_handle, NULL, sizeof(Node)));
-		std::construct_at(&newNode->data,std::forward<Args>(args)... );
-		newNode->next = nullptr;
+		std::construct_at(&newNode->data, std::forward<Args>(args)...);
 		{
-			std::unique_lock<std::shared_mutex> s_lock{ m_sharedMutex };
+			std::lock_guard<SRWLock> s_lock{ m_sharedMutex };
 			newNode->next = head.next;
 			head.next = newNode;
 		}
@@ -209,7 +213,7 @@ public:
 		Node* curNode = &head;
 		Value* targetData = nullptr;
 		{
-			std::shared_lock<std::shared_mutex> s_lock{ m_sharedMutex };
+			std::shared_lock<SRWLock> s_lock{ m_sharedMutex };
 			curNode = head.next;
 			while (curNode)
 			{
@@ -228,7 +232,7 @@ public:
 		const Node* curNode = &head;
 		const Value* targetData = nullptr;
 		{
-			std::shared_lock<std::shared_mutex> s_lock{ m_sharedMutex };
+			std::shared_lock<SRWLock> s_lock{ m_sharedMutex };
 			curNode = head.next;
 			while (curNode)
 			{
@@ -245,21 +249,26 @@ public:
 	void erase(const Value& val_)noexcept
 	{
 		Node* prevNode = &head;
+		Node* curNode;
+		bool flag = false;
 		{
-			std::unique_lock<std::shared_mutex> s_lock{ m_sharedMutex };
-			Node* curNode = prevNode->next;
+			std::lock_guard<SRWLock> s_lock{ m_sharedMutex };
+			curNode = prevNode->next;
 			while (curNode)
 			{
 				if (val_ == curNode->data)
 				{
 					prevNode->next = curNode->next;
-					std::destroy_at(curNode);
-					HeapFree(m_handle, NULL, curNode);
+					flag = true;
 					break;
 				}
 				prevNode = curNode;
 				curNode = curNode->next;
 			}
+		}
+		if (flag)
+		{
+			::HeapFree(m_handle, NULL, curNode);
 		}
 	}
 	void clear()noexcept
@@ -269,8 +278,7 @@ public:
 		{
 			Node* const temp = current;
 			current = current->next;
-			std::destroy_at(temp);
-			HeapFree(m_handle, NULL, temp);
+			::HeapFree(m_handle, NULL, temp);
 		}
 	}
 	vector<Value*> GetAllElements()const noexcept
@@ -293,8 +301,11 @@ private:
 	std::vector<ConcurrentList<Key>> buckets;
 	std::hash<Key> hasher;
 public:
-	ConcurrentHashSet() noexcept : buckets(1024) { }
-
+	ConcurrentHashSet() noexcept :buckets(256) {}
+	~ConcurrentHashSet()noexcept
+	{
+		clear();
+	}
 	template <typename ...Args>
 	Key* emplace(Args&&... args) noexcept
 	{

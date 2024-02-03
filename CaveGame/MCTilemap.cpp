@@ -40,14 +40,14 @@ MCTilemap::MCTilemap()
 
 }
 
-void MCTilemap::SetTile(int x, int y, int z, int tile, bool notify)
+void MCTilemap::SetTile(int x, int y, int z, int tile, bool notify) noexcept
 {
 	constexpr int modulo = MCTileChunk::CHUNK_WIDTH;
 	const int chunkX = x / modulo;
 	const int chunkZ = z / modulo;
 	const int localX = x % modulo;
 	const int localZ = z % modulo;
-	MCTileChunk* pChunk = &tileChunk[chunkX][chunkZ];
+	MCTileChunk* const pChunk = &tileChunk[chunkX][chunkZ];
 	pChunk->SetTile(localX, y, localZ, tile);
 
 	if (notify)
@@ -70,7 +70,7 @@ void MCTilemap::SetTile(int x, int y, int z, int tile, bool notify)
 	}
 }
 
-void MCTilemap::SetTile(const glm::ivec3& v, int tile, bool notify)
+void MCTilemap::SetTile(const glm::ivec3& v, int tile, bool notify) noexcept
 {
 	SetTile(v.x, v.y, v.z, tile, notify);
 }
@@ -86,18 +86,18 @@ int MCTilemap::GetTile(const glm::ivec3& v) const noexcept
 	return GetTile(v.x, v.y, v.z);
 }
 
-MCTileChunk* MCTilemap::GetChunk(int x, int z)noexcept
+MCTileChunk*const MCTilemap::GetChunk(int x, int z)noexcept
 {
 	return &(tileChunk[x][z]);
 }
 
-bool MCTilemap::HandleCollision(const glm::vec3& pre_position, glm::vec3& position, glm::vec3& velocity)
+bool MCTilemap::HandleCollision(const glm::vec3& pre_position, glm::vec3& position, glm::vec3& velocity)const noexcept
 {
-	glm::vec3 world_pos = position;
-	glm::vec3 world_vel = velocity;
+	const glm::vec3 world_pos = position;
+	const glm::vec3 world_vel = velocity;
 
-	float w = 0.75f;
-	float h = 2.0f;
+	const float w = 0.75f;
+	const float h = 2.0f;
 
 	glm::vec3 pre_pos = pre_position;
 	glm::vec3 post_pos = world_pos;
@@ -237,7 +237,7 @@ bool MCTilemap::HandleCollision(const glm::vec3& pre_position, glm::vec3& positi
 	return landed;
 }
 
-RaycastResult MCTilemap::RaycastTile(const glm::vec3& start_position, const glm::vec3& direction, float distance) const
+RaycastResult MCTilemap::RaycastTile(const glm::vec3& start_position, const glm::vec3& direction, float distance) const noexcept
 {
 	RaycastResult result = RaycastResult{ false, glm::zero<glm::vec3>(), glm::zero<glm::vec3>(), glm::zero<glm::ivec3>() };
 	glm::vec3 tracePosition = start_position;
@@ -252,8 +252,8 @@ RaycastResult MCTilemap::RaycastTile(const glm::vec3& start_position, const glm:
 			if (direction[i] == 0.0f)
 				continue;
 
-			int nextStep = direction[i] > 0.0f ? (int)glm::floor(tracePosition[i]) + 1 : (int)glm::ceil(tracePosition[i]) - 1;
-			glm::vec3 v = direction / direction[i] * (nextStep - tracePosition[i]);
+			const int nextStep = direction[i] > 0.0f ? (int)glm::floor(tracePosition[i]) + 1 : (int)glm::ceil(tracePosition[i]) - 1;
+			const glm::vec3 v = direction / direction[i] * (nextStep - tracePosition[i]);
 
 			if (glm::length2(v) >= glm::length2(intersectionDelta))
 				continue;
@@ -286,7 +286,7 @@ RaycastResult MCTilemap::RaycastTile(const glm::vec3& start_position, const glm:
 			tilePosition.z < 0 || tilePosition.z >= MCTilemap::MAP_WIDTH)
 			return result;
 
-		int tile = GetTile(tilePosition);
+		const int tile = GetTile(tilePosition);
 		if (tile > 0)
 		{
 			result = { true, tracePosition, faceDirection, tilePosition };
@@ -296,7 +296,7 @@ RaycastResult MCTilemap::RaycastTile(const glm::vec3& start_position, const glm:
 	return result;
 }
 
-void MCTilemap::AddNotifyCallback(const std::function<void(MCTileChunk*, int, int)>& callback)
+void MCTilemap::AddNotifyCallback(const std::function<void(MCTileChunk*, int, int)>& callback)noexcept
 {
 	notifyCallback.push_back(callback);
 }

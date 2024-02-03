@@ -106,6 +106,7 @@
     <ClInclude Include="SkyBox.h" />
     <ClInclude Include="SoundMgr.h" />
     <ClInclude Include="SpotLight.h" />
+    <ClInclude Include="SRWLock.hpp" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Texture2D.h" />
     <ClInclude Include="ThreadMgr.h" />

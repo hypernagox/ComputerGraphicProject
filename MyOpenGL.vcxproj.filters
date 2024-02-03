@@ -639,6 +639,9 @@
     <ClInclude Include="Scene_Intro.h">
       <Filter>Engine\05. Scene\Scene_Intro</Filter>
     </ClInclude>
+    <ClInclude Include="SRWLock.hpp">
+      <Filter>Utility\struct</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resource\Shader\CubeShader.glsl">
